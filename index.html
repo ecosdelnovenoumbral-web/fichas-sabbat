@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vampire: El Sabbat - Ficha de Personaje</title>
-    <!-- Importar los scripts de Firebase (versión compat para fácil uso) -->
+    <!-- Importar los scripts de Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <style>
@@ -35,6 +35,15 @@
             color: var(--accent-color);
             text-transform: uppercase;
             letter-spacing: 2px;
+        }
+        h2 {
+            text-align: center;
+            color: var(--accent-color);
+            border-bottom: 1px solid var(--accent-color);
+            padding-bottom: 5px;
+            margin-top: 30px;
+            font-size: 18px;
+            text-transform: uppercase;
         }
         .firebase-panel {
             background: #1a1a1a;
@@ -71,6 +80,12 @@
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 15px;
             margin-bottom: 15px;
         }
@@ -138,22 +153,89 @@
                 <input type="text" id="generacion" value="13">
             </div>
         </div>
+
+        <!-- Atributos -->
+        <h2>Atributos</h2>
+        <div class="grid-3">
+            <div class="field-group">
+                <label>Fuerza</label>
+                <input type="text" id="fuerza">
+            </div>
+            <div class="field-group">
+                <label>Carisma</label>
+                <input type="text" id="carisma">
+            </div>
+            <div class="field-group">
+                <label>Percepción</label>
+                <input type="text" id="percepcion">
+            </div>
+            <div class="field-group">
+                <label>Destreza</label>
+                <input type="text" id="destreza">
+            </div>
+            <div class="field-group">
+                <label>Manipulación</label>
+                <input type="text" id="manipulacion">
+            </div>
+            <div class="field-group">
+                <label>Inteligencia</label>
+                <input type="text" id="inteligencia">
+            </div>
+            <div class="field-group">
+                <label>Resistencia</label>
+                <input type="text" id="resistencia">
+            </div>
+            <div class="field-group">
+                <label>Apariencia</label>
+                <input type="text" id="apariencia">
+            </div>
+            <div class="field-group">
+                <label>Astucia</label>
+                <input type="text" id="astucia">
+            </div>
+        </div>
+
+        <!-- Habilidades -->
+        <h2>Habilidades</h2>
+        <div class="grid-3">
+            <div class="field-group">
+                <label>Alerta</label>
+                <input type="text" id="alerta">
+            </div>
+            <div class="field-group">
+                <label>Armas Fuego</label>
+                <input type="text" id="armasFuego">
+            </div>
+            <div class="field-group">
+                <label>Academias</label>
+                <input type="text" id="academias">
+            </div>
+            <div class="field-group">
+                <label>Atletismo</label>
+                <input type="text" id="atletismo">
+            </div>
+            <div class="field-group">
+                <label>Armas C/C</label>
+                <input type="text" id="armasCC">
+            </div>
+            <div class="field-group">
+                <label>Ciencias</label>
+                <input type="text" id="ciencias">
+            </div>
+        </div>
     </div>
 
     <!-- Script de Configuración y Lógica de Firebase -->
     <script>
-        // Configuración oficial de tu Firebase
         const firebaseConfig = {
             databaseURL: "https://ecosnovenumbral-default-rtdb.firebaseio.com"
         };
 
-        // Inicializar Firebase
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
         const db = firebase.database();
 
-        // Función para Guardar la Ficha
         function guardarFicha() {
             const idPersonaje = document.getElementById('idPersonaje').value.trim();
             if (!idPersonaje) {
@@ -167,7 +249,22 @@
                 naturaleza: document.getElementById('naturaleza').value,
                 conducta: document.getElementById('conducta').value,
                 clan: document.getElementById('clan').value,
-                generacion: document.getElementById('generacion').value
+                generacion: document.getElementById('generacion').value,
+                fuerza: document.getElementById('fuerza').value,
+                carisma: document.getElementById('carisma').value,
+                percepcion: document.getElementById('percepcion').value,
+                destreza: document.getElementById('destreza').value,
+                manipulacion: document.getElementById('manipulacion').value,
+                inteligencia: document.getElementById('inteligencia').value,
+                resistencia: document.getElementById('resistencia').value,
+                apariencia: document.getElementById('apariencia').value,
+                astucia: document.getElementById('astucia').value,
+                alerta: document.getElementById('alerta').value,
+                armasFuego: document.getElementById('armasFuego').value,
+                academias: document.getElementById('academias').value,
+                atletismo: document.getElementById('atletismo').value,
+                armasCC: document.getElementById('armasCC').value,
+                ciencias: document.getElementById('ciencias').value
             };
 
             db.ref('fichas/' + idPersonaje).set(datosFicha, (error) => {
@@ -179,7 +276,6 @@
             });
         }
 
-        // Función para Cargar la Ficha
         function cargarFicha() {
             const idPersonaje = document.getElementById('idPersonaje').value.trim();
             if (!idPersonaje) {
@@ -196,6 +292,21 @@
                     document.getElementById('conducta').value = data.conducta || '';
                     document.getElementById('clan').value = data.clan || '';
                     document.getElementById('generacion').value = data.generacion || '13';
+                    document.getElementById('fuerza').value = data.fuerza || '';
+                    document.getElementById('carisma').value = data.carisma || '';
+                    document.getElementById('percepcion').value = data.percepcion || '';
+                    document.getElementById('destreza').value = data.destreza || '';
+                    document.getElementById('manipulacion').value = data.manipulacion || '';
+                    document.getElementById('inteligencia').value = data.inteligencia || '';
+                    document.getElementById('resistencia').value = data.resistencia || '';
+                    document.getElementById('apariencia').value = data.apariencia || '';
+                    document.getElementById('astucia').value = data.astucia || '';
+                    document.getElementById('alerta').value = data.alerta || '';
+                    document.getElementById('armasFuego').value = data.armasFuego || '';
+                    document.getElementById('academias').value = data.academias || '';
+                    document.getElementById('atletismo').value = data.atletismo || '';
+                    document.getElementById('armasCC').value = data.armasCC || '';
+                    document.getElementById('ciencias').value = data.ciencias || '';
                     alert("¡Ficha cargada con éxito!");
                 } else {
                     alert("No se encontró ninguna ficha registrada con ese ID.");
