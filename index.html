@@ -4,317 +4,769 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vampire: El Sabbat - Ficha de Personaje</title>
-    <!-- Importar los scripts de Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: #050505;
-            --panel-bg: #121212;
-            --accent-color: #a93226;
-            --text-color: #e0e0e0;
-            --border-color: #333;
+            --card-bg: #120808;
+            --box-bg: #1f1f22;
+            --text-color: #dcd3cb;
+            --border-color: #3a0000;
+            --accent-color: #8a0303;
+            --title-font: 'Cinzel', serif;
+            --decorative-font: 'Cinzel Decorative', serif;
+            --body-font: 'Rajdhani', sans-serif;
         }
         body {
+            font-family: var(--body-font);
             background-color: var(--bg-color);
+            background-image: radial-gradient(circle at center, #1a0505 0%, #000000 100%);
             color: var(--text-color);
-            font-family: Georgia, serif;
             margin: 0;
             padding: 20px;
+            min-height: 100vh;
         }
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
-            background: var(--panel-bg);
+            background: var(--card-bg);
             border: 2px solid var(--accent-color);
             padding: 20px;
-            border-radius: 5px;
+            border-radius: 4px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.9);
+            box-sizing: border-box;
+        }
+        h1, h2, h3, .box-title {
+            font-family: var(--decorative-font);
         }
         h1 {
             text-align: center;
             color: var(--accent-color);
             text-transform: uppercase;
-            letter-spacing: 2px;
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.8);
         }
         h2 {
-            text-align: center;
-            color: var(--accent-color);
-            border-bottom: 1px solid var(--accent-color);
-            padding-bottom: 5px;
-            margin-top: 30px;
-            font-size: 18px;
-            text-transform: uppercase;
-        }
-        .firebase-panel {
-            background: #1a1a1a;
+            font-size: 1.1rem;
+            color: #fff;
+            background-color: #2a0a0a;
             border: 1px solid var(--border-color);
-            padding: 15px;
-            margin-bottom: 20px;
+            padding: 8px;
+            margin: 15px 0 10px 0;
+            text-transform: uppercase;
+            text-align: center;
+            letter-spacing: 2px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }
+        h3 {
+            font-size: 0.95rem;
+            color: #ff4d4d;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 3px;
+            margin: 10px 0 5px 0;
+            text-transform: uppercase;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 15px;
+            box-sizing: border-box;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 15px;
+            box-sizing: border-box;
+        }
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 1rem;
+            gap: 5px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .row span {
+            flex: 0 0 auto;
+            margin-right: 5px;
+        }
+        input[type="text"] {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--border-color);
+            color: #fff;
+            padding: 2px 5px;
+            font-family: inherit;
+            flex: 1;
+            min-width: 0;
+        }
+        input[type="number"] {
+            background: #121212;
+            border: 1px solid var(--accent-color);
+            color: #fff;
+            padding: 4px;
+            font-family: inherit;
+            width: 50px;
+            text-align: center;
+            border-radius: 3px;
+            box-sizing: border-box;
+        }
+        
+        .dots {
+            display: inline-flex;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+        .dot {
+            width: 14px;
+            height: 14px;
+            border: 1px solid var(--accent-color);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #121212;
+            border-radius: 50%;
+            cursor: pointer;
+            position: relative;
+            font-size: 10px;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+        .dot.crossed::after {
+            content: "/";
+            position: absolute;
+            font-size: 12px;
+            color: var(--accent-color);
+        }
+        .dot.filled {
+            background: var(--accent-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+            font-size: 0.85rem;
+        }
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 5px;
+            text-align: center;
+        }
+        th {
+            background-color: #2a0a0a;
+            color: #fff;
+            font-family: var(--title-font);
+            letter-spacing: 1px;
+        }
+        .section-box {
+            background: var(--box-bg);
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            margin-top: 10px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+            box-sizing: border-box;
+            min-width: 0;
+        }
+        .box-title {
+            text-align: center;
+            font-weight: bold;
+            color: #ff4d4d;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+        }
+        
+        .health-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            width: 100%;
+            padding: 5px 0;
+            box-sizing: border-box;
+        }
+        .health-row {
+            display: grid;
+            grid-template-columns: 115px 45px 30px;
+            align-items: center;
+            width: 190px;
+        }
+        .health-label {
+            text-align: left;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+        .health-penalty {
+            text-align: center;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+        .health-checkbox-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .health-checkbox {
+            width: 14px;
+            height: 14px;
+            border: 1px solid var(--border-color);
+            background: #121212;
+            display: inline-block;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .health-checkbox.filled {
+            background: var(--accent-color);
+        }
+
+        .merit-defect-row {
             display: flex;
             gap: 10px;
             align-items: center;
-            flex-wrap: wrap;
+            margin-bottom: 8px;
         }
-        .firebase-panel input {
-            background: #050505;
-            border: 1px solid var(--border-color);
-            color: #fff;
-            padding: 8px;
-            font-size: 14px;
-            border-radius: 3px;
-            flex-grow: 1;
+        .merit-name {
+            flex: 1;
+        }
+        .merit-cost {
+            flex: 0 0 60px;
+            text-align: center;
+        }
+
+        .firebase-panel {
+            background: #2a0a0a;
+            border: 1px solid var(--accent-color);
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
         .firebase-btn {
             background: var(--accent-color);
             color: #fff;
             border: none;
-            padding: 8px 15px;
-            font-weight: bold;
+            padding: 6px 15px;
             cursor: pointer;
-            border-radius: 3px;
+            font-family: var(--body-font);
+            font-weight: bold;
             text-transform: uppercase;
+            border-radius: 3px;
         }
         .firebase-btn:hover {
-            opacity: 0.9;
-        }
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        .grid-3 {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        .field-group {
-            display: flex;
-            flex-direction: column;
-        }
-        .field-group label {
-            font-size: 13px;
-            color: #aaa;
-            margin-bottom: 3px;
-        }
-        .field-group input {
-            background: #050505;
-            border: 1px solid var(--border-color);
-            color: #fff;
-            padding: 6px;
-            border-radius: 3px;
+            background: #b30000;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Vampire: El Sabbat</h1>
+<div class="container">
+    <h1>Vampire: El Sabbat</h1>
 
-        <!-- Panel de Control Firebase -->
-        <div class="firebase-panel">
-            <span>ID del Personaje:</span>
-            <input type="text" id="idPersonaje" placeholder="Ej: sabbat-nigoyin-001">
-            <button class="firebase-btn" onclick="guardarFicha()">Guardar en Firebase</button>
-            <button class="firebase-btn" onclick="cargarFicha()">Cargar de Firebase</button>
+    <div class="firebase-panel">
+        <span>ID del Personaje:</span>
+        <input type="text" id="pj-id" placeholder="Auto / Ej: sabbat-usuario-001" style="width: 200px; background: #121212; border: 1px solid var(--accent-color);">
+        <button class="firebase-btn" onclick="guardarFicha()">Guardar en Firebase</button>
+        <button class="firebase-btn" onclick="cargarFicha()">Cargar de Firebase</button>
+    </div>
+
+    <div class="grid-3">
+        <div class="section-box">
+            <div class="row"><span>Nombre:</span> <input type="text" id="nombre"></div>
+            <div class="row"><span>Jugador:</span> <input type="text" id="jugador"></div>
+        </div>
+        <div class="section-box">
+            <div class="row"><span>Naturaleza:</span> <input type="text" id="naturaleza"></div>
+            <div class="row"><span>Conducta:</span> <input type="text" id="conducta"></div>
+            <div class="row"><span>Concepto:</span> <input type="text" id="concepto"></div>
+        </div>
+        <div class="section-box">
+            <div class="row">
+                <span>Gen:</span>
+                <input type="text" id="gen-texto" style="flex: 1; min-width: 0;">
+                <input type="number" id="gen-input" min="1" max="16" value="13" oninput="actualizarValoresGeneracion()">
+            </div>
+            <div class="row"><span>Clan:</span> <input type="text" id="clan"></div>
+        </div>
+    </div>
+
+    <h2>Atributos</h2>
+    <div class="grid-3">
+        <div class="section-box">
+            <h3>Físicos</h3>
+            <div class="row"><span>Fuerza</span> <div class="dots" id="fuerza"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Destreza</span> <div class="dots" id="destreza"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Resistencia</span> <div class="dots" id="resistencia"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+        </div>
+        <div class="section-box">
+            <h3>Sociales</h3>
+            <div class="row"><span>Carisma</span> <div class="dots" id="carisma"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Manipulación</span> <div class="dots" id="manipulacion"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Apariencia</span> <div class="dots" id="apariencia"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+        </div>
+        <div class="section-box">
+            <h3>Mentales</h3>
+            <div class="row"><span>Percepción</span> <div class="dots" id="percepcion"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Inteligencia</span> <div class="dots" id="inteligencia"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Astucia</span> <div class="dots" id="astucia"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+        </div>
+    </div>
+
+    <h2>Habilidades</h2>
+    <div class="grid-3">
+        <div class="section-box">
+            <h3>Talentos</h3>
+            <div class="row"><span>Alerta</span> <div class="dots" id="alerta"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Atletismo</span> <div class="dots" id="atletismo"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Conducir</span> <div class="dots" id="conducir"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Empatía</span> <div class="dots" id="empatia"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Expresión</span> <div class="dots" id="expresion"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Intimidación</span> <div class="dots" id="intimidacion"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Liderazgo</span> <div class="dots" id="liderazgo"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Peleas</span> <div class="dots" id="peleas"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Subterfugio</span> <div class="dots" id="subterfugio"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Trato con Anim.</span> <div class="dots" id="trato-animales"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+        </div>
+        <div class="section-box">
+            <h3>Técnicas</h3>
+            <div class="row"><span>Armas Fuego</span> <div class="dots" id="armas-fuego"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Armas C/C</span> <div class="dots" id="armas-cc"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Etiqueta</span> <div class="dots" id="etiqueta"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Interpretación</span> <div class="dots" id="interpretacion"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Larceny</span> <div class="dots" id="larceny"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Pericia Artes.</span> <div class="dots" id="pericia-artesanal"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Investigación</span> <div class="dots" id="investigacion-tec"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Sigilo</span> <div class="dots" id="sigilo"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Supervivencia</span> <div class="dots" id="supervivencia"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Trato con Calle</span> <div class="dots" id="trato-calle"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+        </div>
+        <div class="section-box">
+            <h3>Conocimientos</h3>
+            <div class="row"><span>Academias</span> <div class="dots" id="academias"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Ciencias</span> <div class="dots" id="ciencias"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Finanzas</span> <div class="dots" id="finanzas"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Informática</span> <div class="dots" id="informatica"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Investigación</span> <div class="dots" id="investigacion-con"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Leyes</span> <div class="dots" id="leyes"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Lingüística</span> <div class="dots" id="linguistica"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Medicina</span> <div class="dots" id="medicina"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Ocultismo</span> <div class="dots" id="ocultismo"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Política</span> <div class="dots" id="politica"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+        </div>
+    </div>
+
+    <h2>Ventajas</h2>
+    <div class="grid-3">
+        <div class="section-box">
+            <h3>Disciplinas</h3>
+            <div class="row"><input type="text" id="disc-nombre-1"> <div class="dots" id="disc-dots-1"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><input type="text" id="disc-nombre-2"> <div class="dots" id="disc-dots-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><input type="text" id="disc-nombre-3"> <div class="dots" id="disc-dots-3"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><input type="text" id="disc-nombre-4"> <div class="dots" id="disc-dots-4"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><input type="text" id="disc-nombre-5"> <div class="dots" id="disc-dots-5"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><input type="text" id="disc-nombre-6"> <div class="dots" id="disc-dots-6"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
         </div>
 
-        <!-- Datos Básicos -->
-        <div class="grid-2">
-            <div class="field-group">
-                <label>Nombre del Personaje</label>
-                <input type="text" id="nombre">
-            </div>
-            <div class="field-group">
-                <label>Jugador</label>
-                <input type="text" id="jugador">
-            </div>
+        <div class="section-box">
+            <h3>Trasfondos</h3>
+            <div class="row"><input type="text" id="tras-nombre-1"> <div class="dots" id="tras-dots-1"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><input type="text" id="tras-nombre-2"> <div class="dots" id="tras-dots-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><input type="text" id="tras-nombre-3"> <div class="dots" id="tras-dots-3"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><input type="text" id="tras-nombre-4"> <div class="dots" id="tras-dots-4"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><input type="text" id="tras-nombre-5"> <div class="dots" id="tras-dots-5"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><input type="text" id="tras-nombre-6"> <div class="dots" id="tras-dots-6"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
         </div>
 
-        <div class="grid-2">
-            <div class="field-group">
-                <label>Naturaleza</label>
-                <input type="text" id="naturaleza">
+        <div class="section-box">
+            <h3>Virtudes</h3>
+            <div class="row">
+                <input type="text" id="virtud-nombre-1" placeholder="Conciencia">
+                <div class="dots" id="virtud-dots-1"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
             </div>
-            <div class="field-group">
-                <label>Conducta</label>
-                <input type="text" id="conducta">
+            <div class="row">
+                <input type="text" id="virtud-nombre-2" placeholder="Autocontrol">
+                <div class="dots" id="virtud-dots-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
             </div>
-        </div>
-
-        <div class="grid-2">
-            <div class="field-group">
-                <label>Clan</label>
-                <input type="text" id="clan">
-            </div>
-            <div class="field-group">
-                <label>Generación</label>
-                <input type="text" id="generacion" value="13">
-            </div>
-        </div>
-
-        <!-- Atributos -->
-        <h2>Atributos</h2>
-        <div class="grid-3">
-            <div class="field-group">
-                <label>Fuerza</label>
-                <input type="text" id="fuerza">
-            </div>
-            <div class="field-group">
-                <label>Carisma</label>
-                <input type="text" id="carisma">
-            </div>
-            <div class="field-group">
-                <label>Percepción</label>
-                <input type="text" id="percepcion">
-            </div>
-            <div class="field-group">
-                <label>Destreza</label>
-                <input type="text" id="destreza">
-            </div>
-            <div class="field-group">
-                <label>Manipulación</label>
-                <input type="text" id="manipulacion">
-            </div>
-            <div class="field-group">
-                <label>Inteligencia</label>
-                <input type="text" id="inteligencia">
-            </div>
-            <div class="field-group">
-                <label>Resistencia</label>
-                <input type="text" id="resistencia">
-            </div>
-            <div class="field-group">
-                <label>Apariencia</label>
-                <input type="text" id="apariencia">
-            </div>
-            <div class="field-group">
-                <label>Astucia</label>
-                <input type="text" id="astucia">
-            </div>
-        </div>
-
-        <!-- Habilidades -->
-        <h2>Habilidades</h2>
-        <div class="grid-3">
-            <div class="field-group">
-                <label>Alerta</label>
-                <input type="text" id="alerta">
-            </div>
-            <div class="field-group">
-                <label>Armas Fuego</label>
-                <input type="text" id="armasFuego">
-            </div>
-            <div class="field-group">
-                <label>Academias</label>
-                <input type="text" id="academias">
-            </div>
-            <div class="field-group">
-                <label>Atletismo</label>
-                <input type="text" id="atletismo">
-            </div>
-            <div class="field-group">
-                <label>Armas C/C</label>
-                <input type="text" id="armasCC">
-            </div>
-            <div class="field-group">
-                <label>Ciencias</label>
-                <input type="text" id="ciencias">
+            <div class="row">
+                <span>Coraje</span>
+                <div class="dots" id="virtud-dots-3"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
             </div>
         </div>
     </div>
 
-    <!-- Script de Configuración y Lógica de Firebase -->
-    <script>
-        const firebaseConfig = {
-            databaseURL: "https://ecosnovenumbral-default-rtdb.firebaseio.com"
-        };
+    <h2>Senda, Sangre, Voluntad y Salud</h2>
+    <div class="grid-3">
+        <div class="section-box">
+            <div class="box-title">Otros Rasgos</div>
+            <div class="row"><input type="text" id="otros-nombre-1"> <div class="dots" id="otros-dots-1"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><input type="text" id="otros-nombre-2"> <div class="dots" id="otros-dots-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><input type="text" id="otros-nombre-3"> <div class="dots" id="otros-dots-3"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><input type="text" id="otros-nombre-4"> <div class="dots" id="otros-dots-4"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><input type="text" id="otros-nombre-5"> <div class="dots" id="otros-dots-5"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><input type="text" id="otros-nombre-6"> <div class="dots" id="otros-dots-6"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div style="margin-top: 15px; font-size: 0.8rem; display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>Exp. Total:</span>
+                    <input type="number" id="exp-total" min="0" value="0">
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>Ganados Últ. Escena:</span>
+                    <input type="number" id="exp-escena" min="0" value="0">
+                </div>
+            </div>
+        </div>
 
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const db = firebase.database();
+        <div class="section-box">
+            <div style="margin-bottom: 12px; margin-top: 5px; text-align: center;">
+                <div style="font-size:0.85rem; font-weight:bold; margin-bottom:4px; font-family:var(--decorative-font); color:#fff;">Senda</div>
+                <div style="margin-bottom: 6px;">
+                    <input type="text" id="senda-nombre" placeholder="Escribir Senda..." style="text-align: center; width: 80%;">
+                </div>
+                <div style="display: inline-flex; justify-content: center; width: 100%;" class="dots" id="senda-dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+            </div>
+            
+            <div style="margin-bottom: 12px;">
+                <div style="font-size:0.85rem; text-align:center; font-weight:bold; margin-bottom:4px; font-family:var(--decorative-font);">Willpower</div>
+                <div style="display: flex; justify-content: space-around; align-items: center; font-size: 0.75rem;">
+                    <div>MÁX:<br><input type="number" id="willpower-max" min="1" max="11" value="10" oninput="sincronizarWillpower()"></div>
+                    <div>DISP.:<br><input type="number" id="willpower-disp" min="0" max="11" value="10"></div>
+                </div>
+            </div>
 
-        function guardarFicha() {
-            const idPersonaje = document.getElementById('idPersonaje').value.trim();
-            if (!idPersonaje) {
-                alert("Por favor, ingresa un ID de Personaje válido antes de guardar.");
-                return;
+            <div>
+                <div style="font-size:0.85rem; text-align:center; font-weight:bold; margin-bottom:4px; font-family:var(--decorative-font);">Reserva de Sangre</div>
+                <div style="display: flex; justify-content: space-around; align-items: center; font-size: 0.75rem;">
+                    <div>MÁX:<br><input type="number" id="blood-max" min="1" max="50" value="10" readonly style="background:#1a1a1a; cursor:not-allowed;"></div>
+                    <div>DISP.:<br><input type="number" id="blood-disp" min="0" max="50" value="10"></div>
+                </div>
+                <div style="margin-top: 8px; text-align: center; font-size: 0.8rem; display: flex; justify-content: center; align-items: center; gap: 5px;">
+                    <span>Puntos / Turno:</span>
+                    <input type="text" id="blood-turn" value="1" readonly style="width: 35px; text-align: center; background:#121212; border:1px solid var(--accent-color); color:#fff; border-radius:3px; padding:2px;">
+                </div>
+            </div>
+        </div>
+
+        <div class="section-box">
+            <div class="box-title" style="font-family: var(--decorative-font);">Salud</div>
+            <div class="health-container">
+                <div class="health-row"><span class="health-label">Magullado</span><span class="health-penalty">(-0)</span><span class="health-checkbox-container"><span class="health-checkbox" id="salud-1"></span></span></div>
+                <div class="health-row"><span class="health-label">Lastimado</span><span class="health-penalty">(-1)</span><span class="health-checkbox-container"><span class="health-checkbox" id="salud-2"></span></span></div>
+                <div class="health-row"><span class="health-label">Lesionado</span><span class="health-penalty">(-1)</span><span class="health-checkbox-container"><span class="health-checkbox" id="salud-3"></span></span></div>
+                <div class="health-row"><span class="health-label">Herido</span><span class="health-penalty">(-2)</span><span class="health-checkbox-container"><span class="health-checkbox" id="salud-4"></span></span></div>
+                <div class="health-row"><span class="health-label">Malherido</span><span class="health-penalty">(-2)</span><span class="health-checkbox-container"><span class="health-checkbox" id="salud-5"></span></span></div>
+                <div class="health-row"><span class="health-label">Tullido</span><span class="health-penalty">(-5)</span><span class="health-checkbox-container"><span class="health-checkbox" id="salud-6"></span></span></div>
+                <div class="health-row"><span class="health-label">Incapacitado</span><span class="health-penalty"></span><span class="health-checkbox-container"><span class="health-checkbox" id="salud-7"></span></span></div>
+                <div class="health-row"><span class="health-label">Torpo/Destruido</span><span class="health-penalty"></span><span class="health-checkbox-container"><span class="health-checkbox" id="salud-8"></span></span></div>
+            </div>
+        </div>
+    </div>
+
+    <h2>Combate e Inventario</h2>
+    <div class="section-box">
+        <table>
+            <tr>
+                <th>Arma / Ataque</th>
+                <th>Dificultad</th>
+                <th>Daño</th>
+                <th>Alcance</th>
+                <th>Cadencia</th>
+            </tr>
+            <tr>
+                <td><input type="text" id="arma-1-1"></td><td><input type="text" id="arma-1-2"></td><td><input type="text" id="arma-1-3"></td><td><input type="text" id="arma-1-4"></td><td><input type="text" id="arma-1-5"></td>
+            </tr>
+            <tr>
+                <td><input type="text" id="arma-2-1"></td><td><input type="text" id="arma-2-2"></td><td><input type="text" id="arma-2-3"></td><td><input type="text" id="arma-2-4"></td><td><input type="text" id="arma-2-5"></td>
+            </tr>
+            <tr>
+                <td><input type="text" id="arma-3-1"></td><td><input type="text" id="arma-3-2"></td><td><input type="text" id="arma-3-3"></td><td><input type="text" id="arma-3-4"></td><td><input type="text" id="arma-3-5"></td>
+            </tr>
+            <tr>
+                <td><input type="text" id="arma-4-1"></td><td><input type="text" id="arma-4-2"></td><td><input type="text" id="arma-4-3"></td><td><input type="text" id="arma-4-4"></td><td><input type="text" id="arma-4-5"></td>
+            </tr>
+            <tr>
+                <td><input type="text" id="arma-5-1"></td><td><input type="text" id="arma-5-2"></td><td><input type="text" id="arma-5-3"></td><td><input type="text" id="arma-5-4"></td><td><input type="text" id="arma-5-5"></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="grid-3" style="margin-top: 10px; align-items: start;">
+        <div class="section-box">
+            <div class="box-title" style="font-family: var(--decorative-font);">Armadura</div>
+            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Armadura:</span> <input type="text" id="armadura-tipo"></div>
+            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Clase:</span> <input type="text" id="armadura-clase"></div>
+            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Penalización:</span> <input type="text" id="armadura-penalizacion"></div>
+        </div>
+
+        <div class="section-box" style="grid-column: span 2;">
+            <div class="box-title" style="font-family: var(--decorative-font);">Inventario</div>
+            <div class="grid-2" style="gap: 10px;">
+                <div>
+                    <div class="row"><input type="text" id="inv-1"></div>
+                    <div class="row"><input type="text" id="inv-2"></div>
+                    <div class="row"><input type="text" id="inv-3"></div>
+                    <div class="row"><input type="text" id="inv-4"></div>
+                    <div class="row"><input type="text" id="inv-5"></div>
+                    <div class="row"><input type="text" id="inv-6"></div>
+                </div>
+                <div>
+                    <div class="row"><input type="text" id="inv-7"></div>
+                    <div class="row"><input type="text" id="inv-8"></div>
+                    <div class="row"><input type="text" id="inv-9"></div>
+                    <div class="row"><input type="text" id="inv-10"></div>
+                    <div class="row"><input type="text" id="inv-11"></div>
+                    <div class="row"><input type="text" id="inv-12"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid-2" style="margin-top: 10px;">
+        <div class="section-box">
+            <h2>Méritos</h2>
+            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="merito-nom-1"></div><div class="merit-cost"><input type="number" id="merito-val-1" min="-10" max="0" value="0"></div></div>
+            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="merito-nom-2"></div><div class="merit-cost"><input type="number" id="merito-val-2" min="-10" max="0" value="0"></div></div>
+            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="merito-nom-3"></div><div class="merit-cost"><input type="number" id="merito-val-3" min="-10" max="0" value="0"></div></div>
+            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="merito-nom-4"></div><div class="merit-cost"><input type="number" id="merito-val-4" min="-10" max="0" value="0"></div></div>
+            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="merito-nom-5"></div><div class="merit-cost"><input type="number" id="merito-val-5" min="-10" max="0" value="0"></div></div>
+        </div>
+        <div class="section-box">
+            <h2>Defectos</h2>
+            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="defecto-nom-1"></div><div class="merit-cost"><input type="number" id="defecto-val-1" min="0" max="10" value="0"></div></div>
+            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="defecto-nom-2"></div><div class="merit-cost"><input type="number" id="defecto-val-2" min="0" max="10" value="0"></div></div>
+            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="defecto-nom-3"></div><div class="merit-cost"><input type="number" id="defecto-val-3" min="0" max="10" value="0"></div></div>
+            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="defecto-nom-4"></div><div class="merit-cost"><input type="number" id="defecto-val-4" min="0" max="10" value="0"></div></div>
+            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="defecto-nom-5"></div><div class="merit-cost"><input type="number" id="defecto-val-5" min="0" max="10" value="0"></div></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    document.querySelectorAll('.dot').forEach(dot => {
+        dot.addEventListener('click', function() {
+            if (!this.classList.contains('crossed') && !this.classList.contains('filled')) {
+                this.classList.add('crossed');
+            } else if (this.classList.contains('crossed')) {
+                this.classList.remove('crossed');
+                this.classList.add('filled');
+            } else {
+                this.classList.remove('filled');
             }
+        });
+    });
 
-            const datosFicha = {
-                nombre: document.getElementById('nombre').value,
-                jugador: document.getElementById('jugador').value,
-                naturaleza: document.getElementById('naturaleza').value,
-                conducta: document.getElementById('conducta').value,
-                clan: document.getElementById('clan').value,
-                generacion: document.getElementById('generacion').value,
-                fuerza: document.getElementById('fuerza').value,
-                carisma: document.getElementById('carisma').value,
-                percepcion: document.getElementById('percepcion').value,
-                destreza: document.getElementById('destreza').value,
-                manipulacion: document.getElementById('manipulacion').value,
-                inteligencia: document.getElementById('inteligencia').value,
-                resistencia: document.getElementById('resistencia').value,
-                apariencia: document.getElementById('apariencia').value,
-                astucia: document.getElementById('astucia').value,
-                alerta: document.getElementById('alerta').value,
-                armasFuego: document.getElementById('armasFuego').value,
-                academias: document.getElementById('academias').value,
-                atletismo: document.getElementById('atletismo').value,
-                armasCC: document.getElementById('armasCC').value,
-                ciencias: document.getElementById('ciencias').value
-            };
+    document.querySelectorAll('.health-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('click', function() {
+            this.classList.toggle('filled');
+        });
+    });
 
-            db.ref('fichas/' + idPersonaje).set(datosFicha, (error) => {
-                if (error) {
-                    alert("Error al guardar: " + error.message);
-                } else {
-                    alert("¡Ficha guardada con éxito en Firebase!");
-                }
-            });
+    function sincronizarWillpower() {
+        const maxInput = document.getElementById('willpower-max');
+        const dispInput = document.getElementById('willpower-disp');
+        dispInput.max = maxInput.value;
+        if (parseInt(dispInput.value) > parseInt(maxInput.value)) {
+            dispInput.value = maxInput.value;
         }
+    }
 
-        function cargarFicha() {
-            const idPersonaje = document.getElementById('idPersonaje').value.trim();
-            if (!idPersonaje) {
-                alert("Por favor, ingresa el ID del personaje que deseas cargar.");
-                return;
-            }
+    function actualizarValoresGeneracion() {
+        const gen = parseInt(document.getElementById('gen-input').value) || 13;
+        const bloodMax = document.getElementById('blood-max');
+        const bloodDisp = document.getElementById('blood-disp');
+        const bloodTurn = document.getElementById('blood-turn');
 
-            db.ref('fichas/' + idPersonaje).once('value').then((snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    document.getElementById('nombre').value = data.nombre || '';
-                    document.getElementById('jugador').value = data.jugador || '';
-                    document.getElementById('naturaleza').value = data.naturaleza || '';
-                    document.getElementById('conducta').value = data.conducta || '';
-                    document.getElementById('clan').value = data.clan || '';
-                    document.getElementById('generacion').value = data.generacion || '13';
-                    document.getElementById('fuerza').value = data.fuerza || '';
-                    document.getElementById('carisma').value = data.carisma || '';
-                    document.getElementById('percepcion').value = data.percepcion || '';
-                    document.getElementById('destreza').value = data.destreza || '';
-                    document.getElementById('manipulacion').value = data.manipulacion || '';
-                    document.getElementById('inteligencia').value = data.inteligencia || '';
-                    document.getElementById('resistencia').value = data.resistencia || '';
-                    document.getElementById('apariencia').value = data.apariencia || '';
-                    document.getElementById('astucia').value = data.astucia || '';
-                    document.getElementById('alerta').value = data.alerta || '';
-                    document.getElementById('armasFuego').value = data.armasFuego || '';
-                    document.getElementById('academias').value = data.academias || '';
-                    document.getElementById('atletismo').value = data.atletismo || '';
-                    document.getElementById('armasCC').value = data.armasCC || '';
-                    document.getElementById('ciencias').value = data.ciencias || '';
-                    alert("¡Ficha cargada con éxito!");
-                } else {
-                    alert("No se encontró ninguna ficha registrada con ese ID.");
-                }
-            }).catch((error) => {
-                alert("Error al cargar: " + error.message);
-            });
+        let maxReserva = 10;
+        let porTurno = 1;
+
+        if (gen === 3) { maxReserva = 100; porTurno = 10; }
+        else if (gen === 4) { maxReserva = 50; porTurno = 5; }
+        else if (gen === 5) { maxReserva = 40; porTurno = 4; }
+        else if (gen === 6) { maxReserva = 30; porTurno = 3; }
+        else if (gen === 7) { maxReserva = 20; porTurno = 2; }
+        else if (gen === 8) { maxReserva = 15; porTurno = 3; }
+        else if (gen === 9) { maxReserva = 14; porTurno = 2; }
+        else if (gen === 10) { maxReserva = 13; porTurno = 1; }
+        else if (gen === 11) { maxReserva = 12; porTurno = 1; }
+        else if (gen === 12) { maxReserva = 11; porTurno = 1; }
+        else { maxReserva = 10; porTurno = 1; }
+
+        bloodMax.value = maxReserva;
+        bloodDisp.max = maxReserva;
+        if (parseInt(bloodDisp.value) > maxReserva) {
+            bloodDisp.value = maxReserva;
         }
-    </script>
+        bloodTurn.value = porTurno;
+    }
+
+    actualizarValoresGeneracion();
+</script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+  import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDida046uOTvsTdYeJWQ3AscySBrVgGri4",
+    authDomain: "ecosnovenumbral.firebaseapp.com",
+    projectId: "ecosnovenumbral",
+    storageBucket: "ecosnovenumbral.firebasestorage.app",
+    messagingSenderId: "863575254950",
+    appId: "1:863575254950:web:dff0626e7a0826de425167",
+    databaseURL: "https://fichasabbat3-default-rtdb.firebaseio.com"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  function limpiarTexto(texto) {
+    return texto.toLowerCase().replace(/[^a-z0-9]/g, "");
+  }
+
+  window.guardarFicha = async function() {
+    const usuarioRaw = document.getElementById("jugador").value.trim();
+    if (!usuarioRaw) {
+      alert("Por favor ingresa tu Nombre de Jugador / Usuario del Foro antes de guardar.");
+      return;
+    }
+
+    const usuarioClean = limpiarTexto(usuarioRaw);
+    let pjId = document.getElementById("pj-id").value.trim();
+
+    if (pjId) {
+      const idPartes = pjId.split("-");
+      if (idPartes.length >= 2 && idPartes[1] !== usuarioClean) {
+        alert(`Seguridad: Esta ficha pertenece al usuario '${idPartes[1]}'. No puedes editarla con el usuario '${usuarioClean}'.`);
+        return;
+      }
+    }
+
+    if (!pjId) {
+      const dbRef = ref(db);
+      try {
+        const snapshot = await get(child(dbRef, `control_usuarios/${usuarioClean}/sabbat_count`));
+        let count = 1;
+        if (snapshot.exists()) {
+          count = snapshot.val() + 1;
+        }
+        
+        const numFormatted = String(count).padStart(3, '0');
+        pjId = `sabbat-${usuarioClean}-${numFormatted}`;
+        
+        await set(ref(db, `control_usuarios/${usuarioClean}/sabbat_count`), count);
+        document.getElementById("pj-id").value = pjId;
+      } catch (error) {
+        console.error("Error al generar ID:", error);
+        alert("Ocurrió un error al generar el ID único del personaje.");
+        return;
+      }
+    }
+
+    const datos = {};
+
+    document.querySelectorAll("input[type='text'], input[type='number']").forEach(input => {
+      if (input.id && input.id !== "pj-id") {
+        datos[input.id] = input.value;
+      }
+    });
+
+    document.querySelectorAll(".dots").forEach(container => {
+      if (container.id) {
+        const estados = [];
+        container.querySelectorAll(".dot").forEach(dot => {
+          if (dot.classList.contains("filled")) estados.push("filled");
+          else if (dot.classList.contains("crossed")) estados.push("crossed");
+          else estados.push("empty");
+        });
+        datos[container.id] = estados;
+      }
+    });
+
+    document.querySelectorAll(".health-checkbox").forEach(box => {
+      if (box.id) {
+        datos[box.id] = box.classList.contains("filled") ? "filled" : "empty";
+      }
+    });
+
+    set(ref(db, 'fichas/vampiro/' + pjId), datos)
+      .then(() => {
+        set(ref(db, 'administracion/registros/' + pjId), {
+          usuario_foro: usuarioRaw,
+          id_ficha: pjId,
+          juego: "vampiro_sabbat",
+          fecha: new Date().toISOString()
+        });
+
+        alert(`¡Ficha guardada exitosamente!\n\nTu ID de Ficha es:\n${pjId}\n\nCopia este ID y publícalo en tu tema de creación de personaje dentro del foro.`);
+      })
+      .catch((err) => {
+        console.error("Error al guardar:", err);
+        alert("Error al guardar en Firebase: " + err.message);
+      });
+  };
+
+  window.cargarFicha = function() {
+    const pjId = document.getElementById("pj-id").value.trim();
+    if (!pjId) {
+      alert("Por favor ingresa un ID completo (Ej: sabbat-usuario-001) para cargar el personaje.");
+      return;
+    }
+
+    const dbRef = ref(db);
+    get(child(dbRef, `fichas/vampiro/${pjId}`)).then((snapshot) => {
+      if (snapshot.exists()) {
+        const datos = snapshot.val();
+
+        document.querySelectorAll("input[type='text'], input[type='number']").forEach(input => {
+          if (input.id && datos[input.id] !== undefined) {
+            input.value = datos[input.id];
+          }
+        });
+
+        document.querySelectorAll(".dots").forEach(container => {
+          if (container.id && datos[container.id]) {
+            const estados = datos[container.id];
+            container.querySelectorAll(".dot").forEach((dot, index) => {
+              dot.classList.remove("filled", "crossed");
+              if (estados[index] === "filled") dot.classList.add("filled");
+              else if (estados[index] === "crossed") dot.classList.add("crossed");
+            });
+          }
+        });
+
+        document.querySelectorAll(".health-checkbox").forEach(box => {
+          if (box.id && datos[box.id] !== undefined) {
+            box.classList.remove("filled");
+            if (datos[box.id] === "filled") box.classList.add("filled");
+          }
+        });
+
+        actualizarValoresGeneracion();
+        sincronizarWillpower();
+        alert(`¡Ficha ${pjId} cargada con éxito!`);
+      } else {
+        alert("No se encontró ningún personaje con ese ID.");
+      }
+    }).catch(err => {
+      console.error("Error al cargar:", err);
+      alert("Error al cargar desde Firebase: " + err.message);
+    });
+  };
+</script>
+
 </body>
 </html>
