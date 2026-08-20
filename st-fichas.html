@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control ST - Ecos del Noveno Umbral</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --card-bg: #120808;
+            --text-color: #dcd3cb;
+            --border-color: #3a0000;
+            --accent-color: #8a0303;
+            --decorative-font: 'Cinzel Decorative', serif;
+            --body-font: 'Rajdhani', sans-serif;
+        }
+        body {
+            font-family: var(--body-font);
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at center, #1a0505 0%, #000000 100%);
+            color: var(--text-color);
+            margin: 0;
+            padding: 30px;
+            min-height: 100vh;
+        }
+        .st-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border: 2px solid var(--accent-color);
+            padding: 25px;
+            border-radius: 6px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.9);
+        }
+        h1 {
+            font-family: var(--decorative-font);
+            color: var(--accent-color);
+            text-align: center;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        p.subtitle {
+            text-align: center;
+            color: #b3a69c;
+            margin-bottom: 30px;
+        }
+        .character-row {
+            background: #1a0a0a;
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: border-color 0.2s;
+        }
+        .character-row:hover {
+            border-color: var(--accent-color);
+        }
+        .btn-st {
+            background: var(--accent-color);
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-family: var(--body-font);
+            font-weight: bold;
+            border-radius: 3px;
+            transition: background 0.2s;
+        }
+        .btn-st:hover { 
+            background: #a80404; 
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #b3a69c;
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+        .back-link:hover {
+            color: #ff4d4d;
+        }
+    </style>
+</head>
+<body>
+
+<div class="st-container">
+    <a href="index.html" class="back-link">&larr; Volver al Portal Principal</a>
+    <h1>Panel Secreto de Narradores</h1>
+    <p class="subtitle">Monitoreo y revisión de fichas registradas en el Sabbat.</p>
+    
+    <div id="st-character-list">
+        <p style="text-align:center; color:#b3a69c;">Conectando con el osario de Firebase...</p>
+    </div>
+</div>
+
+<!-- Scripts de Firebase -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    // ⚠️ REEMPLAZA ESTO CON TUS CREDENCIALES EXACTAS DE FIREBASE
+    const firebaseConfig = {
+        apiKey: "TU_API_KEY",
+        authDomain: "TU_AUTH_DOMAIN",
+        databaseURL: "TU_DATABASE_URL",
+        projectId: "TU_PROJECT_ID",
+        storageBucket: "TU_STORAGE_BUCKET",
+        messagingSenderId: "TU_MESSAGING_SENDER_ID",
+        appId: "TU_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    window.onload = function() {
+        const dbRef = ref(database, 'fichas/vampire');
+        get(dbRef).then((snapshot) => {
+            const listaDiv = document.getElementById('st-character-list');
+            listaDiv.innerHTML = '';
+
+            if (snapshot.exists()) {
+                const fichas = snapshot.val();
+                
+                Object.keys(fichas).forEach(idUsuario => {
+                    const ficha = fichas[idUsuario];
+                    const row = document.createElement('div');
+                    row.className = 'character-row';
+                    
+                    row.innerHTML = `
+                        <div>
+                            <strong style="color: #ff4d4d; font-size: 1.2rem;">${ficha.nombre || 'Sin Nombre'}</strong><br>
+                            <span style="color: #b3a69c; font-size: 0.9rem;">ID: <code>${idUsuario}</code> | Clan: ${ficha.clan || 'No especificado'}</span>
+                        </div>
+                        <button class="btn-st" onclick="revisarFicha('${idUsuario}')">Revisar Ficha</button>
+                    `;
+                    listaDiv.appendChild(row);
+                });
+            } else {
+                listaDiv.innerHTML = '<p style="text-align:center; color:#b3a69c;">No hay fichas registradas en este sistema todavía.</p>';
+            }
+        }).catch((error) => {
+            console.error(error);
+            document.getElementById('st-character-list').innerHTML = '<p style="color:red; text-align:center;">Error al conectar con la base de datos.</p>';
+        });
+    };
+
+    window.revisarFicha = function(idUsuario) {
+        // Redirige al archivo de la ficha pasando el ID por la URL para que el ST pueda verla
+        window.location.href = `index-vampire.html?st_id=${idUsuario}`;
+    };
+</script>
+
+</body>
+</html>
