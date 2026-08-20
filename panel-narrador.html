@@ -179,7 +179,6 @@
         let estadoActual = "borrador";
         let idFichaSeleccionada = null;
 
-        // Archivos HTML visuales según el sistema de juego
         const mapaVistas = {
             vampiro: "index-vampire.html",
             mago: "index-mage.html",
@@ -226,7 +225,7 @@
                 const ficha = nodoSistema[id];
                 if (typeof ficha !== 'object' || ficha === null) continue;
 
-                // Verificación de estado
+                // Si la ficha no tiene la marca 'enviado', se agrupa en 'borrador'
                 const esFinalizado = ficha.estado === 'enviado' || ficha.finalizado === true || ficha.enviado === true;
                 const coincideEstado = (estadoActual === 'finalizado' && esFinalizado) || (estadoActual === 'borrador' && !esFinalizado);
 
@@ -236,15 +235,16 @@
                     item.className = `ficha-item ${id === idFichaSeleccionada ? 'active' : ''}`;
                     
                     const nombre = ficha.nombre || ficha.nombrePersonaje || 'Sin Nombre';
-                    const jugador = ficha.jugador || ficha.usuario || 'Jugador Desconocido';
+                    const clan = ficha.clan || 'Sin Clan';
+                    const jugador = ficha.jugador || ficha.usuario || 'Desconocido';
 
                     item.innerHTML = `
                         <div class="item-id">${id}</div>
                         <div class="item-nombre">${nombre}</div>
-                        <div class="item-detalles">Jugador: ${jugador}</div>
+                        <div class="item-detalles">Clan: ${clan} | Jugador: ${jugador}</div>
                     `;
 
-                    item.onclick = () => seleccionarFicha(id);
+                    item.onclick = (e) => seleccionarFicha(id, e.currentTarget);
                     contenedorLista.appendChild(item);
                 }
             }
@@ -254,14 +254,12 @@
             }
         }
 
-        function seleccionarFicha(id) {
+        function seleccionarFicha(id, elemento) {
             idFichaSeleccionada = id;
             
-            // Marcar elemento activo en la lista
             document.querySelectorAll('.ficha-item').forEach(el => el.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            if(elemento) elemento.classList.add('active');
 
-            // Cargar página de ficha en el iframe pasando el ID por URL
             const vistaHTML = mapaVistas[sistemaActual] || "index-vampire.html";
             const frame = document.getElementById('frame-ficha');
             const placeholder = document.getElementById('no-selection');
@@ -276,7 +274,6 @@
             document.getElementById('no-selection').style.display = 'block';
         }
 
-        // Carga inicial al abrir la página
         cargarDatos();
     </script>
 </body>
