@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración y Narrador</title>
+    <style>
+        body {
+            background-color: #0d0d0d;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #8b0000;
+            border-bottom: 2px solid #8b0000;
+            padding-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .ficha-card {
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+            border-left: 4px solid #8b0000;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .ficha-header {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #ff4d4d;
+            margin-bottom: 8px;
+        }
+        pre {
+            background-color: #050505;
+            color: #00ff66;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Panel Secreto del Narrador</h1>
+        <div id="fichas-lista">Cargando datos de fichas desde Firebase...</div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDIda046uOTvsTdYeJWQ3AscySBrVgGri4",
+            authDomain: "ecosnovenoumbral.firebaseapp.com",
+            databaseURL: "https://ecosnovenoumbral-default-rtdb.firebaseio.com",
+            projectId: "ecosnovenoumbral",
+            storageBucket: "ecosnovenoumbral.firebasestorage.app",
+            messagingSenderId: "863575254950",
+            appId: "1:863575254950:web:dff0626e7a0826de425167"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const contenedor = document.getElementById('fichas-lista');
+        const fichasRef = ref(db, 'fichas');
+
+        onValue(fichasRef, (snapshot) => {
+            const data = snapshot.val();
+            contenedor.innerHTML = '';
+
+            if (!data) {
+                contenedor.innerHTML = '<p>No hay fichas registradas actualmente.</p>';
+                return;
+            }
+
+            for (let categoria in data) {
+                for (let id in data[categoria]) {
+                    const ficha = data[categoria][id];
+                    const card = document.createElement('div');
+                    card.className = 'ficha-card';
+                    card.innerHTML = `
+                        <div class="ficha-header">Categoría: ${categoria.toUpperCase()} | ID: ${id}</div>
+                        <pre>${JSON.stringify(ficha, null, 2)}</pre>
+                    `;
+                    contenedor.appendChild(card);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
