@@ -240,14 +240,14 @@
             let elementosEncontrados = 0;
 
             listaAplanada.forEach(e => {
-                const idCompleto = e.id;
+                const idRuta = e.id;
                 const ficha = e.data;
 
                 let perteneceAlSistema = false;
                 if (sistemaActual === 'todos') {
                     perteneceAlSistema = true;
                 } else {
-                    perteneceAlSistema = idCompleto.toLowerCase().includes(sistemaActual) || 
+                    perteneceAlSistema = idRuta.toLowerCase().includes(sistemaActual) || 
                                          (ficha.sistema && ficha.sistema.toLowerCase() === sistemaActual);
                 }
 
@@ -259,20 +259,24 @@
 
                 if (perteneceAlSistema && coincideEstado) {
                     elementosEncontrados++;
+                    
+                    // Extraer solo la clave del personaje sin la ruta (ej: sabbat-nigoyin-001)
+                    const idLimpio = idRuta.includes('/') ? idRuta.split('/').pop() : idRuta;
+                    
                     const item = document.createElement('div');
-                    item.className = `ficha-item ${idCompleto === idFichaSeleccionada ? 'active' : ''}`;
+                    item.className = `ficha-item ${idLimpio === idFichaSeleccionada ? 'active' : ''}`;
                     
                     const nombre = ficha.nombre || ficha.nombrePersonaje || 'Sin Nombre';
                     const clan = ficha.clan || 'Sin Clan';
                     const jugador = ficha.jugador || ficha.usuario || 'Desconocido';
 
                     item.innerHTML = `
-                        <div class="item-id">${idCompleto}</div>
+                        <div class="item-id">${idLimpio}</div>
                         <div class="item-nombre">${nombre}</div>
                         <div class="item-detalles">Clan: ${clan} | Jugador: ${jugador}</div>
                     `;
 
-                    item.onclick = (evt) => seleccionarFicha(idCompleto, evt.currentTarget);
+                    item.onclick = (evt) => seleccionarFicha(idLimpio, idRuta, evt.currentTarget);
                     contenedorLista.appendChild(item);
                 }
             });
@@ -288,18 +292,15 @@
             }
         }
 
-        function seleccionarFicha(idCompleto, elemento) {
-            idFichaSeleccionada = idCompleto;
+        function seleccionarFicha(idLimpio, idRuta, elemento) {
+            idFichaSeleccionada = idLimpio;
             
             document.querySelectorAll('.ficha-item').forEach(el => el.classList.remove('active'));
             if(elemento) elemento.classList.add('active');
 
-            // Extrae únicamente el ID individual (ej: de "vampiro/sabbat-nigoyin-001" a "sabbat-nigoyin-001")
-            const idLimpio = idCompleto.includes('/') ? idCompleto.split('/').pop() : idCompleto;
-
             let vistaHTML = "index-vampire.html";
-            if (idCompleto.toLowerCase().includes("mago") || sistemaActual === "mago") vistaHTML = "index-mage.html";
-            if (idCompleto.toLowerCase().includes("kueijin") || sistemaActual === "kueijin") vistaHTML = "index-kueijin.html";
+            if (idRuta.toLowerCase().includes("mago") || sistemaActual === "mago") vistaHTML = "index-mage.html";
+            if (idRuta.toLowerCase().includes("kueijin") || sistemaActual === "kueijin") vistaHTML = "index-kueijin.html";
 
             const frame = document.getElementById('frame-ficha');
             const placeholder = document.getElementById('no-selection');
@@ -307,8 +308,8 @@
             placeholder.style.display = 'none';
             frame.style.display = 'block';
             
-            // Envía el idLimpio e indica que debe ejecutarse la auto-carga al abrir
-            frame.src = `${vistaHTML}?id=${encodeURIComponent(idLimpio)}&autoload=true&mode=read`;
+            // Envía el idLimpio al iframe garantizando la carga correcta
+            frame.src = `${vistaHTML}?id=${encodeURIComponent(idLimpio)}`;
         }
 
         function ocultarVisor() {
