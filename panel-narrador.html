@@ -45,56 +45,64 @@
             overflow-x: auto;
             font-size: 0.9em;
         }
+        .btn-refrescar {
+            background-color: #8b0000;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+        .btn-refrescar:hover {
+            background-color: #b22222;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Panel Secreto del Narrador</h1>
+        <button class="btn-refrescar" onclick="cargarFichas()">Actualizar Datos</button>
         <div id="fichas-lista">Cargando datos de fichas desde Firebase...</div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    <script>
+        const databaseURL = "https://ecosnovenoumbral-default-rtdb.firebaseio.com";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDIda046uOTvsTdYeJWQ3AscySBrVgGri4",
-            authDomain: "ecosnovenoumbral.firebaseapp.com",
-            databaseURL: "https://ecosnovenoumbral-default-rtdb.firebaseio.com",
-            projectId: "ecosnovenoumbral",
-            storageBucket: "ecosnovenoumbral.firebasestorage.app",
-            messagingSenderId: "863575254950",
-            appId: "1:863575254950:web:dff0626e7a0826de425167"
-        };
+        async function cargarFichas() {
+            const contenedor = document.getElementById('fichas-lista');
+            contenedor.innerHTML = 'Consultando base de datos...';
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+            try {
+                const response = await fetch(`${databaseURL}/fichas.json`);
+                const data = await response.json();
 
-        const contenedor = document.getElementById('fichas-lista');
-        const fichasRef = ref(db, 'fichas');
+                contenedor.innerHTML = '';
 
-        onValue(fichasRef, (snapshot) => {
-            const data = snapshot.val();
-            contenedor.innerHTML = '';
-
-            if (!data) {
-                contenedor.innerHTML = '<p>No hay fichas registradas actualmente.</p>';
-                return;
-            }
-
-            for (let categoria in data) {
-                for (let id in data[categoria]) {
-                    const ficha = data[categoria][id];
-                    const card = document.createElement('div');
-                    card.className = 'ficha-card';
-                    card.innerHTML = `
-                        <div class="ficha-header">Categoría: ${categoria.toUpperCase()} | ID: ${id}</div>
-                        <pre>${JSON.stringify(ficha, null, 2)}</pre>
-                    `;
-                    contenedor.appendChild(card);
+                if (!data) {
+                    contenedor.innerHTML = '<p>No hay fichas registradas actualmente en la base de datos.</p>';
+                    return;
                 }
+
+                for (let categoria in data) {
+                    for (let id in data[categoria]) {
+                        const ficha = data[categoria][id];
+                        const card = document.createElement('div');
+                        card.className = 'ficha-card';
+                        card.innerHTML = `
+                            <div class="ficha-header">Categoría: ${categoria.toUpperCase()} | ID: ${id}</div>
+                            <pre>${JSON.stringify(ficha, null, 2)}</pre>
+                        `;
+                        contenedor.appendChild(card);
+                    }
+                }
+            } catch (error) {
+                contenedor.innerHTML = `<p style="color: red;">Error al conectar con Firebase: ${error.message}</p>`;
             }
-        });
+        }
+
+        // Cargar automáticamente al abrir la página
+        cargarFichas();
     </script>
 </body>
 </html>
