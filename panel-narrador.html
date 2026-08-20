@@ -17,7 +17,6 @@
             flex-direction: column;
             overflow: hidden;
         }
-        /* BARRA SUPERIOR DE CONTROL */
         header {
             background-color: #121212;
             border-bottom: 2px solid #8b0000;
@@ -65,14 +64,12 @@
             background-color: #1a1a1a;
         }
 
-        /* LAYOUT PRINCIPAL (DOS COLUMNAS) */
         .main-layout {
             display: flex;
             flex: 1;
             overflow: hidden;
         }
         
-        /* COLUMNA IZQUIERDA: LISTA DE FICHAS */
         .sidebar {
             width: 320px;
             background-color: #0f0f0f;
@@ -114,7 +111,6 @@
             color: #888;
         }
 
-        /* COLUMNA DERECHA: VISOR DE LA FICHA */
         .viewport {
             flex: 1;
             background-color: #000;
@@ -136,6 +132,19 @@
             color: #444;
             font-style: italic;
         }
+        .debug-box {
+            background: #111;
+            border: 1px solid #ff4d4d;
+            color: #00ff66;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.75em;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-top: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
@@ -146,26 +155,24 @@
         <div class="controls-group">
             <button class="btn btn-action" onclick="cargarDatos()">Actualizar Datos</button>
             
-            <!-- Selector de Sistema -->
             <select id="select-sistema" class="btn" onchange="cambiarSistema()">
-                <option value="vampiro">Sistema: Vampiro</option>
+                <option value="todos">Mostrar TODOS los Sistemas</option>
+                <option value="vampiro" selected>Sistema: Vampiro</option>
                 <option value="mago">Sistema: Mago</option>
                 <option value="kueijin">Sistema: Kuei-Jin</option>
             </select>
 
-            <!-- Filtros de Estado -->
             <button id="btn-borradores" class="btn btn-toggle active" onclick="filtrarEstado('borrador')">Borradores</button>
             <button id="btn-finalizados" class="btn btn-toggle" onclick="filtrarEstado('finalizado')">Finalizados</button>
+            <button id="btn-todos-estados" class="btn btn-toggle" onclick="filtrarEstado('todos')">Todos</button>
         </div>
     </header>
 
     <div class="main-layout">
-        <!-- Columna 1: Lista -->
         <div class="sidebar" id="lista-fichas">
             <div class="placeholder-text" style="position:static; transform:none; padding:20px;">Cargando lista...</div>
         </div>
 
-        <!-- Columna 2: Ficha gráfica -->
         <div class="viewport">
             <div id="no-selection" class="placeholder-text">Selecciona una ficha de la izquierda para visualizarla</div>
             <iframe id="frame-ficha" src="" style="display:none;"></iframe>
@@ -190,6 +197,7 @@
             contenedorLista.innerHTML = '<div style="color:#888; padding:10px;">Consultando Firebase...</div>';
 
             try {
+                // Consultamos directamente la raíz del nodo 'fichas'
                 const response = await fetch(`${databaseURL}/fichas.json`);
                 baseDatosCompleta = await response.json() || {};
                 renderizarLista();
@@ -209,48 +217,85 @@
             estadoActual = estado;
             document.getElementById('btn-borradores').classList.toggle('active', estado === 'borrador');
             document.getElementById('btn-finalizados').classList.toggle('active', estado === 'finalizado');
+            document.getElementById('btn-todos-estados').classList.toggle('active', estado === 'todos');
             idFichaSeleccionada = null;
             ocultarVisor();
             renderizarLista();
+        }
+
+        function aplanarFichas(objeto, prefijo = '') {
+            let resultado = [];
+            for (let key in objeto) {
+                if (!objeto.hasOwnProperty(key)) continue;
+                let item = objeto[key];
+                if (typeof item === 'object' && item !== null) {
+                    // Si tiene propiedades típicas de una ficha o no tiene sub-objetos grandes
+                    if (item.nombre || item.nombrePersonaje || item.jugador || item.usuario || item.clan) {
+                        resultado.push({ id: prefijo ? `${prefijo}/${key}` : key, data: item });
+                    } else {
+                        // Recorrer anidado si es una subcarpeta (ej: /vampiro/sabbat-001)
+                        resultado = resultado.concat(aplanarFichas(item, prefijo ? `${prefijo}/${key}` : key));
+                    }
+                }
+            }
+            return resultado;
         }
 
         function renderizarLista() {
             const contenedorLista = document.getElementById('lista-fichas');
             contenedorLista.innerHTML = '';
 
-            const nodoSistema = baseDatosCompleta[sistemaActual] || {};
+            const listaAplanada = aplanarFichas(baseDatosCompleta);
             let elementosEncontrados = 0;
 
-            for (let id in nodoSistema) {
-                const ficha = nodoSistema[id];
-                if (typeof ficha !== 'object' || ficha === null) continue;
+            listaAplanada.forEach(e => {
+                const idCompleto = e.id;
+                const ficha = e.data;
 
-                // Si la ficha no tiene la marca 'enviado', se agrupa en 'borrador'
+                // Verificación de Filtro por Sistema
+                let perteneceAlSistema = false;
+                if (sistemaActual === 'todos') {
+                    perteneceAlSistema = true;
+                } else {
+                    perteneceAlSistema = idCompleto.toLowerCase().includes(sistemaActual) || 
+                                         (ficha.sistema && ficha.sistema.toLowerCase() === sistemaActual);
+                }
+
+                // Verificación de Filtro por Estado
                 const esFinalizado = ficha.estado === 'enviado' || ficha.finalizado === true || ficha.enviado === true;
-                const coincideEstado = (estadoActual === 'finalizado' && esFinalizado) || (estadoActual === 'borrador' && !esFinalizado);
+                let coincideEstado = false;
+                if (estadoActual === 'todos') coincideEstado = true;
+                else if (estadoActual === 'finalizado') coincideEstado = esFinalizado;
+                else if (estadoActual === 'borrador') coincideEstado = !esFinalizado;
 
-                if (coincideEstado) {
+                if (perteneceAlSistema && coincideEstado) {
                     elementosEncontrados++;
                     const item = document.createElement('div');
-                    item.className = `ficha-item ${id === idFichaSeleccionada ? 'active' : ''}`;
+                    item.className = `ficha-item ${idCompleto === idFichaSeleccionada ? 'active' : ''}`;
                     
                     const nombre = ficha.nombre || ficha.nombrePersonaje || 'Sin Nombre';
                     const clan = ficha.clan || 'Sin Clan';
                     const jugador = ficha.jugador || ficha.usuario || 'Desconocido';
 
                     item.innerHTML = `
-                        <div class="item-id">${id}</div>
+                        <div class="item-id">${idCompleto}</div>
                         <div class="item-nombre">${nombre}</div>
                         <div class="item-detalles">Clan: ${clan} | Jugador: ${jugador}</div>
                     `;
 
-                    item.onclick = (e) => seleccionarFicha(id, e.currentTarget);
+                    item.onclick = (evt) => seleccionarFicha(idCompleto, evt.currentTarget);
                     contenedorLista.appendChild(item);
                 }
-            }
+            });
 
             if (elementosEncontrados === 0) {
-                contenedorLista.innerHTML = `<div style="color:#666; padding:15px; text-align:center;">No hay fichas en <b>${estadoActual.toUpperCase()}</b> para ${sistemaActual.toUpperCase()}.</div>`;
+                contenedorLista.innerHTML = `
+                    <div style="color:#aaa; padding:10px; text-align:center;">
+                        No se encontraron fichas con los filtros actuales.<br><br>
+                        <small>Respuesta recibida de Firebase:</small>
+                        <div class="debug-box">${JSON.stringify(baseDatosCompleta, null, 2)}</div>
+                    </div>
+                `;
             }
         }
 
@@ -260,7 +305,11 @@
             document.querySelectorAll('.ficha-item').forEach(el => el.classList.remove('active'));
             if(elemento) elemento.classList.add('active');
 
-            const vistaHTML = mapaVistas[sistemaActual] || "index-vampire.html";
+            // Determinar vista HTML correcta
+            let vistaHTML = "index-vampire.html";
+            if (id.toLowerCase().includes("mago") || sistemaActual === "mago") vistaHTML = "index-mage.html";
+            if (id.toLowerCase().includes("kueijin") || sistemaActual === "kueijin") vistaHTML = "index-kueijin.html";
+
             const frame = document.getElementById('frame-ficha');
             const placeholder = document.getElementById('no-selection');
 
