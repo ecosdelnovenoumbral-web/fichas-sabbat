@@ -209,7 +209,8 @@
                 if (!objeto.hasOwnProperty(key)) continue;
                 let item = objeto[key];
                 if (typeof item === 'object' && item !== null) {
-                    if (item.nombre || item.nombrePersonaje || item.jugador || item.usuario || item.clan) {
+                    // Si el objeto contiene datos propios o propiedades internas de la ficha
+                    if (item.nombre || item.nombrePersonaje || item.jugador || item.usuario || item.clan || item.estado || item.enviado !== undefined || item.finalizado !== undefined) {
                         resultado.push({ id: prefijo ? `${prefijo}/${key}` : key, data: item });
                     } else {
                         resultado = resultado.concat(aplanarFichas(item, prefijo ? `${prefijo}/${key}` : key));
