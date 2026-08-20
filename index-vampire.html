@@ -851,6 +851,22 @@
       alert("Error al intentar eliminar la ficha: " + error.message);
     }
   };
+
+  // DETECTOR DE ID EN LA URL PARA AUTOCARGA AL HACER CLIC
+  window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const idParam = urlParams.get('id');
+    const modeParam = urlParams.get('mode');
+
+    if (idParam) {
+      document.getElementById('pj-id').value = idParam;
+      if (modeParam === 'read') {
+        window.cargarModoLecturaAdmin();
+      } else {
+        window.cargarFicha();
+      }
+    }
+  });
 </script>
 
 </body>
