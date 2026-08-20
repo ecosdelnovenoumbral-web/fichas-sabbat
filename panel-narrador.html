@@ -209,7 +209,6 @@
                 if (!objeto.hasOwnProperty(key)) continue;
                 let item = objeto[key];
                 if (typeof item === 'object' && item !== null) {
-                    // Si el objeto contiene datos propios o propiedades internas de la ficha
                     if (item.nombre || item.nombrePersonaje || item.jugador || item.usuario || item.clan || item.estado || item.enviado !== undefined || item.finalizado !== undefined) {
                         resultado.push({ id: prefijo ? `${prefijo}/${key}` : key, data: item });
                     } else {
@@ -295,7 +294,8 @@
             placeholder.style.display = 'none';
             frame.style.display = 'block';
             
-            frame.src = `${vistaHTML}?id=${encodeURIComponent(idLimpio)}`;
+            // Enviamos tanto el ID limpio como la ruta completa para garantizar compatibilidad total
+            frame.src = `${vistaHTML}?id=${encodeURIComponent(idLimpio)}&path=${encodeURIComponent(idRuta)}&auto=true`;
         }
 
         function ocultarVisor() {
