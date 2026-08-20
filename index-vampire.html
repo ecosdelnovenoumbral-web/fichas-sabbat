@@ -565,7 +565,7 @@
         </div>
     </div>
 
-    <!-- Panel de Botones Finales: Enviar y Borrar Admin -->
+    <!-- Panel de Botones Finales -->
     <div class="admin-panel">
         <button class="firebase-btn" style="background-color: #2e7d32;" onclick="enviarFichaFinal()">Enviar y Finalizar Ficha</button>
         <button class="firebase-btn" style="background-color: #0288d1;" onclick="cargarModoLecturaAdmin()">[ADMIN] Cargar en Modo Lectura</button>
@@ -658,6 +658,35 @@
     return texto.toLowerCase().replace(/[^a-z0-9]/g, "");
   }
 
+  function poblarDatosEnFicha(datos) {
+    document.querySelectorAll("input[type='text'], input[type='number']").forEach(input => {
+      if (input.id && datos[input.id] !== undefined) {
+        input.value = datos[input.id];
+      }
+    });
+
+    document.querySelectorAll(".dots").forEach(container => {
+      if (container.id && datos[container.id]) {
+        const estados = datos[container.id];
+        container.querySelectorAll(".dot").forEach((dot, index) => {
+          dot.classList.remove("filled", "crossed");
+          if (estados[index] === "filled") dot.classList.add("filled");
+          else if (estados[index] === "crossed") dot.classList.add("crossed");
+        });
+      }
+    });
+
+    document.querySelectorAll(".health-checkbox").forEach(box => {
+      if (box.id && datos[box.id] !== undefined) {
+        box.classList.remove("filled");
+        if (datos[box.id] === "filled") box.classList.add("filled");
+      }
+    });
+
+    actualizarValoresGeneracion();
+    sincronizarWillpower();
+  }
+
   // Guardar borrador en Firebase
   window.guardarFicha = async function() {
     const usuarioRaw = document.getElementById("jugador").value.trim();
@@ -740,59 +769,38 @@
     }
   };
 
-  // Cargar ficha desde Firebase
-  window.cargarFicha = function() {
-    let pjId = document.getElementById("pj-id").value.trim();
+  // Cargar ficha desde Firebase (Con doble intento por subcarpeta o raíz)
+  window.cargarFicha = async function(idManual) {
+    let pjId = idManual || document.getElementById("pj-id").value.trim();
     if (!pjId) {
       alert("Por favor ingresa un ID completo (Ej: sabbat-nigoyin-001) para cargar el personaje.");
       return;
     }
 
-    // Limpieza de seguridad por si viene la ruta completa "vampiro/sabbat-xxx-000"
     if (pjId.includes('/')) {
       pjId = pjId.split('/').pop();
-      document.getElementById("pj-id").value = pjId;
     }
+    document.getElementById("pj-id").value = pjId;
 
     const dbRef = ref(db);
-    get(child(dbRef, `fichas/vampiro/${pjId}`)).then((snapshot) => {
+    try {
+      // 1. Intento principal en la ruta /fichas/vampiro/ID
+      let snapshot = await get(child(dbRef, `fichas/vampiro/${pjId}`));
+      
+      // 2. Intento secundario directo en /fichas/ID (por si fue guardada sin la subcarpeta 'vampiro')
+      if (!snapshot.exists()) {
+        snapshot = await get(child(dbRef, `fichas/${pjId}`));
+      }
+
       if (snapshot.exists()) {
-        const datos = snapshot.val();
-
-        document.querySelectorAll("input[type='text'], input[type='number']").forEach(input => {
-          if (input.id && datos[input.id] !== undefined) {
-            input.value = datos[input.id];
-          }
-        });
-
-        document.querySelectorAll(".dots").forEach(container => {
-          if (container.id && datos[container.id]) {
-            const estados = datos[container.id];
-            container.querySelectorAll(".dot").forEach((dot, index) => {
-              dot.classList.remove("filled", "crossed");
-              if (estados[index] === "filled") dot.classList.add("filled");
-              else if (estados[index] === "crossed") dot.classList.add("crossed");
-            });
-          }
-        });
-
-        document.querySelectorAll(".health-checkbox").forEach(box => {
-          if (box.id && datos[box.id] !== undefined) {
-            box.classList.remove("filled");
-            if (datos[box.id] === "filled") box.classList.add("filled");
-          }
-        });
-
-        actualizarValoresGeneracion();
-        sincronizarWillpower();
-        alert(`¡Ficha ${pjId} cargada con éxito!`);
+        poblarDatosEnFicha(snapshot.val());
       } else {
         alert("Aviso: No se encontró ningún personaje registrado con ese ID.");
       }
-    }).catch(err => {
+    } catch (err) {
       console.error("Error al cargar:", err);
       alert("Error al cargar desde Firebase: " + err.message);
-    });
+    }
   };
 
   // Enviar y bloquear campos principales
@@ -823,8 +831,8 @@
   }
 
   // Cargar ficha en modo Solo Lectura para administradores
-  window.cargarModoLecturaAdmin = async function() {
-    await window.cargarFicha();
+  window.cargarModoLecturaAdmin = async function(idManual) {
+    await window.cargarFicha(idManual);
     document.querySelectorAll(".container input").forEach(input => {
       input.readOnly = true;
     });
@@ -832,10 +840,9 @@
       el.dataset.readonly = "true";
       el.style.cursor = "not-allowed";
     });
-    alert("[ADMIN] La ficha ha sido cargada en MODO LECTURA. No se pueden realizar cambios.");
   };
 
-  // Eliminar ficha de la base de datos (Uso de remove para compatibilidad v11)
+  // Eliminar ficha de la base de datos
   window.eliminarFichaAdmin = async function() {
     let pjId = document.getElementById("pj-id").value.trim();
     if (pjId.includes('/')) {
@@ -852,6 +859,7 @@
 
     try {
       await remove(ref(db, 'fichas/vampiro/' + pjId));
+      await remove(ref(db, 'fichas/' + pjId));
       await remove(ref(db, 'administracion/registros/' + pjId));
       
       alert(`¡Éxito! La ficha ${pjId} ha sido eliminada por completo.`);
@@ -862,14 +870,13 @@
     }
   };
 
-  // DETECTOR DE ID EN LA URL PARA AUTOCARGA AL HACER CLIC
-  window.addEventListener('DOMContentLoaded', () => {
+  // DETECTOR AUTOMÁTICO DE ID EN LA URL
+  async function procesarUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     let idParam = urlParams.get('id');
     const modeParam = urlParams.get('mode');
 
     if (idParam) {
-      // Extrae la clave limpia eliminando el prefijo de ruta si existe
       if (idParam.includes('/')) {
         idParam = idParam.split('/').pop();
       }
@@ -877,12 +884,19 @@
       document.getElementById('pj-id').value = idParam;
 
       if (modeParam === 'read') {
-        window.cargarModoLecturaAdmin();
+        await window.cargarModoLecturaAdmin(idParam);
       } else {
-        window.cargarFicha(); // Carga editable por defecto
+        await window.cargarFicha(idParam);
       }
     }
-  });
+  }
+
+  // Se dispara la lectura al cargar la estructura del DOM
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', procesarUrl);
+  } else {
+    procesarUrl();
+  }
 </script>
 
 </body>
