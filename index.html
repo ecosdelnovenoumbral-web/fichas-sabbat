@@ -293,7 +293,7 @@
         <span>ID del Personaje:</span>
         <input type="text" id="pj-id" placeholder="Auto / Ej: sabbat-usuario-001" style="width: 200px; background: #121212; border: 1px solid var(--accent-color);">
         <button class="firebase-btn" onclick="guardarFicha()">Guardar Borrador</button>
-        <button class="firebase-btn" onclick="cargarFicha()">Cargar de Firebase</button>
+        <button class="firebase-btn" onclick="cargarFicha()">Cargar Ficha</button>
     </div>
 
     <div class="grid-3">
@@ -676,16 +676,16 @@
     if (!pjId) {
       const dbRef = ref(db);
       try {
-        const snapshot = await get(child(dbRef, `control_usuarios/${usuarioClean}/sabbat_count`));
+        const snapshot = await get(child(dbRef, `control_usuarios/${usuarioClean}/vampire_count`));
         let count = 1;
         if (snapshot.exists()) {
           count = snapshot.val() + 1;
         }
         
         const numFormatted = String(count).padStart(3, '0');
-        pjId = `sabbat-${usuarioClean}-${numFormatted}`;
+        pjId = `vampire-${usuarioClean}-${numFormatted}`;
         
-        await set(ref(db, `control_usuarios/${usuarioClean}/sabbat_count`), count);
+        await set(ref(db, `control_usuarios/${usuarioClean}/vampire_count`), count);
         document.getElementById("pj-id").value = pjId;
       } catch (error) {
         console.error("Error al generar ID:", error);
@@ -720,22 +720,23 @@
     });
 
     try {
-      await set(ref(db, 'fichas/vampiro/' + pjId), datos);
+      await set(ref(db, 'fichas/vampire/' + pjId), datos);
       await set(ref(db, 'administracion/registros/' + pjId), {
         usuario_foro: usuarioRaw,
         id_ficha: pjId,
-        juego: "vampiro_sabbat",
+        juego: "vampire",
         fecha: new Date().toISOString()
       });
+      
+      alert("¡Borrador guardado con éxito!");
       return true;
     } catch (err) {
       console.error("Error al guardar:", err);
-      alert("Error al guardar en Firebase: " + err.message);
+      alert("Error al guardar la información: " + err.message);
       return false;
     }
   };
 
-  // Botón: Enviar y Finalizar Ficha (Con doble confirmación y bloqueo selectivo)
   window.enviarFichaFinal = async function() {
     const confirmar = confirm("¿Estás seguro de enviar y finalizar tu ficha? Una vez enviada, los datos principales y atributos quedarán bloqueados de forma permanente para el usuario.");
     if (!confirmar) return;
@@ -762,7 +763,6 @@
     });
   }
 
-  // Botón Admin: Eliminar ficha cargada para sanear contadores/espacios
   window.eliminarFichaAdmin = async function() {
     const pjId = document.getElementById("pj-id").value.trim();
     if (!pjId) {
@@ -774,7 +774,7 @@
     if (!confirmarAdmin) return;
 
     try {
-      await set(ref(db, 'fichas/vampiro/' + pjId), null);
+      await set(ref(db, 'fichas/vampire/' + pjId), null);
       await set(ref(db, 'administracion/registros/' + pjId), null);
       
       alert(`¡Éxito! La ficha ${pjId} ha sido eliminada por completo de la base de datos.`);
@@ -788,12 +788,12 @@
   window.cargarFicha = function() {
     const pjId = document.getElementById("pj-id").value.trim();
     if (!pjId) {
-      alert("Por favor ingresa un ID completo (Ej: sabbat-nigoyin-001) para cargar el personaje.");
+      alert("Por favor ingresa un ID completo (Ej: vampire-usuario-001) para cargar el personaje.");
       return;
     }
 
     const dbRef = ref(db);
-    get(child(dbRef, `fichas/vampiro/${pjId}`)).then((snapshot) => {
+    get(child(dbRef, `fichas/vampire/${pjId}`)).then((snapshot) => {
       if (snapshot.exists()) {
         const datos = snapshot.val();
 
@@ -829,7 +829,7 @@
       }
     }).catch(err => {
       console.error("Error al cargar:", err);
-      alert("Error al cargar desde Firebase: " + err.message);
+      alert("Error al cargar los datos: " + err.message);
     });
   };
 </script>
