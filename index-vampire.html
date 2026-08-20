@@ -568,6 +568,7 @@
     <!-- Panel de Botones Finales: Enviar y Borrar Admin -->
     <div class="admin-panel">
         <button class="firebase-btn" style="background-color: #2e7d32;" onclick="enviarFichaFinal()">Enviar y Finalizar Ficha</button>
+        <button class="firebase-btn" style="background-color: #0288d1;" onclick="cargarModoLecturaAdmin()">[ADMIN] Cargar en Modo Lectura</button>
         <button class="firebase-btn" style="background-color: #c62828;" onclick="eliminarFichaAdmin()">[ADMIN] Eliminar Ficha Cargada</button>
     </div>
 
@@ -576,6 +577,7 @@
 <script>
     document.querySelectorAll('.dot').forEach(dot => {
         dot.addEventListener('click', function() {
+            if (this.dataset.readonly === "true") return;
             if (!this.classList.contains('crossed') && !this.classList.contains('filled')) {
                 this.classList.add('crossed');
             } else if (this.classList.contains('crossed')) {
@@ -589,6 +591,7 @@
 
     document.querySelectorAll('.health-checkbox').forEach(checkbox => {
         checkbox.addEventListener('click', function() {
+            if (this.dataset.readonly === "true") return;
             this.classList.toggle('filled');
         });
     });
@@ -636,7 +639,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-  import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+  import { getDatabase, ref, set, get, child, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDida046uOTvsTdYeJWQ3AscySBrVgGri4",
@@ -655,6 +658,7 @@
     return texto.toLowerCase().replace(/[^a-z0-9]/g, "");
   }
 
+  // Guardar borrador en Firebase
   window.guardarFicha = async function() {
     const usuarioRaw = document.getElementById("jugador").value.trim();
     if (!usuarioRaw) {
@@ -727,7 +731,6 @@
         juego: "vampiro_sabbat",
         fecha: new Date().toISOString()
       });
-      // Mensaje emergente agregado para el borrador
       alert(`¡Borrador guardado con éxito!\nTu ID asignado es: ${pjId}`);
       return true;
     } catch (err) {
@@ -737,56 +740,7 @@
     }
   };
 
-  // Botón: Enviar y Finalizar Ficha (Con doble confirmación y bloqueo selectivo)
-  window.enviarFichaFinal = async function() {
-    const confirmar = confirm("¿Estás seguro de enviar y finalizar tu ficha? Una vez enviada, los datos principales y atributos quedarán bloqueados de forma permanente para el usuario.");
-    if (!confirmar) return;
-
-    const guardadoExitoso = await window.guardarFicha();
-    if (guardadoExitoso) {
-      bloquearCamposEstaticos();
-      alert("¡Éxito! Tu ficha ha sido enviada y guardada correctamente. Ya se encuentra bloqueada para modificaciones estáticas.");
-    } else {
-      alert("Error: No se pudo finalizar el envío de la ficha. Por favor verifica tus datos e inténtalo de nuevo.");
-    }
-  };
-
-  function bloquearCamposEstaticos() {
-    const inputsAEliminarEdicion = document.querySelectorAll(
-        ".container input[type='text']:not([id^='inv-']):not([id^='arma-']):not([id^='armadura-']), " +
-        ".container input[id='willpower-max'], .container input[id='gen-input']"
-    );
-    
-    inputsAEliminarEdicion.forEach(input => {
-        if(input.id !== "pj-id" && input.id !== "jugador") {
-            input.readOnly = true;
-        }
-    });
-  }
-
-  // Botón Admin: Eliminar ficha cargada para sanear contadores/espacios
-  window.eliminarFichaAdmin = async function() {
-    const pjId = document.getElementById("pj-id").value.trim();
-    if (!pjId) {
-      alert("Error: No hay ningún ID de ficha cargado en pantalla para eliminar.");
-      return;
-    }
-
-    const confirmarAdmin = confirm(`[ADMINISTRADOR]\n¿Deseas ELIMINAR PERMANENTEMENTE la ficha '${pjId}' de la base de datos?\nEsta acción liberará el espacio.`);
-    if (!confirmarAdmin) return;
-
-    try {
-      await set(ref(db, 'fichas/vampiro/' + pjId), null);
-      await set(ref(db, 'administracion/registros/' + pjId), null);
-      
-      alert(`¡Éxito! La ficha ${pjId} ha sido eliminada por completo de la base de datos.`);
-      location.reload();
-    } catch (error) {
-      console.error("Error al eliminar:", error);
-      alert("Error al intentar eliminar la ficha: " + error.message);
-    }
-  };
-
+  // Cargar ficha desde Firebase
   window.cargarFicha = function() {
     const pjId = document.getElementById("pj-id").value.trim();
     if (!pjId) {
@@ -833,6 +787,69 @@
       console.error("Error al cargar:", err);
       alert("Error al cargar desde Firebase: " + err.message);
     });
+  };
+
+  // Enviar y bloquear campos principales
+  window.enviarFichaFinal = async function() {
+    const confirmar = confirm("¿Estás seguro de enviar y finalizar tu ficha? Una vez enviada, los datos principales quedarán bloqueados para modificaciones.");
+    if (!confirmar) return;
+
+    const guardadoExitoso = await window.guardarFicha();
+    if (guardadoExitoso) {
+      bloquearCamposEstaticos();
+      alert("¡Éxito! Tu ficha ha sido enviada y bloqueada correctamente.");
+    } else {
+      alert("Error: No se pudo finalizar el envío de la ficha.");
+    }
+  };
+
+  function bloquearCamposEstaticos() {
+    const inputsAEliminarEdicion = document.querySelectorAll(
+        ".container input[type='text']:not([id^='inv-']):not([id^='arma-']):not([id^='armadura-']), " +
+        ".container input[id='willpower-max'], .container input[id='gen-input']"
+    );
+    
+    inputsAEliminarEdicion.forEach(input => {
+        if(input.id !== "pj-id" && input.id !== "jugador") {
+            input.readOnly = true;
+        }
+    });
+  }
+
+  // Cargar ficha en modo Solo Lectura para administradores
+  window.cargarModoLecturaAdmin = async function() {
+    await window.cargarFicha();
+    document.querySelectorAll(".container input").forEach(input => {
+      input.readOnly = true;
+    });
+    document.querySelectorAll(".dot, .health-checkbox").forEach(el => {
+      el.dataset.readonly = "true";
+      el.style.cursor = "not-allowed";
+    });
+    alert("[ADMIN] La ficha ha sido cargada en MODO LECTURA. No se pueden realizar cambios.");
+  };
+
+  // Eliminar ficha de la base de datos (Uso de remove para compatibilidad v11)
+  window.eliminarFichaAdmin = async function() {
+    const pjId = document.getElementById("pj-id").value.trim();
+    if (!pjId) {
+      alert("Error: No hay ningún ID de ficha ingresado o cargado para eliminar.");
+      return;
+    }
+
+    const confirmarAdmin = confirm(`[ADMINISTRADOR]\n¿Deseas ELIMINAR PERMANENTEMENTE la ficha '${pjId}' de la base de datos?`);
+    if (!confirmarAdmin) return;
+
+    try {
+      await remove(ref(db, 'fichas/vampiro/' + pjId));
+      await remove(ref(db, 'administracion/registros/' + pjId));
+      
+      alert(`¡Éxito! La ficha ${pjId} ha sido eliminada por completo.`);
+      location.reload();
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+      alert("Error al intentar eliminar la ficha: " + error.message);
+    }
   };
 </script>
 
