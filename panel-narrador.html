@@ -209,7 +209,7 @@
                 if (!objeto.hasOwnProperty(key)) continue;
                 let item = objeto[key];
                 if (typeof item === 'object' && item !== null) {
-                    if (item.nombre || item.nombrePersonaje || item.jugador || item.usuario || item.clan || item.estado || item.enviado !== undefined || item.finalizado !== undefined) {
+                    if (item.nombre || item.nombrePersonaje || item.jugador || item.usuario || item.clan) {
                         resultado.push({ id: prefijo ? `${prefijo}/${key}` : key, data: item });
                     } else {
                         resultado = resultado.concat(aplanarFichas(item, prefijo ? `${prefijo}/${key}` : key));
@@ -269,10 +269,8 @@
 
             if (elementosEncontrados === 0) {
                 contenedorLista.innerHTML = `
-                    <div style="color:#666; padding:30px 15px; text-align:center; font-size:0.9em;">
-                        <div style="font-size: 2em; margin-bottom: 10px; opacity: 0.5;">📂</div>
-                        <strong>Sin registros disponibles</strong><br>
-                        <span style="font-size:0.8em; color:#555;">No hay fichas que coincidan con el filtro seleccionado.</span>
+                    <div style="color:#aaa; padding:15px; text-align:center; font-size:0.9em;">
+                        📂 No se encontraron fichas en esta sección.
                     </div>
                 `;
             }
@@ -294,8 +292,7 @@
             placeholder.style.display = 'none';
             frame.style.display = 'block';
             
-            // Enviamos tanto el ID limpio como la ruta completa para garantizar compatibilidad total
-            frame.src = `${vistaHTML}?id=${encodeURIComponent(idLimpio)}&path=${encodeURIComponent(idRuta)}&auto=true`;
+            frame.src = `${vistaHTML}?id=${encodeURIComponent(idLimpio)}`;
         }
 
         function ocultarVisor() {
