@@ -742,10 +742,16 @@
 
   // Cargar ficha desde Firebase
   window.cargarFicha = function() {
-    const pjId = document.getElementById("pj-id").value.trim();
+    let pjId = document.getElementById("pj-id").value.trim();
     if (!pjId) {
       alert("Por favor ingresa un ID completo (Ej: sabbat-nigoyin-001) para cargar el personaje.");
       return;
+    }
+
+    // Limpieza de seguridad por si viene la ruta completa "vampiro/sabbat-xxx-000"
+    if (pjId.includes('/')) {
+      pjId = pjId.split('/').pop();
+      document.getElementById("pj-id").value = pjId;
     }
 
     const dbRef = ref(db);
@@ -831,7 +837,11 @@
 
   // Eliminar ficha de la base de datos (Uso de remove para compatibilidad v11)
   window.eliminarFichaAdmin = async function() {
-    const pjId = document.getElementById("pj-id").value.trim();
+    let pjId = document.getElementById("pj-id").value.trim();
+    if (pjId.includes('/')) {
+      pjId = pjId.split('/').pop();
+    }
+
     if (!pjId) {
       alert("Error: No hay ningún ID de ficha ingresado o cargado para eliminar.");
       return;
@@ -855,15 +865,21 @@
   // DETECTOR DE ID EN LA URL PARA AUTOCARGA AL HACER CLIC
   window.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
-    const idParam = urlParams.get('id');
+    let idParam = urlParams.get('id');
     const modeParam = urlParams.get('mode');
 
     if (idParam) {
+      // Extrae la clave limpia eliminando el prefijo de ruta si existe
+      if (idParam.includes('/')) {
+        idParam = idParam.split('/').pop();
+      }
+
       document.getElementById('pj-id').value = idParam;
+
       if (modeParam === 'read') {
         window.cargarModoLecturaAdmin();
       } else {
-        window.cargarFicha();
+        window.cargarFicha(); // Carga editable por defecto
       }
     }
   });
