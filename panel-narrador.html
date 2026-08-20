@@ -1,4 +1,72 @@
-<script>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración y Narrador</title>
+    <style>
+        body {
+            background-color: #0d0d0d;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #8b0000;
+            border-bottom: 2px solid #8b0000;
+            padding-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .ficha-card {
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+            border-left: 4px solid #8b0000;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .ficha-header {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #ff4d4d;
+            margin-bottom: 8px;
+        }
+        pre {
+            background-color: #050505;
+            color: #00ff66;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 0.9em;
+        }
+        .btn-refrescar {
+            background-color: #8b0000;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+        .btn-refrescar:hover {
+            background-color: #b22222;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Panel Secreto del Narrador</h1>
+        <button class="btn-refrescar" onclick="cargarFichas()">Actualizar Datos</button>
+        <div id="fichas-lista">Cargando datos de fichas desde Firebase...</div>
+    </div>
+
+    <script>
         const databaseURL = "https://ecosnovenoumbral-default-rtdb.firebaseio.com";
 
         async function cargarFichas() {
@@ -6,7 +74,6 @@
             contenedor.innerHTML = 'Consultando base de datos...';
 
             try {
-                // Apuntamos directamente al nodo de vampiro
                 const response = await fetch(`${databaseURL}/fichas/vampiro.json`);
                 const data = await response.json();
 
@@ -17,14 +84,12 @@
                     return;
                 }
 
-                // Si data es un objeto con fichas
                 if (typeof data === 'object') {
                     for (let id in data) {
                         const ficha = data[id];
                         const card = document.createElement('div');
                         card.className = 'ficha-card';
                         
-                        // Extraemos el nombre si existe en la ficha, si no mostramos el ID
                         const nombrePersonaje = (typeof ficha === 'object' && ficha.nombre) ? ficha.nombre : 'Personaje';
 
                         card.innerHTML = `
@@ -42,6 +107,7 @@
             }
         }
 
-        // Cargar automáticamente al abrir la página
         cargarFichas();
     </script>
+</body>
+</html>
