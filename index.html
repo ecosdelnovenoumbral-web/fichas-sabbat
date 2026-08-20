@@ -270,6 +270,18 @@
         .firebase-btn:hover {
             background: #b30000;
         }
+        .admin-panel {
+            background: #150202;
+            border: 1px dashed #ff4d4d;
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
     </style>
 </head>
 <body>
@@ -280,7 +292,7 @@
     <div class="firebase-panel">
         <span>ID del Personaje:</span>
         <input type="text" id="pj-id" placeholder="Auto / Ej: sabbat-usuario-001" style="width: 200px; background: #121212; border: 1px solid var(--accent-color);">
-        <button class="firebase-btn" onclick="guardarFicha()">Guardar en Firebase</button>
+        <button class="firebase-btn" onclick="guardarFicha()">Guardar Borrador</button>
         <button class="firebase-btn" onclick="cargarFicha()">Cargar de Firebase</button>
     </div>
 
@@ -553,6 +565,12 @@
         </div>
     </div>
 
+    <!-- Panel de Botones Finales: Enviar y Borrar Admin -->
+    <div class="admin-panel">
+        <button class="firebase-btn" style="background-color: #2e7d32;" onclick="enviarFichaFinal()">Enviar y Finalizar Ficha</button>
+        <button class="firebase-btn" style="background-color: #c62828;" onclick="eliminarFichaAdmin()">[ADMIN] Eliminar Ficha Cargada</button>
+    </div>
+
 </div>
 
 <script>
@@ -641,7 +659,7 @@
     const usuarioRaw = document.getElementById("jugador").value.trim();
     if (!usuarioRaw) {
       alert("Por favor ingresa tu Nombre de Jugador / Usuario del Foro antes de guardar.");
-      return;
+      return false;
     }
 
     const usuarioClean = limpiarTexto(usuarioRaw);
@@ -651,7 +669,7 @@
       const idPartes = pjId.split("-");
       if (idPartes.length >= 2 && idPartes[1] !== usuarioClean) {
         alert(`Seguridad: Esta ficha pertenece al usuario '${idPartes[1]}'. No puedes editarla con el usuario '${usuarioClean}'.`);
-        return;
+        return false;
       }
     }
 
@@ -672,12 +690,11 @@
       } catch (error) {
         console.error("Error al generar ID:", error);
         alert("Ocurrió un error al generar el ID único del personaje.");
-        return;
+        return false;
       }
     }
 
     const datos = {};
-
     document.querySelectorAll("input[type='text'], input[type='number']").forEach(input => {
       if (input.id && input.id !== "pj-id") {
         datos[input.id] = input.value;
@@ -702,27 +719,76 @@
       }
     });
 
-    set(ref(db, 'fichas/vampiro/' + pjId), datos)
-      .then(() => {
-        set(ref(db, 'administracion/registros/' + pjId), {
-          usuario_foro: usuarioRaw,
-          id_ficha: pjId,
-          juego: "vampiro_sabbat",
-          fecha: new Date().toISOString()
-        });
-
-        alert(`¡Ficha guardada exitosamente!\n\nTu ID de Ficha es:\n${pjId}\n\nCopia este ID y publícalo en tu tema de creación de personaje dentro del foro.`);
-      })
-      .catch((err) => {
-        console.error("Error al guardar:", err);
-        alert("Error al guardar en Firebase: " + err.message);
+    try {
+      await set(ref(db, 'fichas/vampiro/' + pjId), datos);
+      await set(ref(db, 'administracion/registros/' + pjId), {
+        usuario_foro: usuarioRaw,
+        id_ficha: pjId,
+        juego: "vampiro_sabbat",
+        fecha: new Date().toISOString()
       });
+      return true;
+    } catch (err) {
+      console.error("Error al guardar:", err);
+      alert("Error al guardar en Firebase: " + err.message);
+      return false;
+    }
+  };
+
+  // Botón: Enviar y Finalizar Ficha (Con doble confirmación y bloqueo selectivo)
+  window.enviarFichaFinal = async function() {
+    const confirmar = confirm("¿Estás seguro de enviar y finalizar tu ficha? Una vez enviada, los datos principales y atributos quedarán bloqueados de forma permanente para el usuario.");
+    if (!confirmar) return;
+
+    const guardadoExitoso = await window.guardarFicha();
+    if (guardadoExitoso) {
+      bloquearCamposEstaticos();
+      alert("¡Éxito! Tu ficha ha sido enviada y guardada correctamente. Ya se encuentra bloqueada para modificaciones estáticas.");
+    } else {
+      alert("Error: No se pudo finalizar el envío de la ficha. Por favor verifica tus datos e inténtalo de nuevo.");
+    }
+  };
+
+  function bloquearCamposEstaticos() {
+    const inputsAEliminarEdicion = document.querySelectorAll(
+        ".container input[type='text']:not([id^='inv-']):not([id^='arma-']):not([id^='armadura-']), " +
+        ".container input[id='willpower-max'], .container input[id='gen-input']"
+    );
+    
+    inputsAEliminarEdicion.forEach(input => {
+        if(input.id !== "pj-id" && input.id !== "jugador") {
+            input.readOnly = true;
+        }
+    });
+  }
+
+  // Botón Admin: Eliminar ficha cargada para sanear contadores/espacios
+  window.eliminarFichaAdmin = async function() {
+    const pjId = document.getElementById("pj-id").value.trim();
+    if (!pjId) {
+      alert("Error: No hay ningún ID de ficha cargado en pantalla para eliminar.");
+      return;
+    }
+
+    const confirmarAdmin = confirm(`[ADMINISTRADOR]\n¿Deseas ELIMINAR PERMANENTEMENTE la ficha '${pjId}' de la base de datos?\nEsta acción liberará el espacio.`);
+    if (!confirmarAdmin) return;
+
+    try {
+      await set(ref(db, 'fichas/vampiro/' + pjId), null);
+      await set(ref(db, 'administracion/registros/' + pjId), null);
+      
+      alert(`¡Éxito! La ficha ${pjId} ha sido eliminada por completo de la base de datos.`);
+      location.reload();
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+      alert("Error al intentar eliminar la ficha: " + error.message);
+    }
   };
 
   window.cargarFicha = function() {
     const pjId = document.getElementById("pj-id").value.trim();
     if (!pjId) {
-      alert("Por favor ingresa un ID completo (Ej: sabbat-usuario-001) para cargar el personaje.");
+      alert("Por favor ingresa un ID completo (Ej: sabbat-nigoyin-001) para cargar el personaje.");
       return;
     }
 
@@ -759,7 +825,7 @@
         sincronizarWillpower();
         alert(`¡Ficha ${pjId} cargada con éxito!`);
       } else {
-        alert("No se encontró ningún personaje con ese ID.");
+        alert("Aviso: No se encontró ningún personaje registrado con ese ID.");
       }
     }).catch(err => {
       console.error("Error al cargar:", err);
