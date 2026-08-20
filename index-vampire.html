@@ -727,6 +727,8 @@
         juego: "vampiro_sabbat",
         fecha: new Date().toISOString()
       });
+      // Mensaje emergente agregado para el borrador
+      alert(`¡Borrador guardado con éxito!\nTu ID asignado es: ${pjId}`);
       return true;
     } catch (err) {
       console.error("Error al guardar:", err);
