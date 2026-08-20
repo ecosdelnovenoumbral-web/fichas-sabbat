@@ -687,7 +687,6 @@
     sincronizarWillpower();
   }
 
-  // Guardar borrador en Firebase
   window.guardarFicha = async function() {
     const usuarioRaw = document.getElementById("jugador").value.trim();
     if (!usuarioRaw) {
@@ -700,7 +699,7 @@
 
     if (pjId) {
       const idPartes = pjId.split("-");
-      if (idPartes.length >= 2 && idPartes[1] !== usuarioClean) {
+      if (idPartes.length >= 2 && idPartes[1].toLowerCase() !== usuarioClean) {
         alert(`Seguridad: Esta ficha pertenece al usuario '${idPartes[1]}'. No puedes editarla con el usuario '${usuarioClean}'.`);
         return false;
       }
@@ -769,43 +768,71 @@
     }
   };
 
-  // Cargar ficha desde Firebase (Con doble intento por subcarpeta o raíz)
+  // Carga robusta multicapa para resolver búsquedas con subdirectorios o variaciones de ID
   window.cargarFicha = async function(idManual) {
-    let pjId = idManual || document.getElementById("pj-id").value.trim();
-    if (!pjId) {
-      alert("Por favor ingresa un ID completo (Ej: sabbat-nigoyin-001) para cargar el personaje.");
+    let inputVal = idManual || document.getElementById("pj-id").value.trim();
+    if (!inputVal) {
+      alert("Por favor ingresa un ID para cargar el personaje.");
       return;
     }
 
-    if (pjId.includes('/')) {
-      pjId = pjId.split('/').pop();
+    let targetKey = inputVal;
+    if (targetKey.includes('/')) {
+      targetKey = targetKey.split('/').pop();
     }
-    document.getElementById("pj-id").value = pjId;
+    document.getElementById("pj-id").value = targetKey;
 
     const dbRef = ref(db);
     try {
-      // 1. Intento principal en la ruta /fichas/vampiro/ID
-      let snapshot = await get(child(dbRef, `fichas/vampiro/${pjId}`));
+      // 1. Intento por ruta de vampiros
+      let snapshot = await get(child(dbRef, `fichas/vampiro/${targetKey}`));
       
-      // 2. Intento secundario directo en /fichas/ID (por si fue guardada sin la subcarpeta 'vampiro')
+      // 2. Intento en raíz de fichas
       if (!snapshot.exists()) {
-        snapshot = await get(child(dbRef, `fichas/${pjId}`));
+        snapshot = await get(child(dbRef, `fichas/${targetKey}`));
+      }
+
+      // 3. Barrido completo en fichas si el ID vino truncado o con diferencias de minúsculas
+      if (!snapshot.exists()) {
+        const rootFichas = await get(child(dbRef, 'fichas'));
+        if (rootFichas.exists()) {
+          const allFichas = rootFichas.val();
+          
+          if (allFichas.vampiro) {
+            for (const key in allFichas.vampiro) {
+              if (key.toLowerCase() === targetKey.toLowerCase() || key.includes(targetKey)) {
+                snapshot = await get(child(dbRef, `fichas/vampiro/${key}`));
+                document.getElementById("pj-id").value = key;
+                break;
+              }
+            }
+          }
+          
+          if (!snapshot.exists()) {
+            for (const key in allFichas) {
+              if (key !== 'vampiro' && (key.toLowerCase() === targetKey.toLowerCase() || key.includes(targetKey))) {
+                snapshot = await get(child(dbRef, `fichas/${key}`));
+                document.getElementById("pj-id").value = key;
+                break;
+              }
+            }
+          }
+        }
       }
 
       if (snapshot.exists()) {
         poblarDatosEnFicha(snapshot.val());
       } else {
-        alert("Aviso: No se encontró ningún personaje registrado con ese ID.");
+        alert(`No se encontró ningún personaje registrado con el identificador: ${targetKey}`);
       }
     } catch (err) {
       console.error("Error al cargar:", err);
-      alert("Error al cargar desde Firebase: " + err.message);
+      alert("Error al intentar conectarse a la base de datos: " + err.message);
     }
   };
 
-  // Enviar y bloquear campos principales
   window.enviarFichaFinal = async function() {
-    const confirmar = confirm("¿Estás seguro de enviar y finalizar tu ficha? Una vez enviada, los datos principales quedarán bloqueados para modificaciones.");
+    const confirmar = confirm("¿Estás seguro de enviar y finalizar tu ficha? Una vez enviada, los datos principales quedarán bloqueados.");
     if (!confirmar) return;
 
     const guardadoExitoso = await window.guardarFicha();
@@ -830,7 +857,6 @@
     });
   }
 
-  // Cargar ficha en modo Solo Lectura para administradores
   window.cargarModoLecturaAdmin = async function(idManual) {
     await window.cargarFicha(idManual);
     document.querySelectorAll(".container input").forEach(input => {
@@ -842,7 +868,6 @@
     });
   };
 
-  // Eliminar ficha de la base de datos
   window.eliminarFichaAdmin = async function() {
     let pjId = document.getElementById("pj-id").value.trim();
     if (pjId.includes('/')) {
@@ -870,7 +895,6 @@
     }
   };
 
-  // DETECTOR AUTOMÁTICO DE ID EN LA URL
   async function procesarUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     let idParam = urlParams.get('id');
@@ -891,7 +915,6 @@
     }
   }
 
-  // Se dispara la lectura al cargar la estructura del DOM
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', procesarUrl);
   } else {
