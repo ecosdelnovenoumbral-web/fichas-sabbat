@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ecos del Noveno Umbral - Portal de Fichas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --card-bg: #120808;
+            --text-color: #dcd3cb;
+            --border-color: #3a0000;
+            --accent-color: #8a0303;
+            --title-font: 'Cinzel', serif;
+            --decorative-font: 'Cinzel Decorative', serif;
+            --body-font: 'Rajdhani', sans-serif;
+        }
+        body {
+            font-family: var(--body-font);
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at center, #1a0505 0%, #000000 100%);
+            color: var(--text-color);
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+        .portal-container {
+            max-width: 900px;
+            width: 100%;
+            background: var(--card-bg);
+            border: 2px solid var(--accent-color);
+            padding: 40px;
+            border-radius: 6px;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.9);
+            text-align: center;
+            box-sizing: border-box;
+        }
+        h1 {
+            font-family: var(--decorative-font);
+            color: var(--accent-color);
+            text-transform: uppercase;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.8);
+        }
+        .subtitle {
+            font-size: 1.1rem;
+            color: #aaa;
+            margin-bottom: 40px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            justify-content: center;
+        }
+        .game-card {
+            background: #1f1f22;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 25px 20px;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-sizing: border-box;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+        }
+        .game-card.active:hover {
+            border-color: var(--accent-color);
+            background: #2a0a0a;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(138,3,3,0.3);
+        }
+        .game-card.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: #121214;
+        }
+        .game-title {
+            font-family: var(--title-font);
+            font-size: 1.2rem;
+            color: #fff;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+        .game-desc {
+            font-size: 0.9rem;
+            color: #bbb;
+            text-align: center;
+        }
+        .status-badge {
+            margin-top: 15px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 3px 8px;
+            border-radius: 3px;
+        }
+        .badge-active {
+            background: #3a0000;
+            color: #ff9999;
+            border: 1px solid var(--accent-color);
+        }
+        .badge-dev {
+            background: #222;
+            color: #ff6666;
+            border: 1px solid #500;
+        }
+        .footer-note {
+            margin-top: 40px;
+            font-size: 0.85rem;
+            color: #666;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+<div class="portal-container">
+    <h1>Ecos del Noveno Umbral</h1>
+    <div class="subtitle">Portal de Creación y Gestión de Fichas</div>
+
+    <div class="games-grid">
+        <!-- VAMPIRE: EL SABBAT (Activa) -->
+        <a href="index-vampire.html" class="game-card active">
+            <div class="game-title">VAMPIRE: EL SABBAT</div>
+            <div class="game-desc">Acceder al registro y hoja de personaje de la Yncarnación Sabbat.</div>
+            <div class="status-badge badge-active">DISPONIBLE</div>
+        </a>
+
+        <!-- MAGE: THE ASCENSION (Error / Sin datos) -->
+        <div class="game-card disabled">
+            <div class="game-title">MAGE: THE ASCENSION</div>
+            <div class="game-desc">Registros de la Tradición y la Tecnocracia temporalmente inaccesibles.</div>
+            <div class="status-badge badge-dev">ERROR: 404 - SIN DATOS REGISTRADOS</div>
+        </div>
+
+        <!-- KUEI-JIN (Error / Sin datos) -->
+        <div class="game-card disabled">
+            <div class="game-title">KUEI-JIN</div>
+            <div class="game-desc">Registros de los Wu y los Reinos Средний inaccesibles.</div>
+            <div class="status-badge badge-dev">ERROR: 404 - SIN DATOS REGISTRADOS</div>
+        </div>
+    </div>
+
+    <div class="footer-note">Selecciona un sistema de juego para comenzar</div>
+</div>
+
+</body>
+</html>
