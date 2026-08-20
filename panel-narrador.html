@@ -132,19 +132,6 @@
             color: #444;
             font-style: italic;
         }
-        .debug-box {
-            background: #111;
-            border: 1px solid #ff4d4d;
-            color: #00ff66;
-            padding: 10px;
-            font-family: monospace;
-            font-size: 0.75em;
-            white-space: pre-wrap;
-            word-break: break-all;
-            margin-top: 10px;
-            max-height: 250px;
-            overflow-y: auto;
-        }
     </style>
 </head>
 <body>
@@ -260,7 +247,6 @@
                 if (perteneceAlSistema && coincideEstado) {
                     elementosEncontrados++;
                     
-                    // Extraer solo la clave del personaje sin la ruta (ej: sabbat-nigoyin-001)
                     const idLimpio = idRuta.includes('/') ? idRuta.split('/').pop() : idRuta;
                     
                     const item = document.createElement('div');
@@ -283,10 +269,10 @@
 
             if (elementosEncontrados === 0) {
                 contenedorLista.innerHTML = `
-                    <div style="color:#aaa; padding:10px; text-align:center;">
-                        No se encontraron fichas con los filtros actuales.<br><br>
-                        <small>Respuesta recibida de Firebase:</small>
-                        <div class="debug-box">${JSON.stringify(baseDatosCompleta, null, 2)}</div>
+                    <div style="color:#666; padding:30px 15px; text-align:center; font-size:0.9em;">
+                        <div style="font-size: 2em; margin-bottom: 10px; opacity: 0.5;">📂</div>
+                        <strong>Sin registros disponibles</strong><br>
+                        <span style="font-size:0.8em; color:#555;">No hay fichas que coincidan con el filtro seleccionado.</span>
                     </div>
                 `;
             }
@@ -308,7 +294,6 @@
             placeholder.style.display = 'none';
             frame.style.display = 'block';
             
-            // Envía el idLimpio al iframe garantizando la carga correcta
             frame.src = `${vistaHTML}?id=${encodeURIComponent(idLimpio)}`;
         }
 
