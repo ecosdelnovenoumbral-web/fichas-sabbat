@@ -140,46 +140,46 @@
         <h1>Panel Secreto del Narrador</h1>
         
         <div class="controls-group">
-            <button class="btn btn-action" onclick="cargarDatos()">Actualizar Datos[cite: 3]</button>
+            <button class="btn btn-action" onclick="cargarDatos()">Actualizar Datos</button>
             
             <select id="select-sistema" class="btn" onchange="cambiarSistema()">
-                <option value="todos">Mostrar TODOS los Sistemas[cite: 3]</option>
-                <option value="vampiro" selected>Sistema: Vampiro[cite: 3]</option>
-                <option value="mago">Sistema: Mago[cite: 3]</option>
-                <option value="kueijin">Sistema: Kuei-Jin[cite: 3]</option>
+                <option value="todos">Mostrar TODOS los Sistemas</option>
+                <option value="vampiro" selected>Sistema: Vampiro</option>
+                <option value="mago">Sistema: Mago</option>
+                <option value="kueijin">Sistema: Kuei-Jin</option>
             </select>
 
-            <button id="btn-borradores" class="btn btn-toggle active" onclick="filtrarEstado('borrador')">Borradores[cite: 3]</button>
-            <button id="btn-finalizados" class="btn btn-toggle" onclick="filtrarEstado('finalizado')">Finalizados[cite: 3]</button>
-            <button id="btn-todos-estados" class="btn btn-toggle" onclick="filtrarEstado('todos')">Todos[cite: 3]</button>
+            <button id="btn-borradores" class="btn btn-toggle active" onclick="filtrarEstado('borrador')">Borradores</button>
+            <button id="btn-finalizados" class="btn btn-toggle" onclick="filtrarEstado('finalizado')">Finalizados</button>
+            <button id="btn-todos-estados" class="btn btn-toggle" onclick="filtrarEstado('todos')">Todos</button>
         </div>
     </header>
 
     <div class="main-layout">
         <div class="sidebar" id="lista-fichas">
-            <div class="placeholder-text" style="position:static; transform:none; padding:20px;">Cargando lista...[cite: 3]</div>
+            <div class="placeholder-text" style="position:static; transform:none; padding:20px;">Cargando lista...</div>
         </div>
 
         <div class="viewport">
-            <div id="no-selection" class="placeholder-text">Selecciona una ficha de la izquierda para visualizarla[cite: 3]</div>
+            <div id="no-selection" class="placeholder-text">Selecciona una ficha de la izquierda para visualizarla</div>
             <iframe id="frame-ficha" src="" style="display:none;"></iframe>
         </div>
     </div>
 
     <script>
         // ----------------------------------------------------
-        // VALIDACIÓN DE SEGURIDAD (INICIO)[cite: 3]
+        // VALIDACIÓN DE SEGURIDAD (INICIO)
         // ----------------------------------------------------
         (function verificarAccesoNarrador() {
             const urlParams = new URLSearchParams(window.location.search);
             const tokenUrl = urlParams.get("auth");
             const tokenSession = sessionStorage.getItem("narrador_auth");
-            let tokenFinal = tokenUrl || tokenSession;
+            const tokenFinal = tokenUrl || tokenSession;
 
-            // EXCEPCIÓN ADMIN: Si no hay token en URL ni sesión, generamos uno por defecto para Admin
             if (!tokenFinal) {
-                tokenFinal = btoa("1:Admin");
-                sessionStorage.setItem("narrador_auth", tokenFinal);
+                alert("Acceso denegado: Debes iniciar sesión en el foro.");
+                window.location.href = "https://ecosdelnovenoumbral.foroactivo.com/";
+                return;
             }
 
             try {
@@ -189,18 +189,18 @@
                 const decodedData = atob(tokenFinal).split(":");
                 const usuarioForo = decodedData[1] ? decodedData[1].trim().toLowerCase() : "";
                 
-                // Lista de usuarios autorizados normalizados a minúsculas[cite: 3]
+                // Lista de usuarios autorizados normalizados a minúsculas
                 const autorizados = ["admin", "nigoyin"];
 
                 if (!autorizados.includes(usuarioForo)) {
-                    alert("Acceso denegado: Tu cuenta no tiene permisos de Narrador.[cite: 3]");
+                    alert("Acceso denegado: Tu cuenta no tiene permisos de Narrador.");
                     window.location.href = "https://ecosdelnovenoumbral.foroactivo.com/";
                     return;
                 }
 
-                console.log("Narrador autenticado con ID:", decodedData[0], "Usuario:", decodedData[1]);[cite: 3]
+                console.log("Narrador autenticado con ID:", decodedData[0], "Usuario:", decodedData[1]);
             } catch (e) {
-                alert("Acceso denegado: Token de sesión inválido.[cite: 3]");
+                alert("Acceso denegado: Token de sesión inválido.");
                 window.location.href = "https://ecosdelnovenoumbral.foroactivo.com/";
             }
         })();
@@ -214,14 +214,14 @@
 
         async function cargarDatos() {
             const contenedorLista = document.getElementById('lista-fichas');
-            contenedorLista.innerHTML = '<div style="color:#888; padding:10px;">Consultando Firebase...[cite: 3]</div>';
+            contenedorLista.innerHTML = '<div style="color:#888; padding:10px;">Consultando Firebase...</div>';
 
             try {
                 const response = await fetch(`${databaseURL}/fichas.json`);
                 baseDatosCompleta = await response.json() || {};
                 renderizarLista();
             } catch (error) {
-                contenedorLista.innerHTML = `<div style="color:red; padding:10px;">Error al conectar: ${error.message}[cite: 3]</div>`;
+                contenedorLista.innerHTML = `<div style="color:red; padding:10px;">Error al conectar: ${error.message}</div>`;
             }
         }
 
@@ -309,7 +309,7 @@
             if (elementosEncontrados === 0) {
                 contenedorLista.innerHTML = `
                     <div style="color:#aaa; padding:15px; text-align:center; font-size:0.9em;">
-                        📂 No se encontraron fichas en esta sección.[cite: 3]
+                        📂 No se encontraron fichas en esta sección.
                     </div>
                 `;
             }
