@@ -5,6 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Secreto del Narrador</title>
     <script>
+        // ----------------------------------------------------
+        // VERIFICACIÓN DE SEGURIDAD ESTRICTA EN GITHUB
+        // ----------------------------------------------------
+        (function verificarAccesoNarrador() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tokenUrl = urlParams.get("auth");
+            const tokenSession = sessionStorage.getItem("narrador_auth");
+            const tokenFinal = tokenUrl || tokenSession;
+
+            // 1. Si no hay token de autenticación
+            if (!tokenFinal) {
+                alert("Acceso denegado: Debes iniciar sesión como Narrador desde Foroactivo.");
+                window.location.href = "https://ecosdelnovenoumbral.foroactivo.com/";
+                return;
+            }
+
+            try {
+                // Si viene un token por URL, lo guardamos en la sesión
+                if (tokenUrl && !tokenSession) {
+                    sessionStorage.setItem("narrador_auth", tokenUrl);
+                }
+
+                // Decodificamos el token Base64 (ID:Usuario)
+                const decodedData = atob(tokenFinal).split(":");
+                const usuarioForo = decodedData[1] ? decodedData[1].trim().toLowerCase() : "";
+                
+                // Nombres de usuario exactos del foro con acceso de Narrador
+                const autorizados = ["admin", "nigoyin"]; 
+
+                // 2. Si el usuario no está en la lista de autorizados
+                if (!autorizados.includes(usuarioForo)) {
+                    alert("Acceso denegado: Tu cuenta de foro (" + usuarioForo + ") no tiene permisos de Narrador.");
+                    sessionStorage.removeItem("narrador_auth");
+                    window.location.href = "https://ecosdelnovenoumbral.foroactivo.com/";
+                    return;
+                }
+
+                console.log("Acceso concedido al Narrador:", usuarioForo);
+            } catch (e) {
+                alert("Acceso denegado: Token de sesión inválido.");
+                sessionStorage.removeItem("narrador_auth");
+                window.location.href = "https://ecosdelnovenoumbral.foroactivo.com/";
+            }
+        })();
+
         // Neutralizamos cualquier script externo de validación del foro antes de que actúe
         window.alert = function(msg) {
             if (msg && (msg.includes("iniciar sesión") || msg.includes("denegado"))) {
@@ -178,7 +223,7 @@
 
     <script>
         // ----------------------------------------------------
-        // LÓGICA PRINCIPAL DEL PANEL
+        // LÓGICA PRINCIPAL DEL PANEL DE FIREBASE
         // ----------------------------------------------------
         const databaseURL = "https://ecosnovenoumbral-default-rtdb.firebaseio.com";
         let baseDatosCompleta = {};
