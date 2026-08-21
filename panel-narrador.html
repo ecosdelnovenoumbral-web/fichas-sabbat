@@ -187,6 +187,17 @@
                     sessionStorage.setItem("narrador_auth", tokenUrl);
                 }
                 const decodedData = atob(tokenFinal).split(":");
+                const usuarioForo = decodedData[1] ? decodedData[1].trim().toLowerCase() : "";
+                
+                // Lista de usuarios autorizados normalizados a minúsculas
+                const autorizados = ["admin", "nigoyin"];
+
+                if (!autorizados.includes(usuarioForo)) {
+                    alert("Acceso denegado: Tu cuenta no tiene permisos de Narrador.");
+                    window.location.href = "https://ecosdelnovenoumbral.foroactivo.com/";
+                    return;
+                }
+
                 console.log("Narrador autenticado con ID:", decodedData[0], "Usuario:", decodedData[1]);
             } catch (e) {
                 alert("Acceso denegado: Token de sesión inválido.");
