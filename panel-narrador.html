@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Secreto del Narrador</title>
-    <!-- Script para verificar el usuario desde el servidor del foro antes de renderizar -->
-    <script src="/autologin.forum?json=1"></script>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -19,15 +17,6 @@
             flex-direction: column;
             overflow: hidden;
         }
-        
-        /* Ocultar la app por defecto hasta validar permisos */
-        #panel-app {
-            display: none;
-            flex-direction: column;
-            height: 100vh;
-            width: 100%;
-        }
-
         header {
             background-color: #121212;
             border-bottom: 2px solid #8b0000;
@@ -147,67 +136,64 @@
 </head>
 <body>
 
-    <!-- Contenedor principal protegido -->
-    <div id="panel-app">
-        <header>
-            <h1>Panel Secreto del Narrador</h1>
+    <header>
+        <h1>Panel Secreto del Narrador</h1>
+        
+        <div class="controls-group">
+            <button class="btn btn-action" onclick="cargarDatos()">Actualizar Datos</button>
             
-            <div class="controls-group">
-                <button class="btn btn-action" onclick="cargarDatos()">Actualizar Datos</button>
-                
-                <select id="select-sistema" class="btn" onchange="cambiarSistema()">
-                    <option value="todos">Mostrar TODOS los Sistemas</option>
-                    <option value="vampiro" selected>Sistema: Vampiro</option>
-                    <option value="mago">Sistema: Mago</option>
-                    <option value="kueijin">Sistema: Kuei-Jin</option>
-                </select>
+            <select id="select-sistema" class="btn" onchange="cambiarSistema()">
+                <option value="todos">Mostrar TODOS los Sistemas</option>
+                <option value="vampiro" selected>Sistema: Vampiro</option>
+                <option value="mago">Sistema: Mago</option>
+                <option value="kueijin">Sistema: Kuei-Jin</option>
+            </select>
 
-                <button id="btn-borradores" class="btn btn-toggle active" onclick="filtrarEstado('borrador')">Borradores</button>
-                <button id="btn-finalizados" class="btn btn-toggle" onclick="filtrarEstado('finalizado')">Finalizados</button>
-                <button id="btn-todos-estados" class="btn btn-toggle" onclick="filtrarEstado('todos')">Todos</button>
-            </div>
-        </header>
+            <button id="btn-borradores" class="btn btn-toggle active" onclick="filtrarEstado('borrador')">Borradores</button>
+            <button id="btn-finalizados" class="btn btn-toggle" onclick="filtrarEstado('finalizado')">Finalizados</button>
+            <button id="btn-todos-estados" class="btn btn-toggle" onclick="filtrarEstado('todos')">Todos</button>
+        </div>
+    </header>
 
-        <div class="main-layout">
-            <div class="sidebar" id="lista-fichas">
-                <div class="placeholder-text" style="position:static; transform:none; padding:20px;">Cargando lista...</div>
-            </div>
+    <div class="main-layout">
+        <div class="sidebar" id="lista-fichas">
+            <div class="placeholder-text" style="position:static; transform:none; padding:20px;">Cargando lista...</div>
+        </div>
 
-            <div class="viewport">
-                <div id="no-selection" class="placeholder-text">Selecciona una ficha de la izquierda para visualizarla</div>
-                <iframe id="frame-ficha" src="" style="display:none;"></iframe>
-            </div>
+        <div class="viewport">
+            <div id="no-selection" class="placeholder-text">Selecciona una ficha de la izquierda para visualizarla</div>
+            <iframe id="frame-ficha" src="" style="display:none;"></iframe>
         </div>
     </div>
 
     <script>
-        // CONFIGURACIÓN DE PERMISOS
-        // Reemplaza los IDs con el ID del grupo de Narradores / Administradores de tu foro
-        const GRUPOS_AUTORIZADOS = [1, 5, 10]; // Ejemplo: 1 = Admin, 5 = Narradores, etc.
-        const URL_FORO = "https://ecosdelnovenoumbral.foroactivo.com/";
+        // ----------------------------------------------------
+        // VALIDACIÓN DE SEGURIDAD (INICIO)
+        // ----------------------------------------------------
+        (function verificarAccesoNarrador() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tokenUrl = urlParams.get("auth");
+            const tokenSession = sessionStorage.getItem("narrador_auth");
+            const tokenFinal = tokenUrl || tokenSession;
 
-        function verificarAcceso() {
-            // Comprobación de seguridad mediante _userdata de Foroactivo
-            if (typeof _userdata === "undefined" || !_userdata.session_logged_in) {
+            if (!tokenFinal) {
                 alert("Acceso denegado: Debes iniciar sesión en el foro.");
-                window.location.href = URL_FORO;
-                return false;
+                window.location.href = "https://ecosdelnovenoumbral.foroactivo.com/";
+                return;
             }
 
-            // Si es administrador general (_userdata.user_level === 1) o pertenece a un grupo autorizado
-            const esAdmin = _userdata.user_level === 1;
-            const esNarrador = GRUPOS_AUTORIZADOS.includes(_userdata.user_group_id);
-
-            if (!esAdmin && !esNarrador) {
-                alert("Acceso denegado: Se requieren permisos de Narrador.");
-                window.location.href = URL_FORO;
-                return false;
+            try {
+                if (tokenUrl && !tokenSession) {
+                    sessionStorage.setItem("narrador_auth", tokenUrl);
+                }
+                const decodedData = atob(tokenFinal).split(":");
+                console.log("Narrador autenticado con ID:", decodedData[0], "Usuario:", decodedData[1]);
+            } catch (e) {
+                alert("Acceso denegado: Token de sesión inválido.");
+                window.location.href = "https://ecosdelnovenoumbral.foroactivo.com/";
             }
-
-            // Si pasa la validación, mostramos la app
-            document.getElementById('panel-app').style.display = 'flex';
-            return true;
-        }
+        })();
+        // ----------------------------------------------------
 
         const databaseURL = "https://ecosnovenoumbral-default-rtdb.firebaseio.com";
         let baseDatosCompleta = {};
@@ -342,10 +328,7 @@
             document.getElementById('no-selection').style.display = 'block';
         }
 
-        // Ejecutar verificación de permisos antes de realizar cualquier llamada a datos
-        if (verificarAcceso()) {
-            cargarDatos();
-        }
+        cargarDatos();
     </script>
 </body>
 </html>
