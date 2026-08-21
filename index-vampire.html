@@ -658,6 +658,22 @@
     return texto.toLowerCase().replace(/[^a-z0-9]/g, "");
   }
 
+  // Verificar si el usuario activo es un Narrador en Firebase
+  async function esNarradorAutorizado() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const usuarioRaw = urlParams.get('user') || urlParams.get('usuario') || document.getElementById('jugador').value.trim();
+    if (!usuarioRaw) return false;
+
+    const usuarioClean = limpiarTexto(usuarioRaw);
+    try {
+      const snapshot = await get(child(ref(db), `narradores/${usuarioClean}`));
+      return snapshot.exists() && snapshot.val() === true;
+    } catch (err) {
+      console.error("Error al validar narrador:", err);
+      return false;
+    }
+  }
+
   function poblarDatosEnFicha(datos) {
     document.querySelectorAll("input[type='text'], input[type='number']").forEach(input => {
       if (input.id && datos[input.id] !== undefined) {
@@ -768,7 +784,6 @@
     }
   };
 
-  // Carga robusta multicapa para resolver búsquedas con subdirectorios o variaciones de ID
   window.cargarFicha = async function(idManual) {
     let inputVal = idManual || document.getElementById("pj-id").value.trim();
     if (!inputVal) {
@@ -784,15 +799,12 @@
 
     const dbRef = ref(db);
     try {
-      // 1. Intento por ruta de vampiros
       let snapshot = await get(child(dbRef, `fichas/vampiro/${targetKey}`));
       
-      // 2. Intento en raíz de fichas
       if (!snapshot.exists()) {
         snapshot = await get(child(dbRef, `fichas/${targetKey}`));
       }
 
-      // 3. Barrido completo en fichas si el ID vino truncado o con diferencias de minúsculas
       if (!snapshot.exists()) {
         const rootFichas = await get(child(dbRef, 'fichas'));
         if (rootFichas.exists()) {
@@ -858,6 +870,14 @@
   }
 
   window.cargarModoLecturaAdmin = async function(idManual) {
+    const esNarrador = await esNarradorAutorizado();
+    if (!esNarrador) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const userParam = urlParams.get('user') || urlParams.get('usuario') || 'desconocido';
+      alert(`ERROR: Usuario restringido ('${userParam}'). No tienes permisos de Narrador para realizar esta acción.`);
+      return;
+    }
+
     await window.cargarFicha(idManual);
     document.querySelectorAll(".container input").forEach(input => {
       input.readOnly = true;
@@ -869,6 +889,15 @@
   };
 
   window.eliminarFichaAdmin = async function() {
+    const esNarrador = await esNarradorAutorizado();
+    const urlParams = new URLSearchParams(window.location.search);
+    const userParam = urlParams.get('user') || urlParams.get('usuario') || 'desconocido';
+
+    if (!esNarrador) {
+      alert(`ERROR: Usuario restringido ('${userParam}'). No tienes permisos de Narrador para eliminar fichas.`);
+      return;
+    }
+
     let pjId = document.getElementById("pj-id").value.trim();
     if (pjId.includes('/')) {
       pjId = pjId.split('/').pop();
@@ -888,6 +917,9 @@
       await remove(ref(db, 'administracion/registros/' + pjId));
       
       alert(`¡Éxito! La ficha ${pjId} ha sido eliminada por completo.`);
+      
+      // Limpiar URL del parámetro ?id= antes de recargar
+      window.history.replaceState({}, document.title, window.location.pathname);
       location.reload();
     } catch (error) {
       console.error("Error al eliminar:", error);
