@@ -299,7 +299,7 @@
         <button class="firebase-btn" onclick="cargarFicha()">Cargar de Firebase</button>
     </div>
 
-    <!-- SECCIÓN DE CABECERA CON EL NUEVO ORDEN DE COLUMNAS -->
+    <!-- SECCIÓN DE CABECERA -->
     <div class="grid-3">
         <!-- Columna 1: Nombre, Jugador -->
         <div class="section-box">
@@ -668,13 +668,26 @@
   const db = getDatabase(app);
 
   function limpiarTexto(texto) {
-    return texto.toLowerCase().replace(/[^a-z0-9]/g, "");
+    return texto ? texto.toLowerCase().replace(/[^a-z0-9]/g, "") : "";
+  }
+
+  // Obtener nombre del usuario desde URL, Campo o Prompt
+  function obtenerUsuarioActivo() {
+    const urlParams = new URLSearchParams(window.location.search);
+    let usuario = urlParams.get('user') || urlParams.get('usuario') || document.getElementById('jugador').value.trim();
+    
+    if (!usuario) {
+      usuario = prompt("Introduce tu nombre de usuario registrado en el foro:");
+      if (usuario) {
+        document.getElementById('jugador').value = usuario;
+      }
+    }
+    return usuario ? usuario.trim() : "";
   }
 
   // Verificar si el usuario activo es un Narrador en Firebase
   async function esNarradorAutorizado() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const usuarioRaw = urlParams.get('user') || urlParams.get('usuario') || document.getElementById('jugador').value.trim();
+    const usuarioRaw = obtenerUsuarioActivo();
     if (!usuarioRaw) return false;
 
     const usuarioClean = limpiarTexto(usuarioRaw);
@@ -717,7 +730,7 @@
   }
 
   window.guardarFicha = async function() {
-    const usuarioRaw = document.getElementById("jugador").value.trim();
+    const usuarioRaw = obtenerUsuarioActivo();
     if (!usuarioRaw) {
       alert("Por favor ingresa tu Nombre de Jugador / Usuario del Foro antes de guardar.");
       return false;
@@ -729,8 +742,11 @@
     if (pjId) {
       const idPartes = pjId.split("-");
       if (idPartes.length >= 2 && idPartes[1].toLowerCase() !== usuarioClean) {
-        alert(`Seguridad: Esta ficha pertenece al usuario '${idPartes[1]}'. No puedes editarla con el usuario '${usuarioClean}'.`);
-        return false;
+        const esAdmin = await esNarradorAutorizado();
+        if (!esAdmin) {
+          alert(`Seguridad: Esta ficha pertenece al usuario '${idPartes[1]}'. No puedes editarla con el usuario '${usuarioClean}'.`);
+          return false;
+        }
       }
     }
 
@@ -884,10 +900,10 @@
 
   window.cargarModoLecturaAdmin = async function(idManual) {
     const esNarrador = await esNarradorAutorizado();
+    const usuarioActual = obtenerUsuarioActivo() || 'desconocido';
+
     if (!esNarrador) {
-      const urlParams = new URLSearchParams(window.location.search);
-      const userParam = urlParams.get('user') || urlParams.get('usuario') || 'desconocido';
-      alert(`ERROR: Usuario restringido ('${userParam}'). No tienes permisos de Narrador para realizar esta acción.`);
+      alert(`ERROR: Usuario restringido ('${usuarioActual}'). No tienes permisos de Narrador para realizar esta acción.`);
       return;
     }
 
@@ -904,11 +920,10 @@
 
   window.eliminarFichaAdmin = async function() {
     const esNarrador = await esNarradorAutorizado();
-    const urlParams = new URLSearchParams(window.location.search);
-    const userParam = urlParams.get('user') || urlParams.get('usuario') || 'desconocido';
+    const usuarioActual = obtenerUsuarioActivo() || 'desconocido';
 
     if (!esNarrador) {
-      alert(`ERROR: Usuario restringido ('${userParam}'). No tienes permisos de Narrador para eliminar fichas.`);
+      alert(`ERROR: Usuario restringido ('${usuarioActual}'). No tienes permisos de Narrador para eliminar fichas.`);
       return;
     }
 
