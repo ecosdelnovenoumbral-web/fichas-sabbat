@@ -206,7 +206,6 @@
         let estadoActual = "borrador";
         let idFichaSeleccionada = null;
 
-        // Neutralizamos alertas flotantes no deseadas
         window.alert = function(msg) {
             if (msg && (msg.includes("iniciar sesión") || msg.includes("denegado"))) {
                 console.log("Alerta bloqueada:", msg);
@@ -215,9 +214,6 @@
             window.alert(msg);
         };
 
-        // ----------------------------------------------------
-        // 1. OBTENER USUARIO DEL FORO Y VERIFICAR EN FIREBASE
-        // ----------------------------------------------------
         async function verificarPermisoFirebase() {
             const urlParams = new URLSearchParams(window.location.search);
             const tokenUrl = urlParams.get("auth");
@@ -234,7 +230,6 @@
                     sessionStorage.setItem("narrador_auth", tokenUrl);
                 }
 
-                // Extraemos el usuario desde el token Base64
                 const decodedData = atob(tokenFinal).split(":");
                 const usuarioForo = decodedData[1] ? decodedData[1].trim() : "";
 
@@ -243,11 +238,9 @@
                     return;
                 }
 
-                // Consultamos directamente el nodo /narradores de Firebase para el usuario
                 const res = await fetch(`${databaseURL}/narradores.json`);
                 const listaNarradores = await res.json() || {};
 
-                // Buscamos coincidencia (insensible a mayúsculas/minúsculas)
                 let esNarradorValido = false;
                 for (let key in listaNarradores) {
                     if (key.toLowerCase() === usuarioForo.toLowerCase() && listaNarradores[key] === true) {
@@ -257,7 +250,6 @@
                 }
 
                 if (esNarradorValido) {
-                    console.log("Acceso concedido por Firebase al usuario:", usuarioForo);
                     const overlay = document.getElementById('overlay-bloqueo');
                     if (overlay) overlay.style.display = 'none';
                     cargarDatos();
@@ -275,9 +267,6 @@
             window.location.href = "https://ecosdelnovenoumbral.foroactivo.com/";
         }
 
-        // ----------------------------------------------------
-        // 2. LÓGICA DEL PANEL
-        // ----------------------------------------------------
         async function cargarDatos() {
             const contenedorLista = document.getElementById('lista-fichas');
             contenedorLista.innerHTML = '<div style="color:#888; padding:10px;">Consultando Firebase...</div>';
@@ -314,7 +303,7 @@
                 if (!objeto.hasOwnProperty(key)) continue;
                 let item = objeto[key];
                 if (typeof item === 'object' && item !== null) {
-                    if (item.nombre || item.nombrePersonaje || item.jugador || item.usuario || item.clan) {
+                    if (item.nombre || item.nombrePersonaje || item.jugador || item.usuario || item.clan || item.estado !== undefined || item.finalizado !== undefined) {
                         resultado.push({ id: prefijo ? `${prefijo}/${key}` : key, data: item });
                     } else {
                         resultado = resultado.concat(aplanarFichas(item, prefijo ? `${prefijo}/${key}` : key));
@@ -324,30 +313,42 @@
             return resultado;
         }
 
+        // --- CORRECCIÓN CLAVE PARA EVITAR EL BORRADO CRUZADO ---
         async function cambiarEstadoFicha(idRuta, nuevoEstadoValor, eventoClick) {
             if (eventoClick) eventoClick.stopPropagation();
             
             try {
-                // idRuta viene como "usuario/id_ficha" o similar según la estructura de Firebase
-                const urlPatch = `${databaseURL}/fichas/${idRuta}.json`;
+                // Apuntamos de forma exacta a la ruta completa dentro del nodo /fichas/
+                const urlNodo = `${databaseURL}/fichas/${idRuta}.json`;
                 
-                // Actualizamos las propiedades de estado de manera compatible con los filtros
-                let datosActualizacion = {};
-                if (nuevoEstadoValor === 'finalizado') {
-                    datosActualizacion = { estado: 'enviado', finalizado: true, enviado: true };
-                } else {
-                    datosActualizacion = { estado: 'borrador', finalizado: false, enviado: false };
+                // 1. Obtenemos los datos actuales de esta ficha específica antes de tocar nada
+                const resGet = await fetch(urlNodo);
+                const datosFicha = await resGet.json();
+
+                if (!datosFicha) {
+                    throw new Error("No se encontró la ficha en la base de datos.");
                 }
 
-                const response = await fetch(urlPatch, {
-                    method: 'PATCH',
+                // 2. Modificamos los indicadores de estado de forma limpia
+                if (nuevoEstadoValor === 'finalizado') {
+                    datosFicha.estado = 'enviado';
+                    datosFicha.finalizado = true;
+                    datosFicha.enviado = true;
+                } else {
+                    datosFicha.estado = 'borrador';
+                    datosFicha.finalizado = false;
+                    datosFicha.enviado = false;
+                }
+
+                // 3. Escribimos la actualización preservando la integridad del registro completo
+                const response = await fetch(urlNodo, {
+                    method: 'PUT', // Usamos PUT para asegurar que la estructura completa se mantenga intacta en su sitio
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(datosActualizacion)
+                    body: JSON.stringify(datosFicha)
                 });
 
                 if (!response.ok) throw new Error("No se pudo actualizar el estado en Firebase.");
 
-                // Refrescamos los datos locales y la interfaz
                 await cargarDatos();
             } catch (error) {
                 alert("Error al cambiar el estado de la ficha: " + error.message);
@@ -391,7 +392,6 @@
                     const clan = ficha.clan || 'Sin Clan';
                     const jugador = ficha.jugador || ficha.usuario || 'Desconocido';
 
-                    // Botón para mover de estado directamente desde la tarjeta
                     const textoBtnAccion = esFinalizado ? 'Pasar a Borrador' : 'Marcar Finalizado';
                     const valorDestino = esFinalizado ? 'borrador' : 'finalizado';
 
@@ -440,7 +440,6 @@
             document.getElementById('no-selection').style.display = 'block';
         }
 
-        // Inicia el flujo de validación primero
         verificarPermisoFirebase();
     </script>
 </body>
