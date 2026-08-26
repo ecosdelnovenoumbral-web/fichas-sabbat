@@ -139,6 +139,7 @@
             font-size: 10px;
             color: var(--accent-color);
             font-weight: bold;
+            user-select: none;
         }
         .dot.crossed::after {
             content: "/";
@@ -269,6 +270,7 @@
             font-weight: bold;
             text-transform: uppercase;
             border-radius: 3px;
+            transition: background 0.2s ease;
         }
         .firebase-btn:hover {
             background: #b30000;
@@ -582,19 +584,39 @@
 </div>
 
 <script>
-    document.querySelectorAll('.dot').forEach(dot => {
-        dot.addEventListener('click', function() {
-            if (this.dataset.readonly === "true") return;
-            if (this.classList.contains('base-point') && !document.body.classList.contains('modo-admin')) return;
-            
-            if (!this.classList.contains('crossed') && !this.classList.contains('filled')) {
-                this.classList.add('crossed');
-            } else if (this.classList.contains('crossed')) {
-                this.classList.remove('crossed');
-                this.classList.add('filled');
-            } else {
-                this.classList.remove('filled');
-            }
+    // Manejo mejorado de la interactividad de puntos (dots)
+    document.querySelectorAll('.dots').forEach(container => {
+        const dots = Array.from(container.querySelectorAll('.dot'));
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', function(e) {
+                if (this.dataset.readonly === "true") return;
+                const isBasePoint = this.classList.contains('base-point');
+                const isModoAdmin = document.body.classList.contains('modo-admin');
+                if (isBasePoint && !isModoAdmin) return;
+
+                // Si es un doble clic con la tecla Shift presionada, cambia estado a "crossed"
+                if (e.shiftKey) {
+                    this.classList.toggle('crossed');
+                    this.classList.remove('filled');
+                    return;
+                }
+
+                // Lógica progresiva de llenado/vaciado
+                const isFilled = this.classList.contains('filled');
+                dots.forEach((d, i) => {
+                    if (d.classList.contains('base-point') && !isModoAdmin) return;
+                    if (i <= index) {
+                        if (isFilled && i === index && (index === dots.length - 1 || !dots[index + 1].classList.contains('filled'))) {
+                            d.classList.remove('filled', 'crossed');
+                        } else {
+                            d.classList.add('filled');
+                            d.classList.remove('crossed');
+                        }
+                    } else {
+                        d.classList.remove('filled', 'crossed');
+                    }
+                });
+            });
         });
     });
 
@@ -608,6 +630,7 @@
     function sincronizarWillpower() {
         const maxInput = document.getElementById('willpower-max');
         const dispInput = document.getElementById('willpower-disp');
+        if (!maxInput || !dispInput) return;
         dispInput.max = maxInput.value;
         if (parseInt(dispInput.value) > parseInt(maxInput.value)) {
             dispInput.value = maxInput.value;
@@ -615,7 +638,9 @@
     }
 
     function actualizarValoresGeneracion() {
-        const gen = parseInt(document.getElementById('gen-input').value) || 13;
+        const genInput = document.getElementById('gen-input');
+        if (!genInput) return;
+        const gen = parseInt(genInput.value) || 13;
         const bloodMax = document.getElementById('blood-max');
         const bloodDisp = document.getElementById('blood-disp');
         const bloodTurn = document.getElementById('blood-turn');
@@ -623,7 +648,7 @@
         let maxReserva = 10;
         let porTurno = 1;
 
-        if (gen === 3) { maxReserva = 100; porTurno = 10; }
+        if (gen <= 3) { maxReserva = 100; porTurno = 10; }
         else if (gen === 4) { maxReserva = 50; porTurno = 5; }
         else if (gen === 5) { maxReserva = 40; porTurno = 4; }
         else if (gen === 6) { maxReserva = 30; porTurno = 3; }
@@ -635,13 +660,18 @@
         else if (gen === 12) { maxReserva = 11; porTurno = 1; }
         else { maxReserva = 10; porTurno = 1; }
 
-        bloodMax.value = maxReserva;
-        bloodDisp.max = maxReserva;
-        if (parseInt(bloodDisp.value) > maxReserva) {
-            bloodDisp.value = maxReserva;
+        if (bloodMax) bloodMax.value = maxReserva;
+        if (bloodDisp) {
+            bloodDisp.max = maxReserva;
+            if (parseInt(bloodDisp.value) > maxReserva) {
+                bloodDisp.value = maxReserva;
+            }
         }
-        bloodTurn.value = porTurno;
+        if (bloodTurn) bloodTurn.value = porTurno;
     }
+
+    window.actualizarValoresGeneracion = actualizarValoresGeneracion;
+    window.sincronizarWillpower = sincronizarWillpower;
 
     actualizarValoresGeneracion();
 </script>
@@ -722,8 +752,8 @@
       }
     });
 
-    actualizarValoresGeneracion();
-    sincronizarWillpower();
+    window.actualizarValoresGeneracion();
+    window.sincronizarWillpower();
   }
 
   function recolectarDatosFicha() {
