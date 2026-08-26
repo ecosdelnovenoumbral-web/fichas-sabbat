@@ -673,7 +673,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     let usuarioUrl = urlParams.get('user') || urlParams.get('usuario');
     if (usuarioUrl) return usuarioUrl.trim();
-    return "hola"; // Usuario base por defecto
+    return "hola";
   }
 
   async function esNarradorAutorizado() {
@@ -782,7 +782,6 @@
     const datos = recolectarDatosFicha();
 
     try {
-      // Guardado bajo la regla $path1 / $path2 permitida en tus reglas de Firebase
       await set(ref(db, `fichas/vampiro_borradores/${pjId}`), datos);
       alert(`¡Borrador guardado con éxito!\nID de ficha: ${pjId}`);
       return true;
@@ -846,14 +845,12 @@
     const datos = recolectarDatosFicha();
 
     try {
-      // Guarda en la ruta exacta permitida por la base de datos
       await set(ref(db, `fichas/vampiro_finalizadas/${pjId}`), datos);
 
-      // Limpia la entrada de borradores
       try {
         await remove(ref(db, `fichas/vampiro_borradores/${pjId}`));
       } catch (e) {
-        console.warn("Limpio de borrador omitido:", e);
+        console.warn("Intento de eliminación de borrador omitido por permisos:", e);
       }
 
       bloquearCamposEstaticos();
