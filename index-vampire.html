@@ -149,6 +149,9 @@
         .dot.filled {
             background: var(--accent-color);
         }
+        .dot.base-point {
+            cursor: default;
+        }
 
         table {
             width: 100%;
@@ -296,23 +299,28 @@
         <button class="firebase-btn" onclick="cargarFicha()">Cargar de Firebase</button>
     </div>
 
+    <!-- SECCIÓN DE CABECERA CON EL NUEVO ORDEN DE COLUMNAS -->
     <div class="grid-3">
+        <!-- Columna 1: Nombre, Jugador -->
         <div class="section-box">
             <div class="row"><span>Nombre:</span> <input type="text" id="nombre"></div>
             <div class="row"><span>Jugador:</span> <input type="text" id="jugador"></div>
         </div>
+        <!-- Columna 2: Naturaleza, Conducta, Concepto -->
         <div class="section-box">
             <div class="row"><span>Naturaleza:</span> <input type="text" id="naturaleza"></div>
             <div class="row"><span>Conducta:</span> <input type="text" id="conducta"></div>
             <div class="row"><span>Concepto:</span> <input type="text" id="concepto"></div>
         </div>
+        <!-- Columna 3: Clan, Generación, Sire -->
         <div class="section-box">
+            <div class="row"><span>Clan:</span> <input type="text" id="clan"></div>
             <div class="row">
                 <span>Gen:</span>
                 <input type="text" id="gen-texto" style="flex: 1; min-width: 0;">
                 <input type="number" id="gen-input" min="1" max="16" value="13" oninput="actualizarValoresGeneracion()">
             </div>
-            <div class="row"><span>Clan:</span> <input type="text" id="clan"></div>
+            <div class="row"><span>Sire:</span> <input type="text" id="sire"></div>
         </div>
     </div>
 
@@ -320,21 +328,21 @@
     <div class="grid-3">
         <div class="section-box">
             <h3>Físicos</h3>
-            <div class="row"><span>Fuerza</span> <div class="dots" id="fuerza"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Destreza</span> <div class="dots" id="destreza"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Resistencia</span> <div class="dots" id="resistencia"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Fuerza</span> <div class="dots atributo-dots" id="fuerza"><span class="dot filled base-point"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Destreza</span> <div class="dots atributo-dots" id="destreza"><span class="dot filled base-point"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Resistencia</span> <div class="dots atributo-dots" id="resistencia"><span class="dot filled base-point"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
         </div>
         <div class="section-box">
             <h3>Sociales</h3>
-            <div class="row"><span>Carisma</span> <div class="dots" id="carisma"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Manipulación</span> <div class="dots" id="manipulacion"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Apariencia</span> <div class="dots" id="apariencia"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Carisma</span> <div class="dots atributo-dots" id="carisma"><span class="dot filled base-point"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Manipulación</span> <div class="dots atributo-dots" id="manipulacion"><span class="dot filled base-point"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Apariencia</span> <div class="dots atributo-dots" id="apariencia"><span class="dot filled base-point"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
         </div>
         <div class="section-box">
             <h3>Mentales</h3>
-            <div class="row"><span>Percepción</span> <div class="dots" id="percepcion"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Inteligencia</span> <div class="dots" id="inteligencia"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Astucia</span> <div class="dots" id="astucia"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Percepción</span> <div class="dots atributo-dots" id="percepcion"><span class="dot filled base-point"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Inteligencia</span> <div class="dots atributo-dots" id="inteligencia"><span class="dot filled base-point"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Astucia</span> <div class="dots atributo-dots" id="astucia"><span class="dot filled base-point"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
         </div>
     </div>
 
@@ -344,40 +352,43 @@
             <h3>Talentos</h3>
             <div class="row"><span>Alerta</span> <div class="dots" id="alerta"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
             <div class="row"><span>Atletismo</span> <div class="dots" id="atletismo"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Conducir</span> <div class="dots" id="conducir"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Callejeo</span> <div class="dots" id="callejeo"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Consciencia</span> <div class="dots" id="consciencia"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
             <div class="row"><span>Empatía</span> <div class="dots" id="empatia"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
             <div class="row"><span>Expresión</span> <div class="dots" id="expresion"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
             <div class="row"><span>Intimidación</span> <div class="dots" id="intimidacion"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
             <div class="row"><span>Liderazgo</span> <div class="dots" id="liderazgo"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Peleas</span> <div class="dots" id="peleas"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Pelea</span> <div class="dots" id="pelea"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
             <div class="row"><span>Subterfugio</span> <div class="dots" id="subterfugio"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Trato con Anim.</span> <div class="dots" id="trato-animales"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><input type="text" id="talento-ext-1"> <div class="dots" id="talento-ext-dots-1"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
         </div>
         <div class="section-box">
             <h3>Técnicas</h3>
-            <div class="row"><span>Armas Fuego</span> <div class="dots" id="armas-fuego"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Armas de Fuego</span> <div class="dots" id="armas-fuego"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
             <div class="row"><span>Armas C/C</span> <div class="dots" id="armas-cc"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Artesanía</span> <div class="dots" id="artesania"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Conducir</span> <div class="dots" id="conducir"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
             <div class="row"><span>Etiqueta</span> <div class="dots" id="etiqueta"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
             <div class="row"><span>Interpretación</span> <div class="dots" id="interpretacion"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Larceny</span> <div class="dots" id="larceny"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Pericia Artes.</span> <div class="dots" id="pericia-artesanal"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Investigación</span> <div class="dots" id="investigacion-tec"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Latrocinio</span> <div class="dots" id="latrocinio"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
             <div class="row"><span>Sigilo</span> <div class="dots" id="sigilo"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
             <div class="row"><span>Supervivencia</span> <div class="dots" id="supervivencia"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Trato con Calle</span> <div class="dots" id="trato-calle"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Trato con Anim.</span> <div class="dots" id="trato-animales"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><input type="text" id="tecnica-ext-1"> <div class="dots" id="tecnica-ext-dots-1"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
         </div>
         <div class="section-box">
             <h3>Conocimientos</h3>
-            <div class="row"><span>Academias</span> <div class="dots" id="academias"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Academicismo</span> <div class="dots" id="academicismo"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
             <div class="row"><span>Ciencias</span> <div class="dots" id="ciencias"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
             <div class="row"><span>Finanzas</span> <div class="dots" id="finanzas"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
             <div class="row"><span>Informática</span> <div class="dots" id="informatica"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Investigación</span> <div class="dots" id="investigacion-con"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Investigación</span> <div class="dots" id="investigacion"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
             <div class="row"><span>Leyes</span> <div class="dots" id="leyes"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
             <div class="row"><span>Lingüística</span> <div class="dots" id="linguistica"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
             <div class="row"><span>Medicina</span> <div class="dots" id="medicina"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
             <div class="row"><span>Ocultismo</span> <div class="dots" id="ocultismo"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
             <div class="row"><span>Política</span> <div class="dots" id="politica"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="row"><span>Tecnología</span> <div class="dots" id="tecnologia"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
         </div>
     </div>
 
@@ -578,6 +589,8 @@
     document.querySelectorAll('.dot').forEach(dot => {
         dot.addEventListener('click', function() {
             if (this.dataset.readonly === "true") return;
+            if (this.classList.contains('base-point') && !document.body.classList.contains('modo-admin')) return;
+            
             if (!this.classList.contains('crossed') && !this.classList.contains('filled')) {
                 this.classList.add('crossed');
             } else if (this.classList.contains('crossed')) {
@@ -878,6 +891,7 @@
       return;
     }
 
+    document.body.classList.add('modo-admin');
     await window.cargarFicha(idManual);
     document.querySelectorAll(".container input").forEach(input => {
       input.readOnly = true;
