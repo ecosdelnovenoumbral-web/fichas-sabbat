@@ -86,6 +86,7 @@
             margin-bottom: 8px;
             cursor: pointer;
             transition: all 0.2s ease;
+            position: relative;
         }
         .ficha-item:hover {
             background-color: #202020;
@@ -109,6 +110,24 @@
         .item-detalles {
             font-size: 0.75em;
             color: #888;
+        }
+        .btn-mover-estado {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #222;
+            border: 1px solid #444;
+            color: #aaa;
+            padding: 4px 8px;
+            font-size: 0.75em;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .btn-mover-estado:hover {
+            background: #8b0000;
+            color: #fff;
+            border-color: #ff4d4d;
         }
 
         .viewport {
@@ -305,6 +324,36 @@
             return resultado;
         }
 
+        async function cambiarEstadoFicha(idRuta, nuevoEstadoValor, eventoClick) {
+            if (eventoClick) eventoClick.stopPropagation();
+            
+            try {
+                // idRuta viene como "usuario/id_ficha" o similar según la estructura de Firebase
+                const urlPatch = `${databaseURL}/fichas/${idRuta}.json`;
+                
+                // Actualizamos las propiedades de estado de manera compatible con los filtros
+                let datosActualizacion = {};
+                if (nuevoEstadoValor === 'finalizado') {
+                    datosActualizacion = { estado: 'enviado', finalizado: true, enviado: true };
+                } else {
+                    datosActualizacion = { estado: 'borrador', finalizado: false, enviado: false };
+                }
+
+                const response = await fetch(urlPatch, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datosActualizacion)
+                });
+
+                if (!response.ok) throw new Error("No se pudo actualizar el estado en Firebase.");
+
+                // Refrescamos los datos locales y la interfaz
+                await cargarDatos();
+            } catch (error) {
+                alert("Error al cambiar el estado de la ficha: " + error.message);
+            }
+        }
+
         function renderizarLista() {
             const contenedorLista = document.getElementById('lista-fichas');
             contenedorLista.innerHTML = '';
@@ -342,10 +391,15 @@
                     const clan = ficha.clan || 'Sin Clan';
                     const jugador = ficha.jugador || ficha.usuario || 'Desconocido';
 
+                    // Botón para mover de estado directamente desde la tarjeta
+                    const textoBtnAccion = esFinalizado ? 'Pasar a Borrador' : 'Marcar Finalizado';
+                    const valorDestino = esFinalizado ? 'borrador' : 'finalizado';
+
                     item.innerHTML = `
                         <div class="item-id">${idLimpio}</div>
                         <div class="item-nombre">${nombre}</div>
                         <div class="item-detalles">Clan: ${clan} | Jugador: ${jugador}</div>
+                        <button class="btn-mover-estado" onclick="cambiarEstadoFicha('${idRuta}', '${valorDestino}', event)">${textoBtnAccion}</button>
                     `;
 
                     item.onclick = (evt) => seleccionarFicha(idLimpio, idRuta, evt.currentTarget);
@@ -391,3 +445,4 @@
     </script>
 </body>
 </html>
+```[cite: 5]
