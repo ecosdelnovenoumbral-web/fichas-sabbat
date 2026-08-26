@@ -674,15 +674,26 @@
     return texto ? texto.toLowerCase().replace(/[^a-z0-9]/g, "") : "";
   }
 
-  // Obtener nombre del usuario desde URL o Campo
+  // Obtener nombre del usuario IGNORANDO el input "jugador" si estamos en rol de administración
   function obtenerUsuarioActivo() {
     const urlParams = new URLSearchParams(window.location.search);
-    let usuario = urlParams.get('user') || urlParams.get('usuario') || document.getElementById('jugador').value.trim();
-    return usuario ? usuario.trim() : "Admin";
+    let usuarioUrl = urlParams.get('user') || urlParams.get('usuario');
+    if (usuarioUrl) return usuarioUrl.trim();
+
+    // Si no viene en la URL, por defecto asumimos admin para prevenir bloqueos al ver fichas ajenas
+    return "admin";
   }
 
   // Validar permisos contra la lista directa y/o Firebase si está accesible
   async function esNarradorAutorizado() {
+    const urlParams = new URLSearchParams(window.location.search);
+    let usuarioUrl = urlParams.get('user') || urlParams.get('usuario');
+    
+    // Si entras directo o con parámetro admin, pasa de inmediato
+    if (!usuarioUrl || ADMINS_AUTORIZADOS.includes(limpiarTexto(usuarioUrl))) {
+      return true;
+    }
+
     const usuarioRaw = obtenerUsuarioActivo();
     const usuarioClean = limpiarTexto(usuarioRaw);
 
