@@ -71,7 +71,7 @@
         }
         
         .sidebar {
-            width: 320px;
+            width: 350px;
             background-color: #0f0f0f;
             border-right: 1px solid #222;
             overflow-y: auto;
@@ -87,6 +87,7 @@
             cursor: pointer;
             transition: all 0.2s ease;
             position: relative;
+            padding-right: 115px; /* Espacio para los botones laterales */
         }
         .ficha-item:hover {
             background-color: #202020;
@@ -111,20 +112,47 @@
             font-size: 0.75em;
             color: #888;
         }
-        .btn-mover-estado {
+        
+        /* Contenedor de botones en la tarjeta */
+        .acciones-tarjeta {
             position: absolute;
-            right: 10px;
+            right: 8px;
             top: 50%;
             transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .btn-tarjeta {
             background: #222;
             border: 1px solid #444;
-            color: #aaa;
-            padding: 4px 8px;
-            font-size: 0.75em;
+            color: #ccc;
+            padding: 3px 6px;
+            font-size: 0.7em;
             border-radius: 3px;
             cursor: pointer;
+            text-align: center;
+            white-space: nowrap;
         }
-        .btn-mover-estado:hover {
+        .btn-tarjeta:hover {
+            background: #444;
+            color: #fff;
+        }
+        .btn-tarjeta.btn-finalizar {
+            background: #1e3a1e;
+            border-color: #2e692e;
+            color: #8f8;
+        }
+        .btn-tarjeta.btn-finalizar:hover {
+            background: #2e692e;
+            color: #fff;
+        }
+        .btn-tarjeta.btn-eliminar {
+            background: #3a1e1e;
+            border-color: #692e2e;
+            color: #f88;
+        }
+        .btn-tarjeta.btn-eliminar:hover {
             background: #8b0000;
             color: #fff;
             border-color: #ff4d4d;
@@ -273,7 +301,6 @@
             contenedorLista.innerHTML = '<div style="color:#888; padding:10px;">Consultando Firebase...</div>';
 
             try {
-                // Consultamos ambas ramas de manera independiente y aislada
                 const [resBorradores, resFinalizados] = await Promise.all([
                     fetch(`${databaseURL}/fichas_borradores.json`),
                     fetch(`${databaseURL}/fichas_finalizadas.json`)
@@ -325,55 +352,63 @@
             return resultado;
         }
 
-        // Función totalmente aislada para cambiar de estado sin cruzar ni borrar el nodo equivocado
-        async function cambiarEstadoFicha(idRuta, esActualFinalizado, eventoClick) {
+        // Función para cambiar de estado (Borrador -> Finalizado)
+        async function cambiarEstadoFicha(idRuta, eventoClick) {
             if (eventoClick) eventoClick.stopPropagation();
             
             try {
-                const origenRama = esActualFinalizado ? 'fichas_finalizadas' : 'fichas_borradores';
-                const destinoRama = esActualFinalizado ? 'fichas_borradores' : 'fichas_finalizadas';
-                
-                const urlNodoOrigen = `${databaseURL}/${origenRama}/${idRuta}.json`;
-                
-                // 1. Obtenemos los datos del nodo actual
+                const urlNodoOrigen = `${databaseURL}/fichas_borradores/${idRuta}.json`;
                 const resGet = await fetch(urlNodoOrigen);
                 let datosFicha = await resGet.json();
 
                 if (!datosFicha) {
-                    throw new Error("No se encontró la ficha en la base de datos.");
+                    throw new Error("No se encontró la ficha en borradores.");
                 }
 
-                // 2. Ajustamos los estados internos
-                if (!esActualFinalizado) {
-                    datosFicha.estado = 'enviado';
-                    datosFicha.finalizado = true;
-                    datosFicha.enviado = true;
-                } else {
-                    datosFicha.estado = 'borrador';
-                    datosFicha.finalizado = false;
-                    datosFicha.enviado = false;
-                }
+                datosFicha.estado = 'enviado';
+                datosFicha.finalizado = true;
+                datosFicha.enviado = true;
 
                 const idLimpio = idRuta.includes('/') ? idRuta.split('/').pop() : idRuta;
-                const urlNodoDestino = `${databaseURL}/${destinoRama}/${idLimpio}.json`;
+                const urlNodoDestino = `${databaseURL}/fichas_finalizadas/${idLimpio}.json`;
 
-                // 3. Escribimos en el nodo destino independiente (PUT)
                 const responsePut = await fetch(urlNodoDestino, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(datosFicha)
                 });
 
-                if (!responsePut.ok) throw new Error("No se pudo mover el registro al nuevo estado.");
+                if (!responsePut.ok) throw new Error("No se pudo mover el registro a finalizados.");
 
-                // 4. Borramos estrictamente de su rama de origen sin afectar la otra
-                await fetch(urlNodoOrigen, {
-                    method: 'DELETE'
-                });
+                await fetch(urlNodoOrigen, { method: 'DELETE' });
+                await cargarDatos();
+            } catch (error) {
+                alert("Error al cambiar el estado: " + error.message);
+            }
+        }
+
+        // Función independiente para eliminar fichas de forma segura
+        async function eliminarFichaPanel(idRuta, esFinalizado, eventoClick) {
+            if (eventoClick) eventoClick.stopPropagation();
+
+            if (!confirm("¿Estás seguro de que deseas eliminar permanentemente esta ficha? Esta acción no se puede deshacer.")) {
+                return;
+            }
+
+            try {
+                const rama = esFinalizado ? 'fichas_finalizadas' : 'fichas_borradores';
+                const urlNodo = `${databaseURL}/${rama}/${idRuta}.json`;
+
+                const response = await fetch(urlNodo, { method: 'DELETE' });
+                if (!response.ok) throw new Error("No se pudo eliminar el registro de Firebase.");
+
+                if (idFichaSeleccionada === (idRuta.includes('/') ? idRuta.split('/').pop() : idRuta)) {
+                    ocultarVisor();
+                }
 
                 await cargarDatos();
             } catch (error) {
-                alert("Error al cambiar el estado de la ficha: " + error.message);
+                alert("Error al eliminar la ficha: " + error.message);
             }
         }
 
@@ -381,9 +416,8 @@
             const contenedorLista = document.getElementById('lista-fichas');
             contenedorLista.innerHTML = '';
 
-            // Combinamos las listas de ambas ramas físicas separadas
             const listaBorradoresAplanada = aplanarFichas(baseDatosBorradores, false);
-            const listaFinalizadosAplanada = aplanarFichas(baseDatosFinalizados, true);
+            const listaFinalizadosAplanada = aplanarFichas(baseDatosFinalizadas, true);
             const listaAplanadaTotal = [...listaBorradoresAplanada, ...listaFinalizadosAplanada];
 
             let elementosEncontrados = 0;
@@ -418,13 +452,28 @@
                     const clan = ficha.clan || 'Sin Clan';
                     const jugador = ficha.jugador || ficha.usuario || 'Desconocido';
 
-                    const textoBtnAccion = esFinalizado ? 'Pasar a Borrador' : 'Marcar Finalizado';
+                    // Construcción dinámica de botones según el estado
+                    let botonesHTML = '';
+                    if (!esFinalizado) {
+                        botonesHTML = `
+                            <div class="acciones-tarjeta">
+                                <button class="btn-tarjeta btn-finalizar" onclick="cambiarEstadoFicha('${idRuta}', event)">Finalizar</button>
+                                <button class="btn-tarjeta btn-eliminar" onclick="eliminarFichaPanel('${idRuta}', false, event)">Eliminar</button>
+                            </div>
+                        `;
+                    } else {
+                        botonesHTML = `
+                            <div class="acciones-tarjeta">
+                                <button class="btn-tarjeta btn-eliminar" onclick="eliminarFichaPanel('${idRuta}', true, event)">Eliminar</button>
+                            </div>
+                        `;
+                    }
 
                     item.innerHTML = `
                         <div class="item-id">${idLimpio}</div>
                         <div class="item-nombre">${nombre}</div>
                         <div class="item-detalles">Clan: ${clan} | Jugador: ${jugador}</div>
-                        <button class="btn-mover-estado" onclick="cambiarEstadoFicha('${idRuta}', ${esFinalizado}, event)">${textoBtnAccion}</button>
+                        ${botonesHTML}
                     `;
 
                     item.onclick = (evt) => seleccionarFicha(idLimpio, idRuta, evt.currentTarget);
