@@ -726,6 +726,23 @@
     return false;
   }
 
+  function bloquearFormulario() {
+    document.querySelectorAll(".container input").forEach(input => {
+      input.readOnly = true;
+    });
+    document.querySelectorAll(".dot, .health-checkbox").forEach(el => {
+      el.dataset.readonly = "true";
+      el.style.cursor = "not-allowed";
+    });
+    document.querySelectorAll(".firebase-btn").forEach(btn => {
+      if (!btn.onclick?.toString().includes("cargarModoLecturaAdmin") && !btn.onclick?.toString().includes("cargarFicha")) {
+        btn.disabled = true;
+        btn.style.opacity = "0.5";
+        btn.style.cursor = "not-allowed";
+      }
+    });
+  }
+
   function poblarDatosEnFicha(datos) {
     if (!datos) return;
     document.querySelectorAll("input[type='text'], input[type='number']").forEach(input => {
@@ -809,6 +826,13 @@
       }
     }
 
+    // Validación: Impedir sobrescribir si la ficha ya existe en Finalizadas
+    const snapFinal = await get(child(ref(db), `fichas/vampiro_finalizadas/${pjId}`));
+    if (snapFinal.exists()) {
+      alert(`Error: La ficha con ID '${pjId}' ya está finalizada y bloqueada. No se puede modificar como borrador.`);
+      return false;
+    }
+
     const datos = recolectarDatosFicha();
 
     try {
@@ -838,20 +862,31 @@
     const dbRef = ref(db);
     try {
       let snapshot = null;
+      let esFinalizada = false;
 
       if (ramaManual === 'finalizado') {
         snapshot = await get(child(dbRef, `fichas/vampiro_finalizadas/${targetKey}`));
+        if (snapshot.exists()) esFinalizada = true;
       } else if (ramaManual === 'borrador') {
         snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
       } else {
         snapshot = await get(child(dbRef, `fichas/vampiro_finalizadas/${targetKey}`));
-        if (!snapshot.exists()) {
+        if (snapshot.exists()) {
+          esFinalizada = true;
+        } else {
           snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
         }
       }
 
       if (snapshot && snapshot.exists()) {
         poblarDatosEnFicha(snapshot.val());
+        if (esFinalizada) {
+          const esNarrador = await esNarradorAutorizado();
+          if (!esNarrador) {
+            bloquearFormulario();
+            alert(`La ficha '${targetKey}' está finalizada y bloqueada. Se ha cargado en modo solo lectura.`);
+          }
+        }
       } else {
         alert(`No se encontró ningún personaje registrado con el identificador: ${targetKey}`);
       }
@@ -862,47 +897,54 @@
   };
 
   window.enviarFichaFinal = async function() {
-    const confirmar = confirm("¿Estás seguro de enviar y finalizar tu ficha?");
-    if (!confirmar) return;
-
     let pjId = document.getElementById("pj-id").value.trim();
+
     if (!pjId) {
       const guardadoBorrador = await window.guardarFicha();
       if (!guardadoBorrador) return;
       pjId = document.getElementById("pj-id").value.trim();
     }
 
+    // Validación de ID duplicado o ya enviado
+    const snapFinal = await get(child(ref(db), `fichas/vampiro_finalizadas/${pjId}`));
+    if (snapFinal.exists()) {
+      alert(`Error: La ficha con ID '${pjId}' ya fue finalizada previamente y no se puede re-enviar ni sobrescribir.`);
+      return;
+    }
+
+    const confirmar = confirm("¿Estás seguro de enviar y finalizar tu ficha? Una vez enviada se bloqueará y no se podrá modificar.");
+    if (!confirmar) return;
+
     const datos = recolectarDatosFicha();
+    const usuario = obtenerUsuarioActivo();
 
     try {
+      // 1. Guardar en finalizadas
       await set(ref(db, `fichas/vampiro_finalizadas/${pjId}`), datos);
 
+      // 2. Crear log/registro en administración
+      await set(ref(db, `administracion/registros/${pjId}`), {
+        estado: "finalizado",
+        fecha: new Date().toISOString(),
+        id_ficha: pjId,
+        juego: "vampiro_sabbat",
+        usuario_foro: usuario
+      });
+
+      // 3. Eliminar de borradores
       try {
         await remove(ref(db, `fichas/vampiro_borradores/${pjId}`));
       } catch (e) {
         console.warn("Intento de eliminación de borrador omitido por permisos:", e);
       }
 
-      bloquearCamposEstaticos();
-      alert("¡Éxito! Tu ficha ha sido enviada y finalizada correctamente.");
+      bloquearFormulario();
+      alert("¡Éxito! Tu ficha ha sido enviada y finalizada correctamente. Ha quedado bloqueada para edición.");
     } catch (err) {
       console.error("Error al finalizar ficha:", err);
       alert("Error: No se pudo finalizar el envío de la ficha: " + err.message);
     }
   };
-
-  function bloquearCamposEstaticos() {
-    const inputsAEliminarEdicion = document.querySelectorAll(
-        ".container input[type='text']:not([id^='inv-']):not([id^='arma-']):not([id^='armadura-']), " +
-        ".container input[id='willpower-max'], .container input[id='gen-input']"
-    );
-    
-    inputsAEliminarEdicion.forEach(input => {
-        if(input.id !== "pj-id" && input.id !== "jugador") {
-            input.readOnly = true;
-        }
-    });
-  }
 
   window.cargarModoLecturaAdmin = async function(idManual, ramaManual) {
     const esNarrador = await esNarradorAutorizado();
@@ -913,13 +955,7 @@
 
     document.body.classList.add('modo-admin');
     await window.cargarFicha(idManual, ramaManual);
-    document.querySelectorAll(".container input").forEach(input => {
-      input.readOnly = true;
-    });
-    document.querySelectorAll(".dot, .health-checkbox").forEach(el => {
-      el.dataset.readonly = "true";
-      el.style.cursor = "not-allowed";
-    });
+    bloquearFormulario();
   };
 
   async function procesarUrl() {
