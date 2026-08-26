@@ -580,7 +580,6 @@
     <div class="admin-panel">
         <button class="firebase-btn" style="background-color: #2e7d32;" onclick="enviarFichaFinal()">Enviar y Finalizar Ficha</button>
         <button class="firebase-btn" style="background-color: #0288d1;" onclick="cargarModoLecturaAdmin()">[ADMIN] Cargar en Modo Lectura</button>
-        <button class="firebase-btn" style="background-color: #c62828;" onclick="eliminarFichaAdmin()">[ADMIN] Eliminar Ficha Cargada</button>
     </div>
 
 </div>
@@ -701,7 +700,7 @@
         return true;
       }
     } catch (err) {
-      console.warn("Consulta a Firebase bloqueada o restringida, usando lista local:", err);
+      console.warn("Consulta a Firebase bloqueada o restringida:", err);
     }
 
     return false;
@@ -774,7 +773,7 @@
       if (idPartes.length >= 2 && idPartes[1].toLowerCase() !== usuarioClean) {
         const esAdmin = await esNarradorAutorizado();
         if (!esAdmin) {
-          alert(`Seguridad: Esta ficha pertenece al usuario '${idPartes[1]}'. No puedes editarla con el usuario '${usuarioClean}'.`);
+          alert(`Seguridad: Esta ficha pertenece al usuario '${idPartes[1]}'. No puedes editarla.`);
           return false;
         }
       }
@@ -804,14 +803,8 @@
     const datos = recolectarDatosFicha();
 
     try {
-      // Se guarda explícitamente en la sección de borradores
-      await set(ref(db, 'fichas/vampiro/' + pjId), datos);
-      await set(ref(db, 'administracion/registros/' + pjId), {
-        usuario_foro: usuarioRaw,
-        id_ficha: pjId,
-        juego: "vampiro_sabbat",
-        fecha: new Date().toISOString()
-      });
+      // Guardar correctamente en la rama de borradores que lee el panel
+      await set(ref(db, 'fichas_borradores/' + pjId), datos);
       alert(`¡Borrador guardado con éxito!\nTu ID asignado es: ${pjId}`);
       return true;
     } catch (err) {
@@ -821,7 +814,7 @@
     }
   };
 
-  window.cargarFicha = async function(idManual) {
+  window.cargarFicha = async function(idManual, ramaManual) {
     let inputVal = idManual || document.getElementById("pj-id").value.trim();
     if (!inputVal) {
       alert("Por favor ingresa un ID para cargar el personaje.");
@@ -836,45 +829,22 @@
 
     const dbRef = ref(db);
     try {
-      // Intentar cargar primero desde finalizadas, luego desde borradores
-      let snapshot = await get(child(dbRef, `fichas/vampiro_finalizadas/${targetKey}`));
-      
-      if (!snapshot.exists()) {
-        snapshot = await get(child(dbRef, `fichas/vampiro/${targetKey}`));
-      }
+      let snapshot = null;
 
-      if (!snapshot.exists()) {
-        snapshot = await get(child(dbRef, `fichas/${targetKey}`));
-      }
-
-      if (!snapshot.exists()) {
-        const rootFichas = await get(child(dbRef, 'fichas'));
-        if (rootFichas.exists()) {
-          const allFichas = rootFichas.val();
-          
-          if (allFichas.vampiro_finalizadas) {
-            for (const key in allFichas.vampiro_finalizadas) {
-              if (key.toLowerCase() === targetKey.toLowerCase() || key.includes(targetKey)) {
-                snapshot = await get(child(dbRef, `fichas/vampiro_finalizadas/${key}`));
-                document.getElementById("pj-id").value = key;
-                break;
-              }
-            }
-          }
-
-          if (!snapshot.exists() && allFichas.vampiro) {
-            for (const key in allFichas.vampiro) {
-              if (key.toLowerCase() === targetKey.toLowerCase() || key.includes(targetKey)) {
-                snapshot = await get(child(dbRef, `fichas/vampiro/${key}`));
-                document.getElementById("pj-id").value = key;
-                break;
-              }
-            }
-          }
+      // Si viene especificada la rama desde la URL (borrador o finalizado), buscar directamente allí
+      if (ramaManual === 'finalizado') {
+        snapshot = await get(child(dbRef, `fichas_finalizadas/${targetKey}`));
+      } else if (ramaManual === 'borrador') {
+        snapshot = await get(child(dbRef, `fichas_borradores/${targetKey}`));
+      } else {
+        // Búsqueda general si se invoca manualmente
+        snapshot = await get(child(dbRef, `fichas_finalizadas/${targetKey}`));
+        if (!snapshot.exists()) {
+          snapshot = await get(child(dbRef, `fichas_borradores/${targetKey}`));
         }
       }
 
-      if (snapshot.exists()) {
+      if (snapshot && snapshot.exists()) {
         poblarDatosEnFicha(snapshot.val());
       } else {
         alert(`No se encontró ningún personaje registrado con el identificador: ${targetKey}`);
@@ -886,39 +856,27 @@
   };
 
   window.enviarFichaFinal = async function() {
-    const confirmar = confirm("¿Estás seguro de enviar y finalizar tu ficha? Una vez enviada, los datos principales quedarán bloqueados.");
+    const confirmar = confirm("¿Estás seguro de enviar y finalizar tu ficha? Una vez enviada, pasará al panel del narrador.");
     if (!confirmar) return;
 
-    // Asegurar que tenga un ID generado antes de enviar
     let pjId = document.getElementById("pj-id").value.trim();
     if (!pjId) {
-      // Si no tiene ID, guardamos primero como borrador para que genere el ID automático
       const guardadoBorrador = await window.guardarFicha();
       if (!guardadoBorrador) return;
       pjId = document.getElementById("pj-id").value.trim();
     }
 
     const datos = recolectarDatosFicha();
-    const usuarioRaw = obtenerUsuarioActivo();
 
     try {
-      // 1. Guardar en la sección de fichas finalizadas para que el panel del narrador las detecte
-      await set(ref(db, 'fichas/vampiro_finalizadas/' + pjId), datos);
+      // 1. Guardar en fichas_finalizadas para que aparezca en el panel del narrador
+      await set(ref(db, 'fichas_finalizadas/' + pjId), datos);
 
-      // 2. Opcional: Eliminar el borrador anterior para que no quede duplicado en proceso
-      await remove(ref(db, 'fichas/vampiro/' + pjId));
-
-      // 3. Actualizar registro administrativo
-      await set(ref(db, 'administracion/registros/' + pjId), {
-        usuario_foro: usuarioRaw,
-        id_ficha: pjId,
-        juego: "vampiro_sabbat",
-        estado: "finalizado",
-        fecha: new Date().toISOString()
-      });
+      // 2. Limpiar de borradores para evitar duplicidad
+      await remove(ref(db, 'fichas_borradores/' + pjId));
 
       bloquearCamposEstaticos();
-      alert("¡Éxito! Tu ficha ha sido enviada y bloqueada correctamente.");
+      alert("¡Éxito! Tu ficha ha sido enviada y finalizada correctamente.");
     } catch (err) {
       console.error("Error al finalizar ficha:", err);
       alert("Error: No se pudo finalizar el envío de la ficha: " + err.message);
@@ -938,17 +896,15 @@
     });
   }
 
-  window.cargarModoLecturaAdmin = async function(idManual) {
+  window.cargarModoLecturaAdmin = async function(idManual, ramaManual) {
     const esNarrador = await esNarradorAutorizado();
-    const usuarioActual = obtenerUsuarioActivo();
-
     if (!esNarrador) {
-      alert(`ERROR: Usuario restringido ('${usuarioActual}'). No tienes permisos de Narrador para realizar esta acción.`);
+      alert("ERROR: No tienes permisos de Narrador para realizar esta acción.");
       return;
     }
 
     document.body.classList.add('modo-admin');
-    await window.cargarFicha(idManual);
+    await window.cargarFicha(idManual, ramaManual);
     document.querySelectorAll(".container input").forEach(input => {
       input.readOnly = true;
     });
@@ -958,47 +914,10 @@
     });
   };
 
-  window.eliminarFichaAdmin = async function() {
-    const esNarrador = await esNarradorAutorizado();
-    const usuarioActual = obtenerUsuarioActivo();
-
-    if (!esNarrador) {
-      alert(`ERROR: Usuario restringido ('${usuarioActual}'). No tienes permisos de Narrador para eliminar fichas.`);
-      return;
-    }
-
-    let pjId = document.getElementById("pj-id").value.trim();
-    if (pjId.includes('/')) {
-      pjId = pjId.split('/').pop();
-    }
-
-    if (!pjId) {
-      alert("Error: No hay ningún ID de ficha ingresado o cargado para eliminar.");
-      return;
-    }
-
-    const confirmarAdmin = confirm(`[ADMINISTRADOR]\n¿Deseas ELIMINAR PERMANENTEMENTE la ficha '${pjId}' de la base de datos?`);
-    if (!confirmarAdmin) return;
-
-    try {
-      await remove(ref(db, 'fichas/vampiro_finalizadas/' + pjId));
-      await remove(ref(db, 'fichas/vampiro/' + pjId));
-      await remove(ref(db, 'fichas/' + pjId));
-      await remove(ref(db, 'administracion/registros/' + pjId));
-      
-      alert(`¡Éxito! La ficha ${pjId} ha sido eliminada por completo.`);
-      
-      window.history.replaceState({}, document.title, window.location.pathname);
-      location.reload();
-    } catch (error) {
-      console.error("Error al eliminar:", error);
-      alert("Error al intentar eliminar la ficha: " + error.message);
-    }
-  };
-
   async function procesarUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     let idParam = urlParams.get('id');
+    const ramaParam = urlParams.get('rama'); // "borrador" o "finalizado"
     const modeParam = urlParams.get('mode');
 
     if (idParam) {
@@ -1009,9 +928,9 @@
       document.getElementById('pj-id').value = idParam;
 
       if (modeParam === 'read') {
-        await window.cargarModoLecturaAdmin(idParam);
+        await window.cargarModoLecturaAdmin(idParam, ramaParam);
       } else {
-        await window.cargarFicha(idParam);
+        await window.cargarFicha(idParam, ramaParam);
       }
     }
   }
