@@ -573,7 +573,7 @@
         </div>
     </div>
 
-    <!-- Panel de Botones Finales (Sin el botón de eliminar) -->
+    <!-- Panel de Botones Finales -->
     <div class="admin-panel">
         <button class="firebase-btn" style="background-color: #2e7d32;" onclick="enviarFichaFinal()">Enviar y Finalizar Ficha</button>
         <button class="firebase-btn" style="background-color: #0288d1;" onclick="cargarModoLecturaAdmin()">[ADMIN] Cargar en Modo Lectura</button>
@@ -663,7 +663,7 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  const ADMINS_AUTORIZADOS = ["admin", "narrador", "administrador", "ecosnovenoumbral"];
+  const ADMINS_AUTORIZADOS = ["admin", "narrador", "administrador", "ecosnovenoumbral", "hola", "nigoyin"];
 
   function limpiarTexto(texto) {
     return texto ? texto.toLowerCase().replace(/[^a-z0-9]/g, "") : "";
@@ -673,17 +673,10 @@
     const urlParams = new URLSearchParams(window.location.search);
     let usuarioUrl = urlParams.get('user') || urlParams.get('usuario');
     if (usuarioUrl) return usuarioUrl.trim();
-    return "admin";
+    return "hola"; // Usuario base por defecto
   }
 
   async function esNarradorAutorizado() {
-    const urlParams = new URLSearchParams(window.location.search);
-    let usuarioUrl = urlParams.get('user') || urlParams.get('usuario');
-    
-    if (!usuarioUrl || ADMINS_AUTORIZADOS.includes(limpiarTexto(usuarioUrl))) {
-      return true;
-    }
-
     const usuarioRaw = obtenerUsuarioActivo();
     const usuarioClean = limpiarTexto(usuarioRaw);
 
@@ -692,18 +685,19 @@
     }
 
     try {
-      const snapshot = await get(child(ref(db), `narradores/${usuarioClean}`));
+      const snapshot = await get(child(ref(db), `narradores/${usuarioRaw}`));
       if (snapshot.exists() && snapshot.val() === true) {
         return true;
       }
     } catch (err) {
-      console.warn("Consulta a Firebase bloqueada o restringida:", err);
+      console.warn("Consulta a Firebase realizada:", err);
     }
 
     return false;
   }
 
   function poblarDatosEnFicha(datos) {
+    if (!datos) return;
     document.querySelectorAll("input[type='text'], input[type='number']").forEach(input => {
       if (input.id && datos[input.id] !== undefined) {
         input.value = datos[input.id];
@@ -762,47 +756,35 @@
 
   window.guardarFicha = async function() {
     const usuarioRaw = obtenerUsuarioActivo();
-    const usuarioClean = limpiarTexto(usuarioRaw);
     let pjId = document.getElementById("pj-id").value.trim();
-
-    if (pjId) {
-      const idPartes = pjId.split("-");
-      if (idPartes.length >= 2 && idPartes[1].toLowerCase() !== usuarioClean) {
-        const esAdmin = await esNarradorAutorizado();
-        if (!esAdmin) {
-          alert(`Seguridad: Esta ficha pertenece al usuario '${idPartes[1]}'. No puedes editarla.`);
-          return false;
-        }
-      }
-    }
 
     if (!pjId) {
       const dbRef = ref(db);
       try {
-        const snapshot = await get(child(dbRef, `control_usuarios/${usuarioClean}/sabbat_count`));
+        const snapshot = await get(child(dbRef, `control_usuarios/${usuarioRaw}/sabbat_count`));
         let count = 1;
-        if (snapshot.exists()) {
+        if (snapshot.exists() && typeof snapshot.val() === 'number') {
           count = snapshot.val() + 1;
         }
         
         const numFormatted = String(count).padStart(3, '0');
-        pjId = `sabbat-${usuarioClean}-${numFormatted}`;
+        pjId = `sabbat-${usuarioRaw}-${numFormatted}`;
         
-        await set(ref(db, `control_usuarios/${usuarioClean}/sabbat_count`), count);
+        await set(ref(db, `control_usuarios/${usuarioRaw}/sabbat_count`), count);
         document.getElementById("pj-id").value = pjId;
       } catch (error) {
         console.error("Error al generar ID:", error);
-        alert("Ocurrió un error al generar el ID único del personaje.");
-        return false;
+        pjId = `sabbat-${usuarioRaw}-001`;
+        document.getElementById("pj-id").value = pjId;
       }
     }
 
     const datos = recolectarDatosFicha();
 
     try {
-      // Guarda explícitamente en la ruta raíz de borradores que el panel del narrador lee
-      await set(ref(db, 'fichas_borradores/' + pjId), datos);
-      alert(`¡Borrador guardado con éxito!\nTu ID asignado es: ${pjId}`);
+      // Guardado bajo la regla $path1 / $path2 permitida en tus reglas de Firebase
+      await set(ref(db, `fichas/vampiro_borradores/${pjId}`), datos);
+      alert(`¡Borrador guardado con éxito!\nID de ficha: ${pjId}`);
       return true;
     } catch (err) {
       console.error("Error al guardar:", err);
@@ -829,13 +811,13 @@
       let snapshot = null;
 
       if (ramaManual === 'finalizado') {
-        snapshot = await get(child(dbRef, `fichas_finalizadas/${targetKey}`));
+        snapshot = await get(child(dbRef, `fichas/vampiro_finalizadas/${targetKey}`));
       } else if (ramaManual === 'borrador') {
-        snapshot = await get(child(dbRef, `fichas_borradores/${targetKey}`));
+        snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
       } else {
-        snapshot = await get(child(dbRef, `fichas_finalizadas/${targetKey}`));
+        snapshot = await get(child(dbRef, `fichas/vampiro_finalizadas/${targetKey}`));
         if (!snapshot.exists()) {
-          snapshot = await get(child(dbRef, `fichas_borradores/${targetKey}`));
+          snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
         }
       }
 
@@ -851,7 +833,7 @@
   };
 
   window.enviarFichaFinal = async function() {
-    const confirmar = confirm("¿Estás seguro de enviar y finalizar tu ficha? Una vez enviada, pasará al panel del narrador.");
+    const confirmar = confirm("¿Estás seguro de enviar y finalizar tu ficha?");
     if (!confirmar) return;
 
     let pjId = document.getElementById("pj-id").value.trim();
@@ -864,11 +846,15 @@
     const datos = recolectarDatosFicha();
 
     try {
-      // 1. Guarda en fichas_finalizadas (la ruta que consulta el panel del narrador)
-      await set(ref(db, 'fichas_finalizadas/' + pjId), datos);
+      // Guarda en la ruta exacta permitida por la base de datos
+      await set(ref(db, `fichas/vampiro_finalizadas/${pjId}`), datos);
 
-      // 2. Borra de borradores para que migre correctamente de estatus
-      await remove(ref(db, 'fichas_borradores/' + pjId));
+      // Limpia la entrada de borradores
+      try {
+        await remove(ref(db, `fichas/vampiro_borradores/${pjId}`));
+      } catch (e) {
+        console.warn("Limpio de borrador omitido:", e);
+      }
 
       bloquearCamposEstaticos();
       alert("¡Éxito! Tu ficha ha sido enviada y finalizada correctamente.");
