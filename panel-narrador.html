@@ -87,7 +87,7 @@
             cursor: pointer;
             transition: all 0.2s ease;
             position: relative;
-            padding-right: 115px; /* Espacio para los botones laterales */
+            padding-right: 115px;
         }
         .ficha-item:hover {
             background-color: #202020;
@@ -113,7 +113,6 @@
             color: #888;
         }
         
-        /* Contenedor de botones en la tarjeta */
         .acciones-tarjeta {
             position: absolute;
             right: 8px;
@@ -301,10 +300,8 @@
             contenedorLista.innerHTML = '<div style="color:#888; padding:10px;">Consultando Firebase...</div>';
 
             try {
-                const [resBorradores, resFinalizados] = await Promise.all([
-                    fetch(`${databaseURL}/fichas_borradores.json`),
-                    fetch(`${databaseURL}/fichas_finalizadas.json`)
-                ]);
+                const resBorradores = await fetch(`${databaseURL}/fichas_borradores.json`);
+                const resFinalizados = await fetch(`${databaseURL}/fichas_finalizadas.json`);
 
                 baseDatosBorradores = await resBorradores.json() || {};
                 baseDatosFinalizados = await resFinalizados.json() || {};
@@ -334,6 +331,8 @@
 
         function aplanarFichas(objeto, esFinalizadoFlag, prefijo = '') {
             let resultado = [];
+            if (!objeto || typeof objeto !== 'object') return resultado;
+            
             for (let key in objeto) {
                 if (!objeto.hasOwnProperty(key)) continue;
                 let item = objeto[key];
@@ -352,7 +351,6 @@
             return resultado;
         }
 
-        // Función para cambiar de estado (Borrador -> Finalizado)
         async function cambiarEstadoFicha(idRuta, eventoClick) {
             if (eventoClick) eventoClick.stopPropagation();
             
@@ -387,7 +385,6 @@
             }
         }
 
-        // Función independiente para eliminar fichas de forma segura
         async function eliminarFichaPanel(idRuta, esFinalizado, eventoClick) {
             if (eventoClick) eventoClick.stopPropagation();
 
@@ -402,7 +399,8 @@
                 const response = await fetch(urlNodo, { method: 'DELETE' });
                 if (!response.ok) throw new Error("No se pudo eliminar el registro de Firebase.");
 
-                if (idFichaSeleccionada === (idRuta.includes('/') ? idRuta.split('/').pop() : idRuta)) {
+                const idLimpioEval = idRuta.includes('/') ? idRuta.split('/').pop() : idRuta;
+                if (idFichaSeleccionada === idLimpioEval) {
                     ocultarVisor();
                 }
 
@@ -417,7 +415,7 @@
             contenedorLista.innerHTML = '';
 
             const listaBorradoresAplanada = aplanarFichas(baseDatosBorradores, false);
-            const listaFinalizadosAplanada = aplanarFichas(baseDatosFinalizadas, true);
+            const listaFinalizadosAplanada = aplanarFichas(baseDatosFinalizados, true);
             const listaAplanadaTotal = [...listaBorradoresAplanada, ...listaFinalizadosAplanada];
 
             let elementosEncontrados = 0;
@@ -452,7 +450,6 @@
                     const clan = ficha.clan || 'Sin Clan';
                     const jugador = ficha.jugador || ficha.usuario || 'Desconocido';
 
-                    // Construcción dinámica de botones según el estado
                     let botonesHTML = '';
                     if (!esFinalizado) {
                         botonesHTML = `
@@ -476,7 +473,7 @@
                         ${botonesHTML}
                     `;
 
-                    item.onclick = (evt) => seleccionarFicha(idLimpio, idRuta, evt.currentTarget);
+                    item.onclick = (evt) => seleccionarFicha(idLimpio, idRuta, esFinalizado, evt.currentTarget);
                     contenedorLista.appendChild(item);
                 }
             });
@@ -490,7 +487,7 @@
             }
         }
 
-        function seleccionarFicha(idLimpio, idRuta, elemento) {
+        function seleccionarFicha(idLimpio, idRuta, esFinalizado, elemento) {
             idFichaSeleccionada = idLimpio;
             
             document.querySelectorAll('.ficha-item').forEach(el => el.classList.remove('active'));
@@ -506,7 +503,9 @@
             placeholder.style.display = 'none';
             frame.style.display = 'block';
             
-            frame.src = `${vistaHTML}?id=${encodeURIComponent(idLimpio)}`;
+            // Pasamos también el parámetro de estado para que index-vampire sepa de qué rama cargarla
+            const ramaParam = esFinalizado ? "finalizado" : "borrador";
+            frame.src = `${vistaHTML}?id=${encodeURIComponent(idLimpio)}&rama=${ramaParam}`;
         }
 
         function ocultarVisor() {
@@ -518,4 +517,3 @@
     </script>
 </body>
 </html>
-```[cite: 5]
