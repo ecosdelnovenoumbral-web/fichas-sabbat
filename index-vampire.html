@@ -301,18 +301,15 @@
 
     <!-- SECCIÓN DE CABECERA -->
     <div class="grid-3">
-        <!-- Columna 1: Nombre, Jugador -->
         <div class="section-box">
             <div class="row"><span>Nombre:</span> <input type="text" id="nombre"></div>
             <div class="row"><span>Jugador:</span> <input type="text" id="jugador"></div>
         </div>
-        <!-- Columna 2: Naturaleza, Conducta, Concepto -->
         <div class="section-box">
             <div class="row"><span>Naturaleza:</span> <input type="text" id="naturaleza"></div>
             <div class="row"><span>Conducta:</span> <input type="text" id="conducta"></div>
             <div class="row"><span>Concepto:</span> <input type="text" id="concepto"></div>
         </div>
-        <!-- Columna 3: Clan, Generación, Sire -->
         <div class="section-box">
             <div class="row"><span>Clan:</span> <input type="text" id="clan"></div>
             <div class="row">
@@ -576,7 +573,7 @@
         </div>
     </div>
 
-    <!-- Panel de Botones Finales -->
+    <!-- Panel de Botones Finales (Sin el botón de eliminar) -->
     <div class="admin-panel">
         <button class="firebase-btn" style="background-color: #2e7d32;" onclick="enviarFichaFinal()">Enviar y Finalizar Ficha</button>
         <button class="firebase-btn" style="background-color: #0288d1;" onclick="cargarModoLecturaAdmin()">[ADMIN] Cargar en Modo Lectura</button>
@@ -803,7 +800,7 @@
     const datos = recolectarDatosFicha();
 
     try {
-      // Guardar correctamente en la rama de borradores que lee el panel
+      // Guarda explícitamente en la ruta raíz de borradores que el panel del narrador lee
       await set(ref(db, 'fichas_borradores/' + pjId), datos);
       alert(`¡Borrador guardado con éxito!\nTu ID asignado es: ${pjId}`);
       return true;
@@ -831,13 +828,11 @@
     try {
       let snapshot = null;
 
-      // Si viene especificada la rama desde la URL (borrador o finalizado), buscar directamente allí
       if (ramaManual === 'finalizado') {
         snapshot = await get(child(dbRef, `fichas_finalizadas/${targetKey}`));
       } else if (ramaManual === 'borrador') {
         snapshot = await get(child(dbRef, `fichas_borradores/${targetKey}`));
       } else {
-        // Búsqueda general si se invoca manualmente
         snapshot = await get(child(dbRef, `fichas_finalizadas/${targetKey}`));
         if (!snapshot.exists()) {
           snapshot = await get(child(dbRef, `fichas_borradores/${targetKey}`));
@@ -869,10 +864,10 @@
     const datos = recolectarDatosFicha();
 
     try {
-      // 1. Guardar en fichas_finalizadas para que aparezca en el panel del narrador
+      // 1. Guarda en fichas_finalizadas (la ruta que consulta el panel del narrador)
       await set(ref(db, 'fichas_finalizadas/' + pjId), datos);
 
-      // 2. Limpiar de borradores para evitar duplicidad
+      // 2. Borra de borradores para que migre correctamente de estatus
       await remove(ref(db, 'fichas_borradores/' + pjId));
 
       bloquearCamposEstaticos();
@@ -917,7 +912,7 @@
   async function procesarUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     let idParam = urlParams.get('id');
-    const ramaParam = urlParams.get('rama'); // "borrador" o "finalizado"
+    const ramaParam = urlParams.get('rama');
     const modeParam = urlParams.get('mode');
 
     if (idParam) {
