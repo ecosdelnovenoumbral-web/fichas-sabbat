@@ -228,11 +228,11 @@
 
     <script>
         const databaseURL = "https://ecosnovenoumbral-default-rtdb.firebaseio.com";
-        let baseDatosBorradores = {};
-        let baseDatosFinalizados = {};
-        let sistemaActual = "vampiro";
-        let estadoActual = "borrador";
-        let idFichaSeleccionada = null;
+        var baseDatosBorradores = {};
+        var baseDatosFinalizadas = {};
+        var sistemaActual = "vampiro";
+        var estadoActual = "borrador";
+        var idFichaSeleccionada = null;
 
         window.alert = function(msg) {
             if (msg && (msg.includes("iniciar sesión") || msg.includes("denegado"))) {
@@ -301,10 +301,10 @@
 
             try {
                 const resBorradores = await fetch(`${databaseURL}/fichas_borradores.json`);
-                const resFinalizados = await fetch(`${databaseURL}/fichas_finalizadas.json`);
-
                 baseDatosBorradores = await resBorradores.json() || {};
-                baseDatosFinalizados = await resFinalizados.json() || {};
+
+                const resFinalizados = await fetch(`${databaseURL}/fichas_finalizadas.json`);
+                baseDatosFinalizadas = await resFinalizados.json() || {};
                 
                 renderizarLista();
             } catch (error) {
@@ -415,7 +415,7 @@
             contenedorLista.innerHTML = '';
 
             const listaBorradoresAplanada = aplanarFichas(baseDatosBorradores, false);
-            const listaFinalizadosAplanada = aplanarFichas(baseDatosFinalizados, true);
+            const listaFinalizadosAplanada = aplanarFichas(baseDatosFinalizadas, true);
             const listaAplanadaTotal = [...listaBorradoresAplanada, ...listaFinalizadosAplanada];
 
             let elementosEncontrados = 0;
@@ -495,7 +495,7 @@
 
             let vistaHTML = "index-vampire.html";
             if (idRuta.toLowerCase().includes("mago") || sistemaActual === "mago") vistaHTML = "index-mage.html";
-            if (idRuta.toLowerCase().includes("kueijin") || sistemaActual === "kueijin") vistaHTML = "index-kueijin.html";
+            if (idRynth && idRuta.toLowerCase().includes("kueijin") || sistemaActual === "kueijin") vistaHTML = "index-kueijin.html";
 
             const frame = document.getElementById('frame-ficha');
             const placeholder = document.getElementById('no-selection');
@@ -503,7 +503,6 @@
             placeholder.style.display = 'none';
             frame.style.display = 'block';
             
-            // Pasamos también el parámetro de estado para que index-vampire sepa de qué rama cargarla
             const ramaParam = esFinalizado ? "finalizado" : "borrador";
             frame.src = `${vistaHTML}?id=${encodeURIComponent(idLimpio)}&rama=${ramaParam}`;
         }
