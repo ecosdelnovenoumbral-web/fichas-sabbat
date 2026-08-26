@@ -201,7 +201,8 @@
 
     <script>
         const databaseURL = "https://ecosnovenoumbral-default-rtdb.firebaseio.com";
-        let baseDatosCompleta = {};
+        let baseDatosBorradores = {};
+        let baseDatosFinalizados = {};
         let sistemaActual = "vampiro";
         let estadoActual = "borrador";
         let idFichaSeleccionada = null;
@@ -272,8 +273,15 @@
             contenedorLista.innerHTML = '<div style="color:#888; padding:10px;">Consultando Firebase...</div>';
 
             try {
-                const response = await fetch(`${databaseURL}/fichas.json`);
-                baseDatosCompleta = await response.json() || {};
+                // Consultamos ambas ramas de manera independiente y aislada
+                const [resBorradores, resFinalizados] = await Promise.all([
+                    fetch(`${databaseURL}/fichas_borradores.json`),
+                    fetch(`${databaseURL}/fichas_finalizadas.json`)
+                ]);
+
+                baseDatosBorradores = await resBorradores.json() || {};
+                baseDatosFinalizados = await resFinalizados.json() || {};
+                
                 renderizarLista();
             } catch (error) {
                 contenedorLista.innerHTML = `<div style="color:red; padding:10px;">Error al conectar: ${error.message}</div>`;
@@ -297,40 +305,46 @@
             renderizarLista();
         }
 
-        function aplanarFichas(objeto, prefijo = '') {
+        function aplanarFichas(objeto, esFinalizadoFlag, prefijo = '') {
             let resultado = [];
             for (let key in objeto) {
                 if (!objeto.hasOwnProperty(key)) continue;
                 let item = objeto[key];
                 if (typeof item === 'object' && item !== null) {
                     if (item.nombre || item.nombrePersonaje || item.jugador || item.usuario || item.clan || item.estado !== undefined || item.finalizado !== undefined) {
-                        resultado.push({ id: prefijo ? `${prefijo}/${key}` : key, data: item });
+                        resultado.push({ 
+                            id: prefijo ? `${prefijo}/${key}` : key, 
+                            data: item, 
+                            esFinalizado: esFinalizadoFlag 
+                        });
                     } else {
-                        resultado = resultado.concat(aplanarFichas(item, prefijo ? `${prefijo}/${key}` : key));
+                        resultado = resultado.concat(aplanarFichas(item, esFinalizadoFlag, prefijo ? `${prefijo}/${key}` : key));
                     }
                 }
             }
             return resultado;
         }
 
-        // --- CORRECCIÓN CLAVE PARA EVITAR EL BORRADO CRUZADO ---
-        async function cambiarEstadoFicha(idRuta, nuevoEstadoValor, eventoClick) {
+        // Función totalmente aislada para cambiar de estado sin cruzar ni borrar el nodo equivocado
+        async function cambiarEstadoFicha(idRuta, esActualFinalizado, eventoClick) {
             if (eventoClick) eventoClick.stopPropagation();
             
             try {
-                // Apuntamos de forma exacta a la ruta completa dentro del nodo /fichas/
-                const urlNodo = `${databaseURL}/fichas/${idRuta}.json`;
+                const origenRama = esActualFinalizado ? 'fichas_finalizadas' : 'fichas_borradores';
+                const destinoRama = esActualFinalizado ? 'fichas_borradores' : 'fichas_finalizadas';
                 
-                // 1. Obtenemos los datos actuales de esta ficha específica antes de tocar nada
-                const resGet = await fetch(urlNodo);
-                const datosFicha = await resGet.json();
+                const urlNodoOrigen = `${databaseURL}/${origenRama}/${idRuta}.json`;
+                
+                // 1. Obtenemos los datos del nodo actual
+                const resGet = await fetch(urlNodoOrigen);
+                let datosFicha = await resGet.json();
 
                 if (!datosFicha) {
                     throw new Error("No se encontró la ficha en la base de datos.");
                 }
 
-                // 2. Modificamos los indicadores de estado de forma limpia
-                if (nuevoEstadoValor === 'finalizado') {
+                // 2. Ajustamos los estados internos
+                if (!esActualFinalizado) {
                     datosFicha.estado = 'enviado';
                     datosFicha.finalizado = true;
                     datosFicha.enviado = true;
@@ -340,14 +354,22 @@
                     datosFicha.enviado = false;
                 }
 
-                // 3. Escribimos la actualización preservando la integridad del registro completo
-                const response = await fetch(urlNodo, {
-                    method: 'PUT', // Usamos PUT para asegurar que la estructura completa se mantenga intacta en su sitio
+                const idLimpio = idRuta.includes('/') ? idRuta.split('/').pop() : idRuta;
+                const urlNodoDestino = `${databaseURL}/${destinoRama}/${idLimpio}.json`;
+
+                // 3. Escribimos en el nodo destino independiente (PUT)
+                const responsePut = await fetch(urlNodoDestino, {
+                    method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(datosFicha)
                 });
 
-                if (!response.ok) throw new Error("No se pudo actualizar el estado en Firebase.");
+                if (!responsePut.ok) throw new Error("No se pudo mover el registro al nuevo estado.");
+
+                // 4. Borramos estrictamente de su rama de origen sin afectar la otra
+                await fetch(urlNodoOrigen, {
+                    method: 'DELETE'
+                });
 
                 await cargarDatos();
             } catch (error) {
@@ -359,12 +381,17 @@
             const contenedorLista = document.getElementById('lista-fichas');
             contenedorLista.innerHTML = '';
 
-            const listaAplanada = aplanarFichas(baseDatosCompleta);
+            // Combinamos las listas de ambas ramas físicas separadas
+            const listaBorradoresAplanada = aplanarFichas(baseDatosBorradores, false);
+            const listaFinalizadosAplanada = aplanarFichas(baseDatosFinalizados, true);
+            const listaAplanadaTotal = [...listaBorradoresAplanada, ...listaFinalizadosAplanada];
+
             let elementosEncontrados = 0;
 
-            listaAplanada.forEach(e => {
+            listaAplanadaTotal.forEach(e => {
                 const idRuta = e.id;
                 const ficha = e.data;
+                const esFinalizado = e.esFinalizado;
 
                 let perteneceAlSistema = false;
                 if (sistemaActual === 'todos') {
@@ -374,7 +401,6 @@
                                          (ficha.sistema && ficha.sistema.toLowerCase() === sistemaActual);
                 }
 
-                const esFinalizado = ficha.estado === 'enviado' || ficha.finalizado === true || ficha.enviado === true;
                 let coincideEstado = false;
                 if (estadoActual === 'todos') coincideEstado = true;
                 else if (estadoActual === 'finalizado') coincideEstado = esFinalizado;
@@ -393,13 +419,12 @@
                     const jugador = ficha.jugador || ficha.usuario || 'Desconocido';
 
                     const textoBtnAccion = esFinalizado ? 'Pasar a Borrador' : 'Marcar Finalizado';
-                    const valorDestino = esFinalizado ? 'borrador' : 'finalizado';
 
                     item.innerHTML = `
                         <div class="item-id">${idLimpio}</div>
                         <div class="item-nombre">${nombre}</div>
                         <div class="item-detalles">Clan: ${clan} | Jugador: ${jugador}</div>
-                        <button class="btn-mover-estado" onclick="cambiarEstadoFicha('${idRuta}', '${valorDestino}', event)">${textoBtnAccion}</button>
+                        <button class="btn-mover-estado" onclick="cambiarEstadoFicha('${idRuta}', ${esFinalizado}, event)">${textoBtnAccion}</button>
                     `;
 
                     item.onclick = (evt) => seleccionarFicha(idLimpio, idRuta, evt.currentTarget);
