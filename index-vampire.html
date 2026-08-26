@@ -932,7 +932,6 @@
       
       alert(`¡Éxito! La ficha ${pjId} ha sido eliminada por completo.`);
       
-      // Limpiar URL del parámetro ?id= antes de recargar
       window.history.replaceState({}, document.title, window.location.pathname);
       location.reload();
     } catch (error) {
