@@ -681,11 +681,11 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // Lista estricta de administradores principales
+  // Lista estricta de administradores estáticos
   const ADMINS_AUTORIZADOS = ["admin", "narrador", "administrador", "ecosnovenoumbral", "nigoyin"];
 
   function limpiarTexto(texto) {
-    return texto ? texto.toLowerCase().replace(/[^a-z0-9]/g, "") : "";
+    return texto ? texto.toLowerCase().trim() : "";
   }
 
   function obtenerUsuarioActivo() {
@@ -694,23 +694,43 @@
     if (usuarioUrl && usuarioUrl.trim() !== "") {
       return usuarioUrl.trim();
     }
-    return ""; // Devuelve vacío si no se pasó ningún parámetro
+    return ""; 
   }
 
   async function esNarradorAutorizado() {
     const usuarioRaw = obtenerUsuarioActivo();
-    if (!usuarioRaw) return false; // Si no hay usuario definido, rechaza inmediatamente
+    if (!usuarioRaw) return false;
 
     const usuarioClean = limpiarTexto(usuarioRaw);
 
+    // 1. Verificar contra la lista estática local
     if (ADMINS_AUTORIZADOS.includes(usuarioClean)) {
       return true;
     }
 
+    // 2. Verificar contra Firebase (Insensible a Mayúsculas/Minúsculas)
     try {
-      const snapshot = await get(child(ref(db), `narradores/${usuarioRaw}`));
+      // Intenta consultar la clave en minúsculas limpia (ej: "nigoyin")
+      let snapshot = await get(child(ref(db), `narradores/${usuarioClean}`));
       if (snapshot.exists() && snapshot.val() === true) {
         return true;
+      }
+
+      // Si no existe, intenta consultar la clave tal como viene en la URL (ej: "Nigoyin")
+      snapshot = await get(child(ref(db), `narradores/${usuarioRaw}`));
+      if (snapshot.exists() && snapshot.val() === true) {
+        return true;
+      }
+
+      // Si se guardaron todos los narradores como sub-nodos, recorremos todo el nodo /narradores
+      const snapshotAll = await get(child(ref(db), "narradores"));
+      if (snapshotAll.exists()) {
+        const narradoresData = snapshotAll.val();
+        for (let key in narradoresData) {
+          if (limpiarTexto(key) === usuarioClean && narradoresData[key] === true) {
+            return true;
+          }
+        }
       }
     } catch (err) {
       console.warn("Error consultando permisos en Firebase:", err);
@@ -722,7 +742,6 @@
   function aplicarReglasPermisosUsuario() {
     if (document.body.classList.contains('modo-admin')) return;
 
-    // Bloquear todo el formulario por defecto
     document.querySelectorAll(".container input").forEach(input => {
       input.readOnly = true;
     });
@@ -731,7 +750,6 @@
       el.style.cursor = "not-allowed";
     });
 
-    // PERMISOS JUGADOR:
     const wpDisp = document.getElementById("willpower-disp");
     const bloodDisp = document.getElementById("blood-disp");
     if (wpDisp) wpDisp.readOnly = false;
