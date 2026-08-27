@@ -300,11 +300,20 @@
             contenedorLista.innerHTML = '<div style="color:#888; padding:10px;">Consultando Firebase...</div>';
 
             try {
-                const resBorradores = await fetch(`${databaseURL}/fichas_borradores.json`);
-                baseDatosBorradores = await resBorradores.json() || {};
+                // Consulta directa a las rutas fácticas de la base de datos
+                const resBorradoresVampiro = await fetch(`${databaseURL}/fichas/vampiro_borradores.json`);
+                const resBorradoresGral = await fetch(`${databaseURL}/fichas_borradores.json`);
+                
+                const borrv = await resBorradoresVampiro.json() || {};
+                const borrg = await resBorradoresGral.json() || {};
+                baseDatosBorradores = { ...borrg, ...borrv };
 
-                const resFinalizados = await fetch(`${databaseURL}/fichas_finalizadas.json`);
-                baseDatosFinalizadas = await resFinalizados.json() || {};
+                const resFinalizadasVampiro = await fetch(`${databaseURL}/fichas/vampiro_finalizadas.json`);
+                const resFinalizadasGral = await fetch(`${databaseURL}/fichas_finalizadas.json`);
+                
+                const finv = await resFinalizadasVampiro.json() || {};
+                const fing = await resFinalizadasGral.json() || {};
+                baseDatosFinalizadas = { ...fing, ...finv };
                 
                 renderizarLista();
             } catch (error) {
@@ -337,7 +346,7 @@
                 if (!objeto.hasOwnProperty(key)) continue;
                 let item = objeto[key];
                 if (typeof item === 'object' && item !== null) {
-                    if (item.nombre || item.nombrePersonaje || item.jugador || item.usuario || item.clan || item.estado !== undefined || item.finalizado !== undefined) {
+                    if (item.nombre || item.nombrePersonaje || item.jugador || item.usuario || item.clan || item.estado !== undefined || item.finalizado !== undefined || item.atributos || item.habilidades) {
                         resultado.push({ 
                             id: prefijo ? `${prefijo}/${key}` : key, 
                             data: item, 
@@ -355,20 +364,26 @@
             if (eventoClick) eventoClick.stopPropagation();
             
             try {
-                const urlNodoOrigen = `${databaseURL}/fichas_borradores/${idRuta}.json`;
-                const resGet = await fetch(urlNodoOrigen);
+                const idLimpio = idRuta.includes('/') ? idRuta.split('/').pop() : idRuta;
+                let urlNodoOrigen = `${databaseURL}/fichas/vampiro_borradores/${idLimpio}.json`;
+                
+                let resGet = await fetch(urlNodoOrigen);
                 let datosFicha = await resGet.json();
+
+                if (!datosFicha) {
+                    urlNodoOrigen = `${databaseURL}/fichas_borradores/${idRuta}.json`;
+                    resGet = await fetch(urlNodoOrigen);
+                    datosFicha = await resGet.json();
+                }
 
                 if (!datosFicha) {
                     throw new Error("No se encontró la ficha en borradores.");
                 }
 
-                datosFicha.estado = 'enviado';
+                datosFicha.estado = 'finalizado';
                 datosFicha.finalizado = true;
-                datosFicha.enviado = true;
 
-                const idLimpio = idRuta.includes('/') ? idRuta.split('/').pop() : idRuta;
-                const urlNodoDestino = `${databaseURL}/fichas_finalizadas/${idLimpio}.json`;
+                const urlNodoDestino = `${databaseURL}/fichas/vampiro_finalizadas/${idLimpio}.json`;
 
                 const responsePut = await fetch(urlNodoDestino, {
                     method: 'PUT',
@@ -393,14 +408,15 @@
             }
 
             try {
-                const rama = esFinalizado ? 'fichas_finalizadas' : 'fichas_borradores';
-                const urlNodo = `${databaseURL}/${rama}/${idRuta}.json`;
+                const idLimpio = idRuta.includes('/') ? idRuta.split('/').pop() : idRuta;
+                const ramaEspecifica = esFinalizado ? 'vampiro_finalizadas' : 'vampiro_borradores';
+                const ramaGeneral = esFinalizado ? 'fichas_finalizadas' : 'fichas_borradores';
 
-                const response = await fetch(urlNodo, { method: 'DELETE' });
-                if (!response.ok) throw new Error("No se pudo eliminar el registro de Firebase.");
+                // Intentar eliminar en ambas estructuras por compatibilidad
+                await fetch(`${databaseURL}/fichas/${ramaEspecifica}/${idLimpio}.json`, { method: 'DELETE' });
+                await fetch(`${databaseURL}/${ramaGeneral}/${idRuta}.json`, { method: 'DELETE' });
 
-                const idLimpioEval = idRuta.includes('/') ? idRuta.split('/').pop() : idRuta;
-                if (idFichaSeleccionada === idLimpioEval) {
+                if (idFichaSeleccionada === idLimpio) {
                     ocultarVisor();
                 }
 
@@ -430,7 +446,8 @@
                     perteneceAlSistema = true;
                 } else {
                     perteneceAlSistema = idRuta.toLowerCase().includes(sistemaActual) || 
-                                         (ficha.sistema && ficha.sistema.toLowerCase() === sistemaActual);
+                                         (ficha.sistema && ficha.sistema.toLowerCase() === sistemaActual) ||
+                                         (sistemaActual === 'vampiro' && idRuta.toLowerCase().includes('sabbat'));
                 }
 
                 let coincideEstado = false;
@@ -446,9 +463,9 @@
                     const item = document.createElement('div');
                     item.className = `ficha-item ${idLimpio === idFichaSeleccionada ? 'active' : ''}`;
                     
-                    const nombre = ficha.nombre || ficha.nombrePersonaje || 'Sin Nombre';
-                    const clan = ficha.clan || 'Sin Clan';
-                    const jugador = ficha.jugador || ficha.usuario || 'Desconocido';
+                    const nombre = ficha.nombre || ficha.nombrePersonaje || ficha.personaje || 'Sin Nombre';
+                    const clan = ficha.clan || ficha.credo || 'Sin Clan';
+                    const jugador = ficha.jugador || ficha.usuario || ficha.usuario_foro || 'Desconocido';
 
                     let botonesHTML = '';
                     if (!esFinalizado) {
@@ -504,7 +521,7 @@
             frame.style.display = 'block';
             
             const ramaParam = esFinalizado ? "finalizado" : "borrador";
-            frame.src = `${vistaHTML}?id=${encodeURIComponent(idLimpio)}&rama=${ramaParam}`;
+            frame.src = `${vistaHTML}?id=${encodeURIComponent(idLimpio)}&rama=${ramaParam}&mode=read`;
         }
 
         function ocultarVisor() {
