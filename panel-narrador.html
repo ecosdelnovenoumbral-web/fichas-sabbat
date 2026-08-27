@@ -585,8 +585,11 @@
             placeholder.style.display = 'none';
             frame.style.display = 'block';
             
+            const tokenSession = sessionStorage.getItem("narrador_auth") || "";
             const ramaParam = esFinalizado ? "finalizado" : "borrador";
-            frame.src = `${vistaHTML}?id=${encodeURIComponent(idLimpio)}&rama=${ramaParam}&mode=read`;
+
+            // Se pasa mode=edit y el token del Narrador al iframe para desbloquear edición total
+            frame.src = `${vistaHTML}?id=${encodeURIComponent(idLimpio)}&rama=${ramaParam}&mode=edit&auth=${encodeURIComponent(tokenSession)}`;
         }
 
         function ocultarVisor() {
