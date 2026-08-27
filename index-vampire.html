@@ -108,6 +108,9 @@
             flex: 1;
             min-width: 0;
         }
+        input[readonly] {
+            color: #aaa;
+        }
         input[type="number"] {
             background: #121212;
             border: 1px solid var(--accent-color);
@@ -299,15 +302,16 @@
     <div class="firebase-panel">
         <span>ID del Personaje:</span>
         <input type="text" id="pj-id" placeholder="Auto / Ej: sabbat-usuario-001" style="width: 200px; background: #121212; border: 1px solid var(--accent-color);">
-        <button class="firebase-btn" onclick="guardarFicha()">Guardar</button>
+        <button class="firebase-btn" onclick="guardarFicha()">Guardar Borrador</button>
         <button class="firebase-btn" onclick="cargarFicha()">Cargar</button>
+        <button class="firebase-btn" style="background-color: #b71c1c;" onclick="eliminarFicha()">Eliminar Ficha</button>
     </div>
 
     <!-- SECCIÓN DE CABECERA -->
     <div class="grid-3">
         <div class="section-box">
             <div class="row"><span>Nombre:</span> <input type="text" id="nombre"></div>
-            <div class="row"><span>Jugador:</span> <input type="text" id="jugador"></div>
+            <div class="row"><span>Jugador:</span> <input type="text" id="jugador" readonly></div>
         </div>
         <div class="section-box">
             <div class="row"><span>Naturaleza:</span> <input type="text" id="naturaleza"></div>
@@ -580,17 +584,17 @@
     <!-- Panel de Botones Finales -->
     <div class="admin-panel">
         <button class="firebase-btn" style="background-color: #2e7d32;" onclick="enviarFichaFinal()">Enviar y Finalizar Ficha</button>
-        <button class="firebase-btn" style="background-color: #0288d1;" onclick="cargarModoLecturaAdmin(null, null, false)">Editar</button>
+        <button class="firebase-btn" style="background-color: #0288d1;" onclick="cargarModoLecturaAdmin(null, null, false)">Modo Narrador (Edición)</button>
     </div>
 
 </div>
 
 <script>
-    // Manejo de 3 Estados Cíclicos para Puntos (Vacio -> Lerner '/' -> Filled -> Vacio)
+    // Manejo de 3 Estados Cíclicos para Puntos
     document.querySelectorAll('.dots').forEach(container => {
         const dots = Array.from(container.querySelectorAll('.dot'));
-        dots.forEach((dot, index) => {
-            dot.addEventListener('click', function(e) {
+        dots.forEach((dot) => {
+            dot.addEventListener('click', function() {
                 if (this.dataset.readonly === "true") return;
                 const isBasePoint = this.classList.contains('base-point');
                 const isModoAdmin = document.body.classList.contains('modo-admin');
@@ -660,7 +664,6 @@
 
     window.actualizarValoresGeneracion = actualizarValoresGeneracion;
     window.sincronizarWillpower = sincronizarWillpower;
-
     actualizarValoresGeneracion();
 </script>
 
@@ -694,6 +697,14 @@
     return "invitado";
   }
 
+  // Inicialización de campo jugador con el nick activo del foro
+  const usuarioActivo = obtenerUsuarioActivo();
+  const inputJugador = document.getElementById("jugador");
+  if (inputJugador) {
+    inputJugador.value = usuarioActivo;
+    inputJugador.readOnly = true;
+  }
+
   async function esNarradorAutorizado() {
     const urlParams = new URLSearchParams(window.location.search);
     const tokenUrl = urlParams.get('auth') || sessionStorage.getItem('narrador_auth');
@@ -704,7 +715,7 @@
         const usuarioForo = decodedData[1] ? decodedData[1].trim() : "";
         if (usuarioForo) {
           const snapshot = await get(child(ref(db), `narradores/${usuarioForo}`));
-          if (snapshot.exists() && snapshot.val() === true) {
+          if (snapshot.exists() && (snapshot.val() === true || snapshot.val() === "true")) {
             return true;
           }
         }
@@ -721,9 +732,14 @@
     }
 
     try {
-      const snapshot = await get(child(ref(db), `narradores/${usuarioRaw}`));
-      if (snapshot.exists() && snapshot.val() === true) {
-        return true;
+      const snapshotAll = await get(child(ref(db), `narradores`));
+      if (snapshotAll.exists()) {
+        const narradores = snapshotAll.val();
+        for (let key in narradores) {
+          if (limpiarTexto(key) === usuarioClean && (narradores[key] === true || narradores[key] === "true")) {
+            return true;
+          }
+        }
       }
     } catch (err) {
       console.warn("Consulta a Firebase realizada:", err);
@@ -732,9 +748,23 @@
     return false;
   }
 
-  function aplicarReglasPermisosUsuario() {
+  function aplicarReglasPermisosUsuario(esBorrador = false) {
     if (document.body.classList.contains('modo-admin')) return;
 
+    if (esBorrador) {
+      document.querySelectorAll(".container input").forEach(input => {
+        if (input.id !== "jugador" && input.id !== "blood-max" && input.id !== "blood-turn") {
+          input.readOnly = false;
+        }
+      });
+      document.querySelectorAll(".dot, .health-checkbox").forEach(el => {
+        el.dataset.readonly = "false";
+        el.style.cursor = "pointer";
+      });
+      return;
+    }
+
+    // Si la ficha está finalizada, se bloquean los rasgos fijos
     document.querySelectorAll(".container input").forEach(input => {
       input.readOnly = true;
     });
@@ -770,7 +800,9 @@
 
   function desbloquearFichaCompletaNarrador() {
     document.querySelectorAll(".container input").forEach(input => {
-      input.readOnly = false;
+      if (input.id !== "jugador" && input.id !== "blood-max" && input.id !== "blood-turn") {
+        input.readOnly = false;
+      }
     });
     document.querySelectorAll(".dot, .health-checkbox").forEach(el => {
       el.dataset.readonly = "false";
@@ -783,11 +815,33 @@
     });
   }
 
+  function limpiarFormulario() {
+    document.getElementById("pj-id").value = "";
+    document.querySelectorAll("input[type='text'], input[type='number']").forEach(input => {
+      if (input.id !== "jugador") {
+        input.value = input.type === 'number' ? 0 : '';
+      }
+    });
+    document.querySelectorAll(".dot").forEach(dot => {
+      dot.classList.remove("filled", "lerner", "crossed");
+    });
+    document.querySelectorAll(".health-checkbox").forEach(box => {
+      box.classList.remove("filled");
+    });
+    document.getElementById("gen-input").value = 13;
+    window.actualizarValoresGeneracion();
+    window.sincronizarWillpower();
+  }
+
   function poblarDatosEnFicha(datos) {
     if (!datos) return;
     document.querySelectorAll("input[type='text'], input[type='number']").forEach(input => {
       if (input.id && datos[input.id] !== undefined) {
-        input.value = datos[input.id];
+        if (input.id === "jugador") {
+          input.value = usuarioActivo;
+        } else {
+          input.value = datos[input.id];
+        }
       }
     });
 
@@ -820,6 +874,7 @@
         datos[input.id] = input.value;
       }
     });
+    datos["jugador"] = usuarioActivo;
 
     document.querySelectorAll(".dots").forEach(container => {
       if (container.id) {
@@ -842,26 +897,25 @@
   }
 
   window.guardarFicha = async function() {
-    const usuarioRaw = obtenerUsuarioActivo();
     let pjId = document.getElementById("pj-id").value.trim();
 
     if (!pjId) {
       const dbRef = ref(db);
       try {
-        const snapshot = await get(child(dbRef, `control_usuarios/${usuarioRaw}/sabbat_count`));
+        const snapshot = await get(child(dbRef, `control_usuarios/${usuarioActivo}/sabbat_count`));
         let count = 1;
         if (snapshot.exists() && typeof snapshot.val() === 'number') {
           count = snapshot.val() + 1;
         }
         
         const numFormatted = String(count).padStart(3, '0');
-        pjId = `sabbat-${usuarioRaw}-${numFormatted}`;
+        pjId = `sabbat-${usuarioActivo}-${numFormatted}`;
         
-        await set(ref(db, `control_usuarios/${usuarioRaw}/sabbat_count`), count);
+        await set(ref(db, `control_usuarios/${usuarioActivo}/sabbat_count`), count);
         document.getElementById("pj-id").value = pjId;
       } catch (error) {
         console.error("Error al generar ID:", error);
-        pjId = `sabbat-${usuarioRaw}-001`;
+        pjId = `sabbat-${usuarioActivo}-001`;
         document.getElementById("pj-id").value = pjId;
       }
     }
@@ -873,14 +927,14 @@
       const ramaParam = urlParams.get('rama');
       let rutaDestino = `fichas/vampiro_borradores/${pjId}`;
 
-      if (ramaParam === 'finalizado') {
+      if (ramaParam && ramaParam.includes('final')) {
         rutaDestino = `fichas/vampiro_finalizadas/${pjId}`;
       }
 
       await set(ref(db, rutaDestino), datos);
-      alert(`¡Guardado exitoso!\nID de ficha: ${pjId}`);
+      alert(`¡Borrador guardado exitosamente!\nID de ficha: ${pjId}`);
       if (!document.body.classList.contains('modo-admin')) {
-        aplicarReglasPermisosUsuario();
+        aplicarReglasPermisosUsuario(true);
       }
       return true;
     } catch (err) {
@@ -897,31 +951,37 @@
       return;
     }
 
-    let targetKey = inputVal;
-    if (targetKey.includes('/')) {
-      targetKey = targetKey.split('/').pop();
-    }
+    let targetKey = inputVal.includes('/') ? inputVal.split('/').pop() : inputVal;
     document.getElementById("pj-id").value = targetKey;
 
     const dbRef = ref(db);
     try {
       let snapshot = null;
+      let esBorrador = false;
 
-      if (ramaManual === 'finalizado') {
-        snapshot = await get(child(dbRef, `fichas/vampiro_finalizadas/${targetKey}`));
-      } else if (ramaManual === 'borrador') {
+      const esRamaBorrador = ramaManual && ramaManual.includes('borra');
+      const esRamaFinal = ramaManual && ramaManual.includes('final');
+
+      if (esRamaBorrador) {
         snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
-      } else {
+        esBorrador = true;
+      } else if (esRamaFinal) {
         snapshot = await get(child(dbRef, `fichas/vampiro_finalizadas/${targetKey}`));
-        if (!snapshot.exists()) {
-          snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
+        esBorrador = false;
+      } else {
+        snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
+        if (snapshot.exists()) {
+          esBorrador = true;
+        } else {
+          snapshot = await get(child(dbRef, `fichas/vampiro_finalizadas/${targetKey}`));
+          esBorrador = false;
         }
       }
 
       if (snapshot && snapshot.exists()) {
         poblarDatosEnFicha(snapshot.val());
         if (!document.body.classList.contains('modo-admin')) {
-          aplicarReglasPermisosUsuario();
+          aplicarReglasPermisosUsuario(esBorrador);
         }
       } else {
         alert(`No se encontró ningún personaje registrado con el identificador: ${targetKey}`);
@@ -929,6 +989,28 @@
     } catch (err) {
       console.error("Error al cargar:", err);
       alert("Error al intentar conectarse a la base de datos: " + err.message);
+    }
+  };
+
+  window.eliminarFicha = async function() {
+    const pjId = document.getElementById("pj-id").value.trim();
+    if (!pjId) {
+      alert("Debes tener una ficha cargada o un ID especificado para poder eliminar.");
+      return;
+    }
+
+    const confirmacion = confirm(`¿Estás seguro de que deseas eliminar permanentemente la ficha "${pjId}"? Esta acción no se puede deshacer.`);
+    if (!confirmacion) return;
+
+    try {
+      await remove(ref(db, `fichas/vampiro_borradores/${pjId}`));
+      await remove(ref(db, `fichas/vampiro_finalizadas/${pjId}`));
+      await remove(ref(db, `administracion/registros/${pjId}`));
+      alert(`La ficha ${pjId} ha sido eliminada con éxito.`);
+      limpiarFormulario();
+    } catch (err) {
+      console.error("Error al eliminar la ficha:", err);
+      alert("Error al eliminar la ficha de Firebase: " + err.message);
     }
   };
 
@@ -941,11 +1023,10 @@
       pjId = document.getElementById("pj-id").value.trim();
     }
 
-    const confirmar = confirm("¿Estás seguro de enviar y finalizar tu ficha?");
+    const confirmar = confirm("¿Estás seguro de enviar y finalizar tu ficha? Una vez finalizada, los campos principales se bloquearán para edición.");
     if (!confirmar) return;
 
     const datos = recolectarDatosFicha();
-    const usuario = obtenerUsuarioActivo();
 
     try {
       await set(ref(db, `fichas/vampiro_finalizadas/${pjId}`), datos);
@@ -955,7 +1036,7 @@
         fecha: new Date().toISOString(),
         id_ficha: pjId,
         juego: "vampiro_sabbat",
-        usuario_foro: usuario
+        usuario_foro: usuarioActivo
       });
 
       try {
@@ -965,9 +1046,9 @@
       }
 
       if (!document.body.classList.contains('modo-admin')) {
-        aplicarReglasPermisosUsuario();
+        aplicarReglasPermisosUsuario(false);
       }
-      alert("¡Éxito! La ficha ha sido finalizada y actualizada en el sistema.");
+      alert("¡Éxito! La ficha ha sido finalizada y guardada en el sistema.");
     } catch (err) {
       console.error("Error al finalizar ficha:", err);
       alert("Error: No se pudo finalizar el envío de la ficha: " + err.message);
@@ -975,17 +1056,19 @@
   };
 
   window.cargarModoLecturaAdmin = async function(idManual, ramaManual, silencioso = false) {
-    const esNarrador = await esNarradorAutorizado();
-    if (!esNarrador) {
-      if (!silencioso) alert("Acceso restringido: Solo el Narrador puede desbloquear la edición total de esta ficha.");
-      return;
-    }
-
-    document.body.classList.add('modo-admin');
     await window.cargarFicha(idManual, ramaManual);
-    desbloquearFichaCompletaNarrador();
-    if (!silencioso) {
-      alert("Modo Narrador Activado: Toda la ficha ha sido desbloqueada para edición.");
+
+    const esNarrador = await esNarradorAutorizado();
+    if (esNarrador) {
+      document.body.classList.add('modo-admin');
+      desbloquearFichaCompletaNarrador();
+      if (!silencioso) {
+        alert("Modo Narrador Activado: Toda la ficha ha sido desbloqueada para edición.");
+      }
+    } else {
+      if (!silencioso) {
+        alert("Acceso restringido: Solo un Narrador autorizado puede activar la edición total.");
+      }
     }
   };
 
