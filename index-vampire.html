@@ -680,8 +680,6 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  const ADMINS_AUTORIZADOS = ["admin", "narrador", "administrador", "ecosnovenoumbral", "nigoyin"];
-
   function limpiarTexto(texto) {
     return texto ? texto.toLowerCase().trim() : "";
   }
@@ -700,11 +698,6 @@
     if (!usuarioRaw) return false;
 
     const usuarioClean = limpiarTexto(usuarioRaw);
-
-    // 1. Validación directa local contra la lista segura para evitar falsos bloqueos
-    if (ADMINS_AUTORIZADOS.includes(usuarioClean)) {
-      return true;
-    }
 
     try {
       let snapshot = await get(child(ref(db), `narradores/${usuarioClean}`));
@@ -728,11 +721,6 @@
       }
     } catch (err) {
       console.warn("Error consultando permisos en Firebase:", err);
-    }
-
-    // 2. Respaldo de seguridad para asegurar acceso inmediato con 'nigoyin'
-    if (usuarioClean === "nigoyin") {
-      return true;
     }
 
     return false;
@@ -873,7 +861,8 @@
       await set(ref(db, `fichas/vampiro_borradores/${pjId}`), datos);
       alert(`¡Guardado exitoso!\nID de ficha: ${pjId}`);
       
-      if (!document.body.classList.contains('modo-admin')) {
+      const esNarrador = await esNarradorAutorizado();
+      if (!esNarrador) {
         aplicarReglasPermisosUsuario();
       }
       return true;
@@ -960,7 +949,8 @@
         console.warn("Intento de eliminación de borrador omitido:", e);
       }
 
-      if (!document.body.classList.contains('modo-admin')) {
+      const esNarrador = await esNarradorAutorizado();
+      if (!esNarrador) {
         aplicarReglasPermisosUsuario();
       }
       alert("¡Éxito! La ficha ha sido finalizada y actualizada en el sistema.");
@@ -973,7 +963,7 @@
   window.cargarModoLecturaAdmin = async function(idManual, ramaManual) {
     const esNarrador = await esNarradorAutorizado();
     if (!esNarrador) {
-      alert("Error: Usuario restringido");
+      alert("Error: Usuario restringido o no autorizado como Narrador en la base de datos.");
       return;
     }
 
