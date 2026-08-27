@@ -139,15 +139,12 @@
             font-size: 10px;
             color: var(--accent-color);
             font-weight: bold;
-            user-select: none;
         }
-        .dot.lerner::after, .dot.crossed::after {
+        .dot.crossed::after {
             content: "/";
             position: absolute;
             font-size: 12px;
-            color: #ffffff;
-            font-weight: bold;
-            line-height: 1;
+            color: var(--accent-color);
         }
         .dot.filled {
             background: var(--accent-color);
@@ -272,7 +269,6 @@
             font-weight: bold;
             text-transform: uppercase;
             border-radius: 3px;
-            transition: background 0.2s ease;
         }
         .firebase-btn:hover {
             background: #b30000;
@@ -299,21 +295,24 @@
     <div class="firebase-panel">
         <span>ID del Personaje:</span>
         <input type="text" id="pj-id" placeholder="Auto / Ej: sabbat-usuario-001" style="width: 200px; background: #121212; border: 1px solid var(--accent-color);">
-        <button class="firebase-btn" onclick="guardarFicha()">Guardar</button>
-        <button class="firebase-btn" onclick="cargarFicha()">Cargar</button>
+        <button class="firebase-btn" onclick="guardarFicha()">Guardar Borrador</button>
+        <button class="firebase-btn" onclick="cargarFicha()">Cargar de Firebase</button>
     </div>
 
     <!-- SECCIÓN DE CABECERA -->
     <div class="grid-3">
+        <!-- Columna 1: Nombre, Jugador -->
         <div class="section-box">
             <div class="row"><span>Nombre:</span> <input type="text" id="nombre"></div>
             <div class="row"><span>Jugador:</span> <input type="text" id="jugador"></div>
         </div>
+        <!-- Columna 2: Naturaleza, Conducta, Concepto -->
         <div class="section-box">
             <div class="row"><span>Naturaleza:</span> <input type="text" id="naturaleza"></div>
             <div class="row"><span>Conducta:</span> <input type="text" id="conducta"></div>
             <div class="row"><span>Concepto:</span> <input type="text" id="concepto"></div>
         </div>
+        <!-- Columna 3: Clan, Generación, Sire -->
         <div class="section-box">
             <div class="row"><span>Clan:</span> <input type="text" id="clan"></div>
             <div class="row">
@@ -501,7 +500,7 @@
 
     <h2>Combate e Inventario</h2>
     <div class="section-box">
-        <table id="tabla-combate">
+        <table>
             <tr>
                 <th>Arma / Ataque</th>
                 <th>Dificultad</th>
@@ -510,19 +509,19 @@
                 <th>Cadencia</th>
             </tr>
             <tr>
-                <td><input type="text" id="arma-1-1" class="campo-combate"></td><td><input type="text" id="arma-1-2" class="campo-combate"></td><td><input type="text" id="arma-1-3" class="campo-combate"></td><td><input type="text" id="arma-1-4" class="campo-combate"></td><td><input type="text" id="arma-1-5" class="campo-combate"></td>
+                <td><input type="text" id="arma-1-1"></td><td><input type="text" id="arma-1-2"></td><td><input type="text" id="arma-1-3"></td><td><input type="text" id="arma-1-4"></td><td><input type="text" id="arma-1-5"></td>
             </tr>
             <tr>
-                <td><input type="text" id="arma-2-1" class="campo-combate"></td><td><input type="text" id="arma-2-2" class="campo-combate"></td><td><input type="text" id="arma-2-3" class="campo-combate"></td><td><input type="text" id="arma-2-4" class="campo-combate"></td><td><input type="text" id="arma-2-5" class="campo-combate"></td>
+                <td><input type="text" id="arma-2-1"></td><td><input type="text" id="arma-2-2"></td><td><input type="text" id="arma-2-3"></td><td><input type="text" id="arma-2-4"></td><td><input type="text" id="arma-2-5"></td>
             </tr>
             <tr>
-                <td><input type="text" id="arma-3-1" class="campo-combate"></td><td><input type="text" id="arma-3-2" class="campo-combate"></td><td><input type="text" id="arma-3-3" class="campo-combate"></td><td><input type="text" id="arma-3-4" class="campo-combate"></td><td><input type="text" id="arma-3-5" class="campo-combate"></td>
+                <td><input type="text" id="arma-3-1"></td><td><input type="text" id="arma-3-2"></td><td><input type="text" id="arma-3-3"></td><td><input type="text" id="arma-3-4"></td><td><input type="text" id="arma-3-5"></td>
             </tr>
             <tr>
-                <td><input type="text" id="arma-4-1" class="campo-combate"></td><td><input type="text" id="arma-4-2" class="campo-combate"></td><td><input type="text" id="arma-4-3" class="campo-combate"></td><td><input type="text" id="arma-4-4" class="campo-combate"></td><td><input type="text" id="arma-4-5" class="campo-combate"></td>
+                <td><input type="text" id="arma-4-1"></td><td><input type="text" id="arma-4-2"></td><td><input type="text" id="arma-4-3"></td><td><input type="text" id="arma-4-4"></td><td><input type="text" id="arma-4-5"></td>
             </tr>
             <tr>
-                <td><input type="text" id="arma-5-1" class="campo-combate"></td><td><input type="text" id="arma-5-2" class="campo-combate"></td><td><input type="text" id="arma-5-3" class="campo-combate"></td><td><input type="text" id="arma-5-4" class="campo-combate"></td><td><input type="text" id="arma-5-5" class="campo-combate"></td>
+                <td><input type="text" id="arma-5-1"></td><td><input type="text" id="arma-5-2"></td><td><input type="text" id="arma-5-3"></td><td><input type="text" id="arma-5-4"></td><td><input type="text" id="arma-5-5"></td>
             </tr>
         </table>
     </div>
@@ -539,20 +538,20 @@
             <div class="box-title" style="font-family: var(--decorative-font);">Inventario</div>
             <div class="grid-2" style="gap: 10px;">
                 <div>
-                    <div class="row"><input type="text" id="inv-1" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-2" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-3" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-4" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-5" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-6" class="campo-inventario"></div>
+                    <div class="row"><input type="text" id="inv-1"></div>
+                    <div class="row"><input type="text" id="inv-2"></div>
+                    <div class="row"><input type="text" id="inv-3"></div>
+                    <div class="row"><input type="text" id="inv-4"></div>
+                    <div class="row"><input type="text" id="inv-5"></div>
+                    <div class="row"><input type="text" id="inv-6"></div>
                 </div>
                 <div>
-                    <div class="row"><input type="text" id="inv-7" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-8" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-9" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-10" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-11" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-12" class="campo-inventario"></div>
+                    <div class="row"><input type="text" id="inv-7"></div>
+                    <div class="row"><input type="text" id="inv-8"></div>
+                    <div class="row"><input type="text" id="inv-9"></div>
+                    <div class="row"><input type="text" id="inv-10"></div>
+                    <div class="row"><input type="text" id="inv-11"></div>
+                    <div class="row"><input type="text" id="inv-12"></div>
                 </div>
             </div>
         </div>
@@ -580,30 +579,26 @@
     <!-- Panel de Botones Finales -->
     <div class="admin-panel">
         <button class="firebase-btn" style="background-color: #2e7d32;" onclick="enviarFichaFinal()">Enviar y Finalizar Ficha</button>
-        <button class="firebase-btn" style="background-color: #0288d1;" onclick="cargarModoLecturaAdmin()">Editar</button>
+        <button class="firebase-btn" style="background-color: #0288d1;" onclick="cargarModoLecturaAdmin()">[ADMIN] Cargar en Modo Lectura</button>
+        <button class="firebase-btn" style="background-color: #c62828;" onclick="eliminarFichaAdmin()">[ADMIN] Eliminar Ficha Cargada</button>
     </div>
 
 </div>
 
 <script>
-    document.querySelectorAll('.dots').forEach(container => {
-        const dots = Array.from(container.querySelectorAll('.dot'));
-        dots.forEach((dot) => {
-            dot.addEventListener('click', function() {
-                if (this.dataset.readonly === "true") return;
-                const isBasePoint = this.classList.contains('base-point');
-                const isModoAdmin = document.body.classList.contains('modo-admin');
-                if (isBasePoint && !isModoAdmin) return;
-
-                if (this.classList.contains('filled')) {
-                    this.classList.remove('filled', 'lerner', 'crossed');
-                } else if (this.classList.contains('lerner') || this.classList.contains('crossed')) {
-                    this.classList.remove('lerner', 'crossed');
-                    this.classList.add('filled');
-                } else {
-                    this.classList.add('lerner');
-                }
-            });
+    document.querySelectorAll('.dot').forEach(dot => {
+        dot.addEventListener('click', function() {
+            if (this.dataset.readonly === "true") return;
+            if (this.classList.contains('base-point') && !document.body.classList.contains('modo-admin')) return;
+            
+            if (!this.classList.contains('crossed') && !this.classList.contains('filled')) {
+                this.classList.add('crossed');
+            } else if (this.classList.contains('crossed')) {
+                this.classList.remove('crossed');
+                this.classList.add('filled');
+            } else {
+                this.classList.remove('filled');
+            }
         });
     });
 
@@ -617,7 +612,6 @@
     function sincronizarWillpower() {
         const maxInput = document.getElementById('willpower-max');
         const dispInput = document.getElementById('willpower-disp');
-        if (!maxInput || !dispInput) return;
         dispInput.max = maxInput.value;
         if (parseInt(dispInput.value) > parseInt(maxInput.value)) {
             dispInput.value = maxInput.value;
@@ -625,9 +619,7 @@
     }
 
     function actualizarValoresGeneracion() {
-        const genInput = document.getElementById('gen-input');
-        if (!genInput) return;
-        const gen = parseInt(genInput.value) || 13;
+        const gen = parseInt(document.getElementById('gen-input').value) || 13;
         const bloodMax = document.getElementById('blood-max');
         const bloodDisp = document.getElementById('blood-disp');
         const bloodTurn = document.getElementById('blood-turn');
@@ -635,7 +627,7 @@
         let maxReserva = 10;
         let porTurno = 1;
 
-        if (gen <= 3) { maxReserva = 100; porTurno = 10; }
+        if (gen === 3) { maxReserva = 100; porTurno = 10; }
         else if (gen === 4) { maxReserva = 50; porTurno = 5; }
         else if (gen === 5) { maxReserva = 40; porTurno = 4; }
         else if (gen === 6) { maxReserva = 30; porTurno = 3; }
@@ -647,18 +639,13 @@
         else if (gen === 12) { maxReserva = 11; porTurno = 1; }
         else { maxReserva = 10; porTurno = 1; }
 
-        if (bloodMax) bloodMax.value = maxReserva;
-        if (bloodDisp) {
-            bloodDisp.max = maxReserva;
-            if (parseInt(bloodDisp.value) > maxReserva) {
-                bloodDisp.value = maxReserva;
-            }
+        bloodMax.value = maxReserva;
+        bloodDisp.max = maxReserva;
+        if (parseInt(bloodDisp.value) > maxReserva) {
+            bloodDisp.value = maxReserva;
         }
-        if (bloodTurn) bloodTurn.value = porTurno;
+        bloodTurn.value = porTurno;
     }
-
-    window.actualizarValoresGeneracion = actualizarValoresGeneracion;
-    window.sincronizarWillpower = sincronizarWillpower;
 
     actualizarValoresGeneracion();
 </script>
@@ -680,100 +667,47 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
+  const ADMINS_AUTORIZADOS = ["admin", "narrador", "administrador", "ecosnovenoumbral"];
+
   function limpiarTexto(texto) {
-    return texto ? texto.toLowerCase().trim() : "";
+    return texto ? texto.toLowerCase().replace(/[^a-z0-9]/g, "") : "";
   }
 
   function obtenerUsuarioActivo() {
     const urlParams = new URLSearchParams(window.location.search);
     let usuarioUrl = urlParams.get('user') || urlParams.get('usuario');
-    if (usuarioUrl && usuarioUrl.trim() !== "") {
-      return usuarioUrl.trim();
-    }
-    return ""; 
+    if (usuarioUrl) return usuarioUrl.trim();
+    return "admin";
   }
 
   async function esNarradorAutorizado() {
-    const usuarioRaw = obtenerUsuarioActivo();
-    if (!usuarioRaw) return false;
+    const urlParams = new URLSearchParams(window.location.search);
+    let usuarioUrl = urlParams.get('user') || urlParams.get('usuario');
+    
+    if (!usuarioUrl || ADMINS_AUTORIZADOS.includes(limpiarTexto(usuarioUrl))) {
+      return true;
+    }
 
+    const usuarioRaw = obtenerUsuarioActivo();
     const usuarioClean = limpiarTexto(usuarioRaw);
 
+    if (ADMINS_AUTORIZADOS.includes(usuarioClean)) {
+      return true;
+    }
+
     try {
-      let snapshot = await get(child(ref(db), `narradores/${usuarioClean}`));
+      const snapshot = await get(child(ref(db), `narradores/${usuarioClean}`));
       if (snapshot.exists() && snapshot.val() === true) {
         return true;
-      }
-
-      snapshot = await get(child(ref(db), `narradores/${usuarioRaw}`));
-      if (snapshot.exists() && snapshot.val() === true) {
-        return true;
-      }
-
-      const snapshotAll = await get(child(ref(db), "narradores"));
-      if (snapshotAll.exists()) {
-        const narradoresData = snapshotAll.val();
-        for (let key in narradoresData) {
-          if (limpiarTexto(key) === usuarioClean && narradoresData[key] === true) {
-            return true;
-          }
-        }
       }
     } catch (err) {
-      console.warn("Error consultando permisos en Firebase:", err);
+      console.warn("Consulta a Firebase bloqueada o restringida, usando lista local:", err);
     }
 
     return false;
   }
 
-  function aplicarReglasPermisosUsuario() {
-    if (document.body.classList.contains('modo-admin')) return;
-
-    document.querySelectorAll(".container input").forEach(input => {
-      input.readOnly = true;
-    });
-    document.querySelectorAll(".dot, .health-checkbox").forEach(el => {
-      el.dataset.readonly = "true";
-      el.style.cursor = "not-allowed";
-    });
-
-    const wpDisp = document.getElementById("willpower-disp");
-    const bloodDisp = document.getElementById("blood-disp");
-    if (wpDisp) wpDisp.readOnly = false;
-    if (bloodDisp) bloodDisp.readOnly = false;
-
-    const expEscena = document.getElementById("exp-escena");
-    if (expEscena) expEscena.readOnly = false;
-
-    document.querySelectorAll(".campo-combate, .campo-inventario").forEach(input => {
-      if (!input.value || input.value.trim() === "") {
-        input.readOnly = false;
-      } else {
-        input.readOnly = true;
-      }
-    });
-
-    const pjIdInput = document.getElementById("pj-id");
-    if (pjIdInput) pjIdInput.readOnly = false;
-  }
-
-  function desbloquearFichaCompletaNarrador() {
-    document.querySelectorAll(".container input").forEach(input => {
-      input.readOnly = false;
-    });
-    document.querySelectorAll(".dot, .health-checkbox").forEach(el => {
-      el.dataset.readonly = "false";
-      el.style.cursor = "pointer";
-    });
-    document.querySelectorAll(".firebase-btn").forEach(btn => {
-      btn.disabled = false;
-      btn.style.opacity = "1";
-      btn.style.cursor = "pointer";
-    });
-  }
-
   function poblarDatosEnFicha(datos) {
-    if (!datos) return;
     document.querySelectorAll("input[type='text'], input[type='number']").forEach(input => {
       if (input.id && datos[input.id] !== undefined) {
         input.value = datos[input.id];
@@ -784,9 +718,9 @@
       if (container.id && datos[container.id]) {
         const estados = datos[container.id];
         container.querySelectorAll(".dot").forEach((dot, index) => {
-          dot.classList.remove("filled", "crossed", "lerner");
+          dot.classList.remove("filled", "crossed");
           if (estados[index] === "filled") dot.classList.add("filled");
-          else if (estados[index] === "crossed" || estados[index] === "lerner") dot.classList.add("lerner");
+          else if (estados[index] === "crossed") dot.classList.add("crossed");
         });
       }
     });
@@ -798,11 +732,47 @@
       }
     });
 
-    window.actualizarValoresGeneracion();
-    window.sincronizarWillpower();
+    actualizarValoresGeneracion();
+    sincronizarWillpower();
   }
 
-  function recolectarDatosFicha() {
+  window.guardarFicha = async function() {
+    const usuarioRaw = obtenerUsuarioActivo();
+    const usuarioClean = limpiarTexto(usuarioRaw);
+    let pjId = document.getElementById("pj-id").value.trim();
+
+    if (pjId) {
+      const idPartes = pjId.split("-");
+      if (idPartes.length >= 2 && idPartes[1].toLowerCase() !== usuarioClean) {
+        const esAdmin = await esNarradorAutorizado();
+        if (!esAdmin) {
+          alert(`Seguridad: Esta ficha pertenece al usuario '${idPartes[1]}'. No puedes editarla con el usuario '${usuarioClean}'.`);
+          return false;
+        }
+      }
+    }
+
+    if (!pjId) {
+      const dbRef = ref(db);
+      try {
+        const snapshot = await get(child(dbRef, `control_usuarios/${usuarioClean}/sabbat_count`));
+        let count = 1;
+        if (snapshot.exists()) {
+          count = snapshot.val() + 1;
+        }
+        
+        const numFormatted = String(count).padStart(3, '0');
+        pjId = `sabbat-${usuarioClean}-${numFormatted}`;
+        
+        await set(ref(db, `control_usuarios/${usuarioClean}/sabbat_count`), count);
+        document.getElementById("pj-id").value = pjId;
+      } catch (error) {
+        console.error("Error al generar ID:", error);
+        alert("Ocurrió un error al generar el ID único del personaje.");
+        return false;
+      }
+    }
+
     const datos = {};
     document.querySelectorAll("input[type='text'], input[type='number']").forEach(input => {
       if (input.id && input.id !== "pj-id") {
@@ -815,7 +785,7 @@
         const estados = [];
         container.querySelectorAll(".dot").forEach(dot => {
           if (dot.classList.contains("filled")) estados.push("filled");
-          else if (dot.classList.contains("lerner") || dot.classList.contains("crossed")) estados.push("lerner");
+          else if (dot.classList.contains("crossed")) estados.push("crossed");
           else estados.push("empty");
         });
         datos[container.id] = estados;
@@ -827,44 +797,16 @@
         datos[box.id] = box.classList.contains("filled") ? "filled" : "empty";
       }
     });
-    return datos;
-  }
-
-  window.guardarFicha = async function() {
-    const usuarioRaw = obtenerUsuarioActivo() || "anonimo";
-    let pjId = document.getElementById("pj-id").value.trim();
-
-    if (!pjId) {
-      const dbRef = ref(db);
-      try {
-        const snapshot = await get(child(dbRef, `control_usuarios/${usuarioRaw}/sabbat_count`));
-        let count = 1;
-        if (snapshot.exists() && typeof snapshot.val() === 'number') {
-          count = snapshot.val() + 1;
-        }
-        
-        const numFormatted = String(count).padStart(3, '0');
-        pjId = `sabbat-${usuarioRaw}-${numFormatted}`;
-        
-        await set(ref(db, `control_usuarios/${usuarioRaw}/sabbat_count`), count);
-        document.getElementById("pj-id").value = pjId;
-      } catch (error) {
-        console.error("Error al generar ID:", error);
-        pjId = `sabbat-${usuarioRaw}-001`;
-        document.getElementById("pj-id").value = pjId;
-      }
-    }
-
-    const datos = recolectarDatosFicha();
 
     try {
-      await set(ref(db, `fichas/vampiro_borradores/${pjId}`), datos);
-      alert(`¡Guardado exitoso!\nID de ficha: ${pjId}`);
-      
-      const esNarrador = await esNarradorAutorizado();
-      if (!esNarrador) {
-        aplicarReglasPermisosUsuario();
-      }
+      await set(ref(db, 'fichas/vampiro/' + pjId), datos);
+      await set(ref(db, 'administracion/registros/' + pjId), {
+        usuario_foro: usuarioRaw,
+        id_ficha: pjId,
+        juego: "vampiro_sabbat",
+        fecha: new Date().toISOString()
+      });
+      alert(`¡Borrador guardado con éxito!\nTu ID asignado es: ${pjId}`);
       return true;
     } catch (err) {
       console.error("Error al guardar:", err);
@@ -873,7 +815,7 @@
     }
   };
 
-  window.cargarFicha = async function(idManual, ramaManual) {
+  window.cargarFicha = async function(idManual) {
     let inputVal = idManual || document.getElementById("pj-id").value.trim();
     if (!inputVal) {
       alert("Por favor ingresa un ID para cargar el personaje.");
@@ -888,26 +830,41 @@
 
     const dbRef = ref(db);
     try {
-      let snapshot = null;
+      let snapshot = await get(child(dbRef, `fichas/vampiro/${targetKey}`));
+      
+      if (!snapshot.exists()) {
+        snapshot = await get(child(dbRef, `fichas/${targetKey}`));
+      }
 
-      if (ramaManual === 'finalizado') {
-        snapshot = await get(child(dbRef, `fichas/vampiro_finalizadas/${targetKey}`));
-      } else if (ramaManual === 'borrador') {
-        snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
-      } else {
-        snapshot = await get(child(dbRef, `fichas/vampiro_finalizadas/${targetKey}`));
-        if (!snapshot.exists()) {
-          snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
+      if (!snapshot.exists()) {
+        const rootFichas = await get(child(dbRef, 'fichas'));
+        if (rootFichas.exists()) {
+          const allFichas = rootFichas.val();
+          
+          if (allFichas.vampiro) {
+            for (const key in allFichas.vampiro) {
+              if (key.toLowerCase() === targetKey.toLowerCase() || key.includes(targetKey)) {
+                snapshot = await get(child(dbRef, `fichas/vampiro/${key}`));
+                document.getElementById("pj-id").value = key;
+                break;
+              }
+            }
+          }
+          
+          if (!snapshot.exists()) {
+            for (const key in allFichas) {
+              if (key !== 'vampiro' && (key.toLowerCase() === targetKey.toLowerCase() || key.includes(targetKey))) {
+                snapshot = await get(child(dbRef, `fichas/${key}`));
+                document.getElementById("pj-id").value = key;
+                break;
+              }
+            }
+          }
         }
       }
 
-      if (snapshot && snapshot.exists()) {
+      if (snapshot.exists()) {
         poblarDatosEnFicha(snapshot.val());
-        
-        const esNarrador = await esNarradorAutorizado();
-        if (!esNarrador) {
-          aplicarReglasPermisosUsuario();
-        }
       } else {
         alert(`No se encontró ningún personaje registrado con el identificador: ${targetKey}`);
       }
@@ -918,71 +875,92 @@
   };
 
   window.enviarFichaFinal = async function() {
-    let pjId = document.getElementById("pj-id").value.trim();
-
-    if (!pjId) {
-      const guardadoBorrador = await window.guardarFicha();
-      if (!guardadoBorrador) return;
-      pjId = document.getElementById("pj-id").value.trim();
-    }
-
-    const confirmar = confirm("¿Estás seguro de enviar y finalizar tu ficha?");
+    const confirmar = confirm("¿Estás seguro de enviar y finalizar tu ficha? Una vez enviada, los datos principales quedarán bloqueados.");
     if (!confirmar) return;
 
-    const datos = recolectarDatosFicha();
-    const usuario = obtenerUsuarioActivo() || "anonimo";
-
-    try {
-      await set(ref(db, `fichas/vampiro_finalizadas/${pjId}`), datos);
-
-      await set(ref(db, `administracion/registros/${pjId}`), {
-        estado: "finalizado",
-        fecha: new Date().toISOString(),
-        id_ficha: pjId,
-        juego: "vampiro_sabbat",
-        usuario_foro: usuario
-      });
-
-      try {
-        await remove(ref(db, `fichas/vampiro_borradores/${pjId}`));
-      } catch (e) {
-        console.warn("Intento de eliminación de borrador omitido:", e);
-      }
-
-      const esNarrador = await esNarradorAutorizado();
-      if (!esNarrador) {
-        aplicarReglasPermisosUsuario();
-      }
-      alert("¡Éxito! La ficha ha sido finalizada y actualizada en el sistema.");
-    } catch (err) {
-      console.error("Error al finalizar ficha:", err);
-      alert("Error: No se pudo finalizar el envío de la ficha: " + err.message);
+    const guardadoExitoso = await window.guardarFicha();
+    if (guardadoExitoso) {
+      bloquearCamposEstaticos();
+      alert("¡Éxito! Tu ficha ha sido enviada y bloqueada correctamente.");
+    } else {
+      alert("Error: No se pudo finalizar el envío de la ficha.");
     }
   };
 
-  window.cargarModoLecturaAdmin = async function(idManual, ramaManual) {
+  function bloquearCamposEstaticos() {
+    const inputsAEliminarEdicion = document.querySelectorAll(
+        ".container input[type='text']:not([id^='inv-']):not([id^='arma-']):not([id^='armadura-']), " +
+        ".container input[id='willpower-max'], .container input[id='gen-input']"
+    );
+    
+    inputsAEliminarEdicion.forEach(input => {
+        if(input.id !== "pj-id" && input.id !== "jugador") {
+            input.readOnly = true;
+        }
+    });
+  }
+
+  window.cargarModoLecturaAdmin = async function(idManual) {
     const esNarrador = await esNarradorAutorizado();
+    const usuarioActual = obtenerUsuarioActivo();
+
     if (!esNarrador) {
-      alert("Error: Usuario restringido o no autorizado como Narrador en la base de datos.");
+      alert(`ERROR: Usuario restringido ('${usuarioActual}'). No tienes permisos de Narrador para realizar esta acción.`);
       return;
     }
 
     document.body.classList.add('modo-admin');
-    await window.cargarFicha(idManual, ramaManual);
-    desbloquearFichaCompletaNarrador();
-    alert("Modo Narrador Activado: Toda la ficha ha sido desbloqueada para edición.");
+    await window.cargarFicha(idManual);
+    document.querySelectorAll(".container input").forEach(input => {
+      input.readOnly = true;
+    });
+    document.querySelectorAll(".dot, .health-checkbox").forEach(el => {
+      el.dataset.readonly = "true";
+      el.style.cursor = "not-allowed";
+    });
+  };
+
+  window.eliminarFichaAdmin = async function() {
+    const esNarrador = await esNarradorAutorizado();
+    const usuarioActual = obtenerUsuarioActivo();
+
+    if (!esNarrador) {
+      alert(`ERROR: Usuario restringido ('${usuarioActual}'). No tienes permisos de Narrador para eliminar fichas.`);
+      return;
+    }
+
+    let pjId = document.getElementById("pj-id").value.trim();
+    if (pjId.includes('/')) {
+      pjId = pjId.split('/').pop();
+    }
+
+    if (!pjId) {
+      alert("Error: No hay ningún ID de ficha ingresado o cargado para eliminar.");
+      return;
+    }
+
+    const confirmarAdmin = confirm(`[ADMINISTRADOR]\n¿Deseas ELIMINAR PERMANENTEMENTE la ficha '${pjId}' de la base de datos?`);
+    if (!confirmarAdmin) return;
+
+    try {
+      await remove(ref(db, 'fichas/vampiro/' + pjId));
+      await remove(ref(db, 'fichas/' + pjId));
+      await remove(ref(db, 'administracion/registros/' + pjId));
+      
+      alert(`¡Éxito! La ficha ${pjId} ha sido eliminada por completo.`);
+      
+      window.history.replaceState({}, document.title, window.location.pathname);
+      location.reload();
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+      alert("Error al intentar eliminar la ficha: " + error.message);
+    }
   };
 
   async function procesarUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     let idParam = urlParams.get('id');
-    const ramaParam = urlParams.get('rama');
     const modeParam = urlParams.get('mode');
-
-    const esNarrador = await esNarradorAutorizado();
-    if (!esNarrador) {
-      aplicarReglasPermisosUsuario();
-    }
 
     if (idParam) {
       if (idParam.includes('/')) {
@@ -991,10 +969,10 @@
 
       document.getElementById('pj-id').value = idParam;
 
-      if (modeParam === 'read' || modeParam === 'edit') {
-        await window.cargarModoLecturaAdmin(idParam, ramaParam);
+      if (modeParam === 'read') {
+        await window.cargarModoLecturaAdmin(idParam);
       } else {
-        await window.cargarFicha(idParam, ramaParam);
+        await window.cargarFicha(idParam);
       }
     }
   }
