@@ -27,6 +27,11 @@
             flex-wrap: wrap;
             gap: 10px;
         }
+        .header-title-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
         h1 {
             color: #8b0000;
             font-size: 1.2em;
@@ -34,10 +39,20 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
+        .badge-narrador {
+            background: #251010;
+            border: 1px solid #8b0000;
+            color: #ff4d4d;
+            font-size: 0.75em;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
         .controls-group {
             display: flex;
             align-items: center;
             gap: 10px;
+            flex-wrap: wrap;
         }
         .btn {
             background-color: #1a1a1a;
@@ -48,6 +63,7 @@
             cursor: pointer;
             font-size: 0.85em;
             font-weight: bold;
+            transition: all 0.2s ease;
         }
         .btn:hover { background-color: #2a2a2a; }
         .btn-action { background-color: #8b0000; color: white; border: none; }
@@ -71,9 +87,32 @@
         }
         
         .sidebar {
-            width: 350px;
+            width: 360px;
             background-color: #0f0f0f;
             border-right: 1px solid #222;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-search {
+            padding: 10px;
+            border-bottom: 1px solid #222;
+            background: #141414;
+        }
+        .search-input {
+            width: 100%;
+            background: #080808;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            outline: none;
+        }
+        .search-input:focus {
+            border-color: #8b0000;
+        }
+        .sidebar-content {
+            flex: 1;
             overflow-y: auto;
             padding: 10px;
         }
@@ -132,6 +171,7 @@
             cursor: pointer;
             text-align: center;
             white-space: nowrap;
+            transition: background 0.15s ease;
         }
         .btn-tarjeta:hover {
             background: #444;
@@ -177,6 +217,7 @@
             transform: translate(-50%, -50%);
             color: #444;
             font-style: italic;
+            text-align: center;
         }
         #overlay-bloqueo {
             position: fixed;
@@ -197,7 +238,10 @@
     <div id="overlay-bloqueo">Verificando sesión con Firebase...</div>
 
     <header>
-        <h1>Panel Secreto del Narrador</h1>
+        <div class="header-title-container">
+            <h1>Panel Secreto del Narrador</h1>
+            <span id="badge-narrador" class="badge-narrador" style="display:none;"></span>
+        </div>
         
         <div class="controls-group">
             <button class="btn btn-action" onclick="cargarDatos()">Actualizar Datos</button>
@@ -216,8 +260,13 @@
     </header>
 
     <div class="main-layout">
-        <div class="sidebar" id="lista-fichas">
-            <div class="placeholder-text" style="position:static; transform:none; padding:20px;">Cargando lista...</div>
+        <div class="sidebar">
+            <div class="sidebar-search">
+                <input type="text" id="input-busqueda" class="search-input" placeholder="Buscar por ID, nombre, jugador o clan..." oninput="filtrarPorTexto()">
+            </div>
+            <div class="sidebar-content" id="lista-fichas">
+                <div class="placeholder-text" style="position:static; transform:none; padding:20px;">Cargando lista...</div>
+            </div>
         </div>
 
         <div class="viewport">
@@ -233,6 +282,7 @@
         var sistemaActual = "vampiro";
         var estadoActual = "borrador";
         var idFichaSeleccionada = null;
+        var busquedaTexto = "";
 
         window.alert = function(msg) {
             if (msg && (msg.includes("iniciar sesión") || msg.includes("denegado"))) {
@@ -280,6 +330,13 @@
                 if (esNarradorValido) {
                     const overlay = document.getElementById('overlay-bloqueo');
                     if (overlay) overlay.style.display = 'none';
+
+                    const badge = document.getElementById('badge-narrador');
+                    if (badge) {
+                        badge.innerText = `Narrador: ${usuarioForo}`;
+                        badge.style.display = 'inline-block';
+                    }
+
                     cargarDatos();
                 } else {
                     expulsar("El usuario ('" + usuarioForo + "') no tiene permisos activos de Narrador en Firebase.");
@@ -300,7 +357,6 @@
             contenedorLista.innerHTML = '<div style="color:#888; padding:10px;">Consultando Firebase...</div>';
 
             try {
-                // Consulta directa a las rutas fácticas de la base de datos
                 const resBorradoresVampiro = await fetch(`${databaseURL}/fichas/vampiro_borradores.json`);
                 const resBorradoresGral = await fetch(`${databaseURL}/fichas_borradores.json`);
                 
@@ -335,6 +391,11 @@
             document.getElementById('btn-todos-estados').classList.toggle('active', estado === 'todos');
             idFichaSeleccionada = null;
             ocultarVisor();
+            renderizarLista();
+        }
+
+        function filtrarPorTexto() {
+            busquedaTexto = document.getElementById('input-busqueda').value.toLowerCase().trim();
             renderizarLista();
         }
 
@@ -412,7 +473,6 @@
                 const ramaEspecifica = esFinalizado ? 'vampiro_finalizadas' : 'vampiro_borradores';
                 const ramaGeneral = esFinalizado ? 'fichas_finalizadas' : 'fichas_borradores';
 
-                // Intentar eliminar en ambas estructuras por compatibilidad
                 await fetch(`${databaseURL}/fichas/${ramaEspecifica}/${idLimpio}.json`, { method: 'DELETE' });
                 await fetch(`${databaseURL}/${ramaGeneral}/${idRuta}.json`, { method: 'DELETE' });
 
@@ -455,17 +515,22 @@
                 else if (estadoActual === 'finalizado') coincideEstado = esFinalizado;
                 else if (estadoActual === 'borrador') coincideEstado = !esFinalizado;
 
-                if (perteneceAlSistema && coincideEstado) {
+                const nombre = ficha.nombre || ficha.nombrePersonaje || ficha.personaje || 'Sin Nombre';
+                const clan = ficha.clan || ficha.credo || 'Sin Clan';
+                const jugador = ficha.jugador || ficha.usuario || ficha.usuario_foro || 'Desconocido';
+                const idLimpio = idRuta.includes('/') ? idRuta.split('/').pop() : idRuta;
+
+                let coincideBusqueda = true;
+                if (busquedaTexto !== "") {
+                    const stringCombinado = `${idLimpio} ${nombre} ${clan} ${jugador}`.toLowerCase();
+                    coincideBusqueda = stringCombinado.includes(busquedaTexto);
+                }
+
+                if (perteneceAlSistema && coincideEstado && coincideBusqueda) {
                     elementosEncontrados++;
-                    
-                    const idLimpio = idRuta.includes('/') ? idRuta.split('/').pop() : idRuta;
                     
                     const item = document.createElement('div');
                     item.className = `ficha-item ${idLimpio === idFichaSeleccionada ? 'active' : ''}`;
-                    
-                    const nombre = ficha.nombre || ficha.nombrePersonaje || ficha.personaje || 'Sin Nombre';
-                    const clan = ficha.clan || ficha.credo || 'Sin Clan';
-                    const jugador = ficha.jugador || ficha.usuario || ficha.usuario_foro || 'Desconocido';
 
                     let botonesHTML = '';
                     if (!esFinalizado) {
@@ -498,7 +563,7 @@
             if (elementosEncontrados === 0) {
                 contenedorLista.innerHTML = `
                     <div style="color:#aaa; padding:15px; text-align:center; font-size:0.9em;">
-                        📂 No se encontraron fichas en esta sección.
+                        📂 No se encontraron fichas que coincidan con los criterios.
                     </div>
                 `;
             }
