@@ -586,10 +586,11 @@
 </div>
 
 <script>
+    // Manejo de 3 Estados Cíclicos para Puntos (Vacio -> Lerner '/' -> Filled -> Vacio)
     document.querySelectorAll('.dots').forEach(container => {
         const dots = Array.from(container.querySelectorAll('.dot'));
-        dots.forEach((dot) => {
-            dot.addEventListener('click', function() {
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', function(e) {
                 if (this.dataset.readonly === "true") return;
                 const isBasePoint = this.classList.contains('base-point');
                 const isModoAdmin = document.body.classList.contains('modo-admin');
@@ -836,6 +837,7 @@
     return datos;
   }
 
+  // BOTÓN GUARDAR
   window.guardarFicha = async function() {
     const usuarioRaw = obtenerUsuarioActivo() || "anonimo";
     let pjId = document.getElementById("pj-id").value.trim();
@@ -867,6 +869,7 @@
       await set(ref(db, `fichas/vampiro_borradores/${pjId}`), datos);
       alert(`¡Guardado exitoso!\nID de ficha: ${pjId}`);
       
+      // Asegurar aplicar restricciones si no es admin
       if (!document.body.classList.contains('modo-admin')) {
         aplicarReglasPermisosUsuario();
       }
@@ -878,6 +881,7 @@
     }
   };
 
+  // BOTÓN CARGAR
   window.cargarFicha = async function(idManual, ramaManual) {
     let inputVal = idManual || document.getElementById("pj-id").value.trim();
     if (!inputVal) {
@@ -909,6 +913,7 @@
       if (snapshot && snapshot.exists()) {
         poblarDatosEnFicha(snapshot.val());
         
+        // CORRECCIÓN CLAVE: Verificar permisos y aplicar restricciones tras cargar los datos
         const esNarrador = await esNarradorAutorizado();
         if (!esNarrador) {
           aplicarReglasPermisosUsuario();
@@ -964,6 +969,7 @@
     }
   };
 
+  // BOTÓN EDITAR
   window.cargarModoLecturaAdmin = async function(idManual, ramaManual) {
     const esNarrador = await esNarradorAutorizado();
     if (!esNarrador) {
@@ -983,6 +989,7 @@
     const ramaParam = urlParams.get('rama');
     const modeParam = urlParams.get('mode');
 
+    // Comprobación inicial de permisos por defecto para usuarios normales al abrir la página
     const esNarrador = await esNarradorAutorizado();
     if (!esNarrador) {
       aplicarReglasPermisosUsuario();
@@ -1012,4 +1019,3 @@
 
 </body>
 </html>
-```[cite: 6]
