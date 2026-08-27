@@ -477,8 +477,8 @@
             <div>
                 <div style="font-size:0.85rem; text-align:center; font-weight:bold; margin-bottom:4px; font-family:var(--decorative-font);">Reserva de Sangre</div>
                 <div style="display: flex; justify-content: space-around; align-items: center; font-size: 0.75rem;">
-                    <div>MÁX:<br><input type="number" id="blood-max" min="1" max="50" value="10" readonly style="background:#1a1a1a; cursor:not-allowed;"></div>
-                    <div>DISP.:<br><input type="number" id="blood-disp" min="0" max="50" value="10"></div>
+                    <div>MÁX:<br><input type="number" id="blood-max" min="1" max="100" value="10" readonly style="background:#1a1a1a; cursor:not-allowed;"></div>
+                    <div>DISP.:<br><input type="number" id="blood-disp" min="0" max="100" value="10"></div>
                 </div>
                 <div style="margin-top: 8px; text-align: center; font-size: 0.8rem; display: flex; justify-content: center; align-items: center; gap: 5px;">
                     <span>Puntos / Turno:</span>
@@ -700,7 +700,6 @@
     return "invitado";
   }
 
-  // Inicialización del campo jugador
   const usuarioActivo = obtenerUsuarioActivo();
   const inputJugador = document.getElementById("jugador");
   if (inputJugador && !inputJugador.value) {
@@ -783,7 +782,6 @@
       return;
     }
 
-    // Si la ficha está finalizada, se bloquean los rasgos fijos
     document.querySelectorAll(".container input").forEach(input => {
       input.readOnly = true;
     });
@@ -837,11 +835,16 @@
   function limpiarFormulario() {
     document.getElementById("pj-id").value = "";
     document.querySelectorAll("input[type='text'], input[type='number']").forEach(input => {
-      input.value = input.type === 'number' ? 0 : '';
+      input.value = input.type === 'number' ? (input.id === 'gen-input' ? 13 : 0) : '';
     });
     document.getElementById("jugador").value = obtenerUsuarioActivo();
     document.querySelectorAll(".dot").forEach(dot => {
-      dot.classList.remove("filled", "lerner", "crossed");
+      if (dot.classList.contains("base-point")) {
+        dot.classList.add("filled");
+        dot.classList.remove("lerner", "crossed");
+      } else {
+        dot.classList.remove("filled", "lerner", "crossed");
+      }
     });
     document.querySelectorAll(".health-checkbox").forEach(box => {
       box.classList.remove("filled");
