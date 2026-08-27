@@ -226,7 +226,7 @@
         </div>
     </div>
 
-    <script>
+    <script[cite: 3]>
         const databaseURL = "https://ecosnovenoumbral-default-rtdb.firebaseio.com";
         var baseDatosBorradores = {};
         var baseDatosFinalizadas = {};
@@ -246,7 +246,10 @@
             const urlParams = new URLSearchParams(window.location.search);
             const tokenUrl = urlParams.get("auth");
             const tokenSession = sessionStorage.getItem("narrador_auth");
-            const tokenFinal = tokenUrl || tokenSession;
+            
+            // Capturar también el parámetro ?user= por si se accede mediante la arquitectura limpia de usuario
+            const usuarioUrl = urlParams.get("user") || urlParams.get("usuario") || urlParams.get("username");
+            const tokenFinal = tokenUrl || tokenSession || usuarioUrl;
 
             if (!tokenFinal) {
                 expulsar("Debes acceder desde el foro.");
@@ -254,12 +257,17 @@
             }
 
             try {
-                if (tokenUrl && !tokenSession) {
-                    sessionStorage.setItem("narrador_auth", tokenUrl);
-                }
+                let usuarioForo = "";
 
-                const decodedData = atob(tokenFinal).split(":");
-                const usuarioForo = decodedData[1] ? decodedData[1].trim() : "";
+                if (usuarioUrl) {
+                    usuarioForo = usuarioUrl.trim();
+                } else {
+                    if (tokenUrl && !tokenSession) {
+                        sessionStorage.setItem("narrador_auth", tokenUrl);
+                    }
+                    const decodedData = atob(tokenFinal).split(":");
+                    usuarioForo = decodedData[1] ? decodedData[1].trim() : "";
+                }
 
                 if (!usuarioForo) {
                     expulsar("Usuario no detectado en la sesión.");
@@ -300,7 +308,6 @@
             contenedorLista.innerHTML = '<div style="color:#888; padding:10px;">Consultando Firebase...</div>';
 
             try {
-                // Consulta directa a las rutas fácticas de la base de datos
                 const resBorradoresVampiro = await fetch(`${databaseURL}/fichas/vampiro_borradores.json`);
                 const resBorradoresGral = await fetch(`${databaseURL}/fichas_borradores.json`);
                 
@@ -412,7 +419,6 @@
                 const ramaEspecifica = esFinalizado ? 'vampiro_finalizadas' : 'vampiro_borradores';
                 const ramaGeneral = esFinalizado ? 'fichas_finalizadas' : 'fichas_borradores';
 
-                // Intentar eliminar en ambas estructuras por compatibilidad
                 await fetch(`${databaseURL}/fichas/${ramaEspecifica}/${idLimpio}.json`, { method: 'DELETE' });
                 await fetch(`${databaseURL}/${ramaGeneral}/${idRuta}.json`, { method: 'DELETE' });
 
@@ -521,7 +527,12 @@
             frame.style.display = 'block';
             
             const ramaParam = esFinalizado ? "finalizado" : "borrador";
-            frame.src = `${vistaHTML}?id=${encodeURIComponent(idLimpio)}&rama=${ramaParam}&mode=read`;
+            
+            // Extraer el parámetro ?user= actual de la URL del panel para propagarlo al iframe de la ficha
+            const urlParamsActuales = new URLSearchParams(window.location.search);
+            const userParam = urlParamsActuales.get("user") || urlParamsActuales.get("usuario") || urlParamsActuales.get("username") || "NIGOYIN";
+
+            frame.src = `${vistaHTML}?id=${encodeURIComponent(idLimpio)}&rama=${ramaParam}&mode=read&user=${encodeURIComponent(userParam)}`;
         }
 
         function ocultarVisor() {
