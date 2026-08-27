@@ -304,6 +304,7 @@
         <input type="text" id="pj-id" placeholder="Auto / Ej: sabbat-usuario-001" style="width: 200px; background: #121212; border: 1px solid var(--accent-color);">
         <button class="firebase-btn" onclick="guardarFicha()">Guardar Borrador</button>
         <button class="firebase-btn" onclick="cargarFicha()">Cargar</button>
+        <button class="firebase-btn" style="background-color: #555;" onclick="limpiarFormulario()">Limpiar / Nueva</button>
     </div>
 
     <!-- SECCIÓN DE CABECERA -->
@@ -832,12 +833,22 @@
     });
   }
 
-  function limpiarFormulario() {
+  window.limpiarFormulario = function() {
     document.getElementById("pj-id").value = "";
     document.querySelectorAll("input[type='text'], input[type='number']").forEach(input => {
-      input.value = input.type === 'number' ? (input.id === 'gen-input' ? 13 : 0) : '';
+      if (input.id === 'gen-input') {
+        input.value = 13;
+      } else if (input.id === 'willpower-max' || input.id === 'willpower-disp') {
+        input.value = 10;
+      } else if (input.type === 'number') {
+        input.value = 0;
+      } else {
+        input.value = '';
+      }
     });
+    
     document.getElementById("jugador").value = obtenerUsuarioActivo();
+
     document.querySelectorAll(".dot").forEach(dot => {
       if (dot.classList.contains("base-point")) {
         dot.classList.add("filled");
@@ -846,16 +857,20 @@
         dot.classList.remove("filled", "lerner", "crossed");
       }
     });
+
     document.querySelectorAll(".health-checkbox").forEach(box => {
       box.classList.remove("filled");
     });
-    document.getElementById("gen-input").value = 13;
+
     window.actualizarValoresGeneracion();
     window.sincronizarWillpower();
-  }
+  };
 
   function poblarDatosEnFicha(datos) {
     if (!datos) return;
+
+    window.limpiarFormulario();
+
     document.querySelectorAll("input[type='text'], input[type='number']").forEach(input => {
       if (input.id && datos[input.id] !== undefined) {
         input.value = datos[input.id];
