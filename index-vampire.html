@@ -701,6 +701,7 @@
 
     const usuarioClean = limpiarTexto(usuarioRaw);
 
+    // 1. Validación directa local contra la lista segura para evitar falsos bloqueos
     if (ADMINS_AUTORIZADOS.includes(usuarioClean)) {
       return true;
     }
@@ -727,6 +728,11 @@
       }
     } catch (err) {
       console.warn("Error consultando permisos en Firebase:", err);
+    }
+
+    // 2. Respaldo de seguridad para asegurar acceso inmediato con 'nigoyin'
+    if (usuarioClean === "nigoyin") {
+      return true;
     }
 
     return false;
@@ -1012,4 +1018,3 @@
 
 </body>
 </html>
-```[cite: 6]
