@@ -141,11 +141,13 @@
             font-weight: bold;
             user-select: none;
         }
-        .dot.crossed::after {
+        .dot.lerner::after, .dot.crossed::after {
             content: "/";
             position: absolute;
             font-size: 12px;
-            color: var(--accent-color);
+            color: #ffffff;
+            font-weight: bold;
+            line-height: 1;
         }
         .dot.filled {
             background: var(--accent-color);
@@ -297,8 +299,8 @@
     <div class="firebase-panel">
         <span>ID del Personaje:</span>
         <input type="text" id="pj-id" placeholder="Auto / Ej: sabbat-usuario-001" style="width: 200px; background: #121212; border: 1px solid var(--accent-color);">
-        <button class="firebase-btn" onclick="guardarFicha()">Guardar Borrador</button>
-        <button class="firebase-btn" onclick="cargarFicha()">Cargar de Firebase</button>
+        <button class="firebase-btn" onclick="guardarFicha()">Guardar</button>
+        <button class="firebase-btn" onclick="cargarFicha()">Cargar</button>
     </div>
 
     <!-- SECCIÓN DE CABECERA -->
@@ -499,7 +501,7 @@
 
     <h2>Combate e Inventario</h2>
     <div class="section-box">
-        <table>
+        <table id="tabla-combate">
             <tr>
                 <th>Arma / Ataque</th>
                 <th>Dificultad</th>
@@ -508,19 +510,19 @@
                 <th>Cadencia</th>
             </tr>
             <tr>
-                <td><input type="text" id="arma-1-1"></td><td><input type="text" id="arma-1-2"></td><td><input type="text" id="arma-1-3"></td><td><input type="text" id="arma-1-4"></td><td><input type="text" id="arma-1-5"></td>
+                <td><input type="text" id="arma-1-1" class="campo-combate"></td><td><input type="text" id="arma-1-2" class="campo-combate"></td><td><input type="text" id="arma-1-3" class="campo-combate"></td><td><input type="text" id="arma-1-4" class="campo-combate"></td><td><input type="text" id="arma-1-5" class="campo-combate"></td>
             </tr>
             <tr>
-                <td><input type="text" id="arma-2-1"></td><td><input type="text" id="arma-2-2"></td><td><input type="text" id="arma-2-3"></td><td><input type="text" id="arma-2-4"></td><td><input type="text" id="arma-2-5"></td>
+                <td><input type="text" id="arma-2-1" class="campo-combate"></td><td><input type="text" id="arma-2-2" class="campo-combate"></td><td><input type="text" id="arma-2-3" class="campo-combate"></td><td><input type="text" id="arma-2-4" class="campo-combate"></td><td><input type="text" id="arma-2-5" class="campo-combate"></td>
             </tr>
             <tr>
-                <td><input type="text" id="arma-3-1"></td><td><input type="text" id="arma-3-2"></td><td><input type="text" id="arma-3-3"></td><td><input type="text" id="arma-3-4"></td><td><input type="text" id="arma-3-5"></td>
+                <td><input type="text" id="arma-3-1" class="campo-combate"></td><td><input type="text" id="arma-3-2" class="campo-combate"></td><td><input type="text" id="arma-3-3" class="campo-combate"></td><td><input type="text" id="arma-3-4" class="campo-combate"></td><td><input type="text" id="arma-3-5" class="campo-combate"></td>
             </tr>
             <tr>
-                <td><input type="text" id="arma-4-1"></td><td><input type="text" id="arma-4-2"></td><td><input type="text" id="arma-4-3"></td><td><input type="text" id="arma-4-4"></td><td><input type="text" id="arma-4-5"></td>
+                <td><input type="text" id="arma-4-1" class="campo-combate"></td><td><input type="text" id="arma-4-2" class="campo-combate"></td><td><input type="text" id="arma-4-3" class="campo-combate"></td><td><input type="text" id="arma-4-4" class="campo-combate"></td><td><input type="text" id="arma-4-5" class="campo-combate"></td>
             </tr>
             <tr>
-                <td><input type="text" id="arma-5-1"></td><td><input type="text" id="arma-5-2"></td><td><input type="text" id="arma-5-3"></td><td><input type="text" id="arma-5-4"></td><td><input type="text" id="arma-5-5"></td>
+                <td><input type="text" id="arma-5-1" class="campo-combate"></td><td><input type="text" id="arma-5-2" class="campo-combate"></td><td><input type="text" id="arma-5-3" class="campo-combate"></td><td><input type="text" id="arma-5-4" class="campo-combate"></td><td><input type="text" id="arma-5-5" class="campo-combate"></td>
             </tr>
         </table>
     </div>
@@ -537,20 +539,20 @@
             <div class="box-title" style="font-family: var(--decorative-font);">Inventario</div>
             <div class="grid-2" style="gap: 10px;">
                 <div>
-                    <div class="row"><input type="text" id="inv-1"></div>
-                    <div class="row"><input type="text" id="inv-2"></div>
-                    <div class="row"><input type="text" id="inv-3"></div>
-                    <div class="row"><input type="text" id="inv-4"></div>
-                    <div class="row"><input type="text" id="inv-5"></div>
-                    <div class="row"><input type="text" id="inv-6"></div>
+                    <div class="row"><input type="text" id="inv-1" class="campo-inventario"></div>
+                    <div class="row"><input type="text" id="inv-2" class="campo-inventario"></div>
+                    <div class="row"><input type="text" id="inv-3" class="campo-inventario"></div>
+                    <div class="row"><input type="text" id="inv-4" class="campo-inventario"></div>
+                    <div class="row"><input type="text" id="inv-5" class="campo-inventario"></div>
+                    <div class="row"><input type="text" id="inv-6" class="campo-inventario"></div>
                 </div>
                 <div>
-                    <div class="row"><input type="text" id="inv-7"></div>
-                    <div class="row"><input type="text" id="inv-8"></div>
-                    <div class="row"><input type="text" id="inv-9"></div>
-                    <div class="row"><input type="text" id="inv-10"></div>
-                    <div class="row"><input type="text" id="inv-11"></div>
-                    <div class="row"><input type="text" id="inv-12"></div>
+                    <div class="row"><input type="text" id="inv-7" class="campo-inventario"></div>
+                    <div class="row"><input type="text" id="inv-8" class="campo-inventario"></div>
+                    <div class="row"><input type="text" id="inv-9" class="campo-inventario"></div>
+                    <div class="row"><input type="text" id="inv-10" class="campo-inventario"></div>
+                    <div class="row"><input type="text" id="inv-11" class="campo-inventario"></div>
+                    <div class="row"><input type="text" id="inv-12" class="campo-inventario"></div>
                 </div>
             </div>
         </div>
@@ -578,13 +580,13 @@
     <!-- Panel de Botones Finales -->
     <div class="admin-panel">
         <button class="firebase-btn" style="background-color: #2e7d32;" onclick="enviarFichaFinal()">Enviar y Finalizar Ficha</button>
-        <button class="firebase-btn" style="background-color: #0288d1;" onclick="cargarModoLecturaAdmin()">[ADMIN] Cargar en Modo Lectura</button>
+        <button class="firebase-btn" style="background-color: #0288d1;" onclick="cargarModoLecturaAdmin()">Editar</button>
     </div>
 
 </div>
 
 <script>
-    // Manejo mejorado de la interactividad de puntos (dots)
+    // Manejo de 3 Estados Cíclicos para Puntos (Vacio -> Lerner '/' -> Filled -> Vacio)
     document.querySelectorAll('.dots').forEach(container => {
         const dots = Array.from(container.querySelectorAll('.dot'));
         dots.forEach((dot, index) => {
@@ -594,28 +596,14 @@
                 const isModoAdmin = document.body.classList.contains('modo-admin');
                 if (isBasePoint && !isModoAdmin) return;
 
-                // Si es un doble clic con la tecla Shift presionada, cambia estado a "crossed"
-                if (e.shiftKey) {
-                    this.classList.toggle('crossed');
-                    this.classList.remove('filled');
-                    return;
+                if (this.classList.contains('filled')) {
+                    this.classList.remove('filled', 'lerner', 'crossed');
+                } else if (this.classList.contains('lerner') || this.classList.contains('crossed')) {
+                    this.classList.remove('lerner', 'crossed');
+                    this.classList.add('filled');
+                } else {
+                    this.classList.add('lerner');
                 }
-
-                // Lógica progresiva de llenado/vaciado
-                const isFilled = this.classList.contains('filled');
-                dots.forEach((d, i) => {
-                    if (d.classList.contains('base-point') && !isModoAdmin) return;
-                    if (i <= index) {
-                        if (isFilled && i === index && (index === dots.length - 1 || !dots[index + 1].classList.contains('filled'))) {
-                            d.classList.remove('filled', 'crossed');
-                        } else {
-                            d.classList.add('filled');
-                            d.classList.remove('crossed');
-                        }
-                    } else {
-                        d.classList.remove('filled', 'crossed');
-                    }
-                });
             });
         });
     });
@@ -726,7 +714,10 @@
     return false;
   }
 
-  function bloquearFormulario() {
+  function aplicarReglasPermisosUsuario() {
+    if (document.body.classList.contains('modo-admin')) return;
+
+    // Bloquear todo el formulario en general
     document.querySelectorAll(".container input").forEach(input => {
       input.readOnly = true;
     });
@@ -734,12 +725,44 @@
       el.dataset.readonly = "true";
       el.style.cursor = "not-allowed";
     });
-    document.querySelectorAll(".firebase-btn").forEach(btn => {
-      if (!btn.onclick?.toString().includes("cargarModoLecturaAdmin") && !btn.onclick?.toString().includes("cargarFicha")) {
-        btn.disabled = true;
-        btn.style.opacity = "0.5";
-        btn.style.cursor = "not-allowed";
+
+    // PERMISOS USUARIO:
+    // 1. Willpower y Sangre DISPONIBLE
+    const wpDisp = document.getElementById("willpower-disp");
+    const bloodDisp = document.getElementById("blood-disp");
+    if (wpDisp) wpDisp.readOnly = false;
+    if (bloodDisp) bloodDisp.readOnly = false;
+
+    // 2. Experiencia Ganados Ultima Escena
+    const expEscena = document.getElementById("exp-escena");
+    if (expEscena) expEscena.readOnly = false;
+
+    // 3. Combate e Inventario: Solo escribir en campos vacíos
+    document.querySelectorAll(".campo-combate, .campo-inventario").forEach(input => {
+      if (!input.value || input.value.trim() === "") {
+        input.readOnly = false;
+      } else {
+        input.readOnly = true; // No pueden borrar datos existentes
       }
+    });
+
+    // El cuadro de ID debe mantenerse editable para buscar
+    const pjIdInput = document.getElementById("pj-id");
+    if (pjIdInput) pjIdInput.readOnly = false;
+  }
+
+  function desbloquearFichaCompletaNarrador() {
+    document.querySelectorAll(".container input").forEach(input => {
+      input.readOnly = false;
+    });
+    document.querySelectorAll(".dot, .health-checkbox").forEach(el => {
+      el.dataset.readonly = "false";
+      el.style.cursor = "pointer";
+    });
+    document.querySelectorAll(".firebase-btn").forEach(btn => {
+      btn.disabled = false;
+      btn.style.opacity = "1";
+      btn.style.cursor = "pointer";
     });
   }
 
@@ -755,9 +778,9 @@
       if (container.id && datos[container.id]) {
         const estados = datos[container.id];
         container.querySelectorAll(".dot").forEach((dot, index) => {
-          dot.classList.remove("filled", "crossed");
+          dot.classList.remove("filled", "crossed", "lerner");
           if (estados[index] === "filled") dot.classList.add("filled");
-          else if (estados[index] === "crossed") dot.classList.add("crossed");
+          else if (estados[index] === "crossed" || estados[index] === "lerner") dot.classList.add("lerner");
         });
       }
     });
@@ -786,7 +809,7 @@
         const estados = [];
         container.querySelectorAll(".dot").forEach(dot => {
           if (dot.classList.contains("filled")) estados.push("filled");
-          else if (dot.classList.contains("crossed")) estados.push("crossed");
+          else if (dot.classList.contains("lerner") || dot.classList.contains("crossed")) estados.push("lerner");
           else estados.push("empty");
         });
         datos[container.id] = estados;
@@ -801,6 +824,7 @@
     return datos;
   }
 
+  // BOTÓN GUARDAR (Guarda siempre como borrador)
   window.guardarFicha = async function() {
     const usuarioRaw = obtenerUsuarioActivo();
     let pjId = document.getElementById("pj-id").value.trim();
@@ -826,18 +850,14 @@
       }
     }
 
-    // Validación: Impedir sobrescribir si la ficha ya existe en Finalizadas
-    const snapFinal = await get(child(ref(db), `fichas/vampiro_finalizadas/${pjId}`));
-    if (snapFinal.exists()) {
-      alert(`Error: La ficha con ID '${pjId}' ya está finalizada y bloqueada. No se puede modificar como borrador.`);
-      return false;
-    }
-
     const datos = recolectarDatosFicha();
 
     try {
       await set(ref(db, `fichas/vampiro_borradores/${pjId}`), datos);
-      alert(`¡Borrador guardado con éxito!\nID de ficha: ${pjId}`);
+      alert(`¡Guardado exitoso!\nID de ficha: ${pjId}`);
+      if (!document.body.classList.contains('modo-admin')) {
+        aplicarReglasPermisosUsuario();
+      }
       return true;
     } catch (err) {
       console.error("Error al guardar:", err);
@@ -846,6 +866,7 @@
     }
   };
 
+  // BOTÓN CARGAR (Busca 1° en finalizadas, si no existe busca en borradores)
   window.cargarFicha = async function(idManual, ramaManual) {
     let inputVal = idManual || document.getElementById("pj-id").value.trim();
     if (!inputVal) {
@@ -870,6 +891,7 @@
       } else if (ramaManual === 'borrador') {
         snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
       } else {
+        // Búsqueda prioritaria: 1° Finalizadas -> 2° Borradores
         snapshot = await get(child(dbRef, `fichas/vampiro_finalizadas/${targetKey}`));
         if (snapshot.exists()) {
           esFinalizada = true;
@@ -880,12 +902,8 @@
 
       if (snapshot && snapshot.exists()) {
         poblarDatosEnFicha(snapshot.val());
-        if (esFinalizada) {
-          const esNarrador = await esNarradorAutorizado();
-          if (!esNarrador) {
-            bloquearFormulario();
-            alert(`La ficha '${targetKey}' está finalizada y bloqueada. Se ha cargado en modo solo lectura.`);
-          }
+        if (!document.body.classList.contains('modo-admin')) {
+          aplicarReglasPermisosUsuario();
         }
       } else {
         alert(`No se encontró ningún personaje registrado con el identificador: ${targetKey}`);
@@ -905,21 +923,14 @@
       pjId = document.getElementById("pj-id").value.trim();
     }
 
-    // Validación de ID duplicado o ya enviado
-    const snapFinal = await get(child(ref(db), `fichas/vampiro_finalizadas/${pjId}`));
-    if (snapFinal.exists()) {
-      alert(`Error: La ficha con ID '${pjId}' ya fue finalizada previamente y no se puede re-enviar ni sobrescribir.`);
-      return;
-    }
-
-    const confirmar = confirm("¿Estás seguro de enviar y finalizar tu ficha? Una vez enviada se bloqueará y no se podrá modificar.");
+    const confirmar = confirm("¿Estás seguro de enviar y finalizar tu ficha?");
     if (!confirmar) return;
 
     const datos = recolectarDatosFicha();
     const usuario = obtenerUsuarioActivo();
 
     try {
-      // 1. Guardar en finalizadas
+      // 1. Sobrescribir / guardar en finalizadas
       await set(ref(db, `fichas/vampiro_finalizadas/${pjId}`), datos);
 
       // 2. Crear log/registro en administración
@@ -931,31 +942,35 @@
         usuario_foro: usuario
       });
 
-      // 3. Eliminar de borradores
+      // 3. Eliminar de borradores para mantener limpio
       try {
         await remove(ref(db, `fichas/vampiro_borradores/${pjId}`));
       } catch (e) {
-        console.warn("Intento de eliminación de borrador omitido por permisos:", e);
+        console.warn("Intento de eliminación de borrador omitido:", e);
       }
 
-      bloquearFormulario();
-      alert("¡Éxito! Tu ficha ha sido enviada y finalizada correctamente. Ha quedado bloqueada para edición.");
+      if (!document.body.classList.contains('modo-admin')) {
+        aplicarReglasPermisosUsuario();
+      }
+      alert("¡Éxito! La ficha ha sido finalizada y actualizada en el sistema.");
     } catch (err) {
       console.error("Error al finalizar ficha:", err);
       alert("Error: No se pudo finalizar el envío de la ficha: " + err.message);
     }
   };
 
+  // BOTÓN EDITAR (Exclusivo Narradores)
   window.cargarModoLecturaAdmin = async function(idManual, ramaManual) {
     const esNarrador = await esNarradorAutorizado();
     if (!esNarrador) {
-      alert("ERROR: No tienes permisos de Narrador para realizar esta acción.");
+      alert("Error usuario restringido");
       return;
     }
 
     document.body.classList.add('modo-admin');
     await window.cargarFicha(idManual, ramaManual);
-    bloquearFormulario();
+    desbloquearFichaCompletaNarrador();
+    alert("Modo Narrador Activado: Toda la ficha ha sido desbloqueada para edición.");
   };
 
   async function procesarUrl() {
@@ -971,7 +986,7 @@
 
       document.getElementById('pj-id').value = idParam;
 
-      if (modeParam === 'read') {
+      if (modeParam === 'read' || modeParam === 'edit') {
         await window.cargarModoLecturaAdmin(idParam, ramaParam);
       } else {
         await window.cargarFicha(idParam, ramaParam);
