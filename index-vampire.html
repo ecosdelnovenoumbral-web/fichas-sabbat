@@ -586,11 +586,10 @@
 </div>
 
 <script>
-    // Manejo de 3 Estados Cíclicos para Puntos (Vacio -> Lerner '/' -> Filled -> Vacio)
     document.querySelectorAll('.dots').forEach(container => {
         const dots = Array.from(container.querySelectorAll('.dot'));
-        dots.forEach((dot, index) => {
-            dot.addEventListener('click', function(e) {
+        dots.forEach((dot) => {
+            dot.addEventListener('click', function() {
                 if (this.dataset.readonly === "true") return;
                 const isBasePoint = this.classList.contains('base-point');
                 const isModoAdmin = document.body.classList.contains('modo-admin');
@@ -681,7 +680,6 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // Lista estricta de administradores estáticos
   const ADMINS_AUTORIZADOS = ["admin", "narrador", "administrador", "ecosnovenoumbral", "nigoyin"];
 
   function limpiarTexto(texto) {
@@ -703,26 +701,21 @@
 
     const usuarioClean = limpiarTexto(usuarioRaw);
 
-    // 1. Verificar contra la lista estática local
     if (ADMINS_AUTORIZADOS.includes(usuarioClean)) {
       return true;
     }
 
-    // 2. Verificar contra Firebase (Insensible a Mayúsculas/Minúsculas)
     try {
-      // Intenta consultar la clave en minúsculas limpia (ej: "nigoyin")
       let snapshot = await get(child(ref(db), `narradores/${usuarioClean}`));
       if (snapshot.exists() && snapshot.val() === true) {
         return true;
       }
 
-      // Si no existe, intenta consultar la clave tal como viene en la URL (ej: "Nigoyin")
       snapshot = await get(child(ref(db), `narradores/${usuarioRaw}`));
       if (snapshot.exists() && snapshot.val() === true) {
         return true;
       }
 
-      // Si se guardaron todos los narradores como sub-nodos, recorremos todo el nodo /narradores
       const snapshotAll = await get(child(ref(db), "narradores"));
       if (snapshotAll.exists()) {
         const narradoresData = snapshotAll.val();
@@ -843,7 +836,6 @@
     return datos;
   }
 
-  // BOTÓN GUARDAR
   window.guardarFicha = async function() {
     const usuarioRaw = obtenerUsuarioActivo() || "anonimo";
     let pjId = document.getElementById("pj-id").value.trim();
@@ -874,6 +866,7 @@
     try {
       await set(ref(db, `fichas/vampiro_borradores/${pjId}`), datos);
       alert(`¡Guardado exitoso!\nID de ficha: ${pjId}`);
+      
       if (!document.body.classList.contains('modo-admin')) {
         aplicarReglasPermisosUsuario();
       }
@@ -885,7 +878,6 @@
     }
   };
 
-  // BOTÓN CARGAR
   window.cargarFicha = async function(idManual, ramaManual) {
     let inputVal = idManual || document.getElementById("pj-id").value.trim();
     if (!inputVal) {
@@ -916,7 +908,9 @@
 
       if (snapshot && snapshot.exists()) {
         poblarDatosEnFicha(snapshot.val());
-        if (!document.body.classList.contains('modo-admin')) {
+        
+        const esNarrador = await esNarradorAutorizado();
+        if (!esNarrador) {
           aplicarReglasPermisosUsuario();
         }
       } else {
@@ -970,7 +964,6 @@
     }
   };
 
-  // BOTÓN EDITAR (Evaluación estricta de rol)
   window.cargarModoLecturaAdmin = async function(idManual, ramaManual) {
     const esNarrador = await esNarradorAutorizado();
     if (!esNarrador) {
@@ -989,6 +982,11 @@
     let idParam = urlParams.get('id');
     const ramaParam = urlParams.get('rama');
     const modeParam = urlParams.get('mode');
+
+    const esNarrador = await esNarradorAutorizado();
+    if (!esNarrador) {
+      aplicarReglasPermisosUsuario();
+    }
 
     if (idParam) {
       if (idParam.includes('/')) {
@@ -1014,3 +1012,4 @@
 
 </body>
 </html>
+```[cite: 6]
