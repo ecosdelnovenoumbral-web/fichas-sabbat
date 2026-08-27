@@ -304,14 +304,13 @@
         <input type="text" id="pj-id" placeholder="Auto / Ej: sabbat-usuario-001" style="width: 200px; background: #121212; border: 1px solid var(--accent-color);">
         <button class="firebase-btn" onclick="guardarFicha()">Guardar Borrador</button>
         <button class="firebase-btn" onclick="cargarFicha()">Cargar</button>
-        <button class="firebase-btn" style="background-color: #b71c1c;" onclick="eliminarFicha()">Eliminar Ficha</button>
     </div>
 
     <!-- SECCIÓN DE CABECERA -->
     <div class="grid-3">
         <div class="section-box">
             <div class="row"><span>Nombre:</span> <input type="text" id="nombre"></div>
-            <div class="row"><span>Jugador:</span> <input type="text" id="jugador" readonly></div>
+            <div class="row"><span>Jugador:</span> <input type="text" id="jugador"></div>
         </div>
         <div class="section-box">
             <div class="row"><span>Naturaleza:</span> <input type="text" id="naturaleza"></div>
@@ -692,17 +691,37 @@
 
   function obtenerUsuarioActivo() {
     const urlParams = new URLSearchParams(window.location.search);
-    let usuarioUrl = urlParams.get('user') || urlParams.get('usuario');
+    let usuarioUrl = urlParams.get('user') || urlParams.get('usuario') || urlParams.get('nick') || urlParams.get('jugador');
     if (usuarioUrl) return usuarioUrl.trim();
+    
+    let sesionForo = sessionStorage.getItem('usuario_foro') || localStorage.getItem('usuario_foro');
+    if (sesionForo) return sesionForo.trim();
+
     return "invitado";
   }
 
-  // Inicialización de campo jugador con el nick activo del foro
+  // Inicialización del campo jugador
   const usuarioActivo = obtenerUsuarioActivo();
   const inputJugador = document.getElementById("jugador");
-  if (inputJugador) {
+  if (inputJugador && !inputJugador.value) {
     inputJugador.value = usuarioActivo;
-    inputJugador.readOnly = true;
+  }
+
+  function validarUsuarioParaGuardar() {
+    const jugadorInput = document.getElementById("jugador").value.trim();
+    const usuarioReal = obtenerUsuarioActivo();
+    const esModoAdmin = document.body.classList.contains('modo-admin');
+
+    if (!jugadorInput) {
+      alert("El nombre de jugador no puede estar vacío.");
+      return false;
+    }
+
+    if (!esModoAdmin && usuarioReal !== "invitado" && jugadorInput.toLowerCase() !== usuarioReal.toLowerCase()) {
+      alert(`Error: El nombre de jugador ("${jugadorInput}") debe coincidir con tu nick activo del foro ("${usuarioReal}").`);
+      return false;
+    }
+    return true;
   }
 
   async function esNarradorAutorizado() {
@@ -753,7 +772,7 @@
 
     if (esBorrador) {
       document.querySelectorAll(".container input").forEach(input => {
-        if (input.id !== "jugador" && input.id !== "blood-max" && input.id !== "blood-turn") {
+        if (input.id !== "blood-max" && input.id !== "blood-turn") {
           input.readOnly = false;
         }
       });
@@ -800,7 +819,7 @@
 
   function desbloquearFichaCompletaNarrador() {
     document.querySelectorAll(".container input").forEach(input => {
-      if (input.id !== "jugador" && input.id !== "blood-max" && input.id !== "blood-turn") {
+      if (input.id !== "blood-max" && input.id !== "blood-turn") {
         input.readOnly = false;
       }
     });
@@ -818,10 +837,9 @@
   function limpiarFormulario() {
     document.getElementById("pj-id").value = "";
     document.querySelectorAll("input[type='text'], input[type='number']").forEach(input => {
-      if (input.id !== "jugador") {
-        input.value = input.type === 'number' ? 0 : '';
-      }
+      input.value = input.type === 'number' ? 0 : '';
     });
+    document.getElementById("jugador").value = obtenerUsuarioActivo();
     document.querySelectorAll(".dot").forEach(dot => {
       dot.classList.remove("filled", "lerner", "crossed");
     });
@@ -837,13 +855,14 @@
     if (!datos) return;
     document.querySelectorAll("input[type='text'], input[type='number']").forEach(input => {
       if (input.id && datos[input.id] !== undefined) {
-        if (input.id === "jugador") {
-          input.value = usuarioActivo;
-        } else {
-          input.value = datos[input.id];
-        }
+        input.value = datos[input.id];
       }
     });
+
+    const inputJugador = document.getElementById("jugador");
+    if (inputJugador && !inputJugador.value) {
+      inputJugador.value = obtenerUsuarioActivo();
+    }
 
     document.querySelectorAll(".dots").forEach(container => {
       if (container.id && datos[container.id]) {
@@ -874,7 +893,6 @@
         datos[input.id] = input.value;
       }
     });
-    datos["jugador"] = usuarioActivo;
 
     document.querySelectorAll(".dots").forEach(container => {
       if (container.id) {
@@ -897,25 +915,28 @@
   }
 
   window.guardarFicha = async function() {
+    if (!validarUsuarioParaGuardar()) return false;
+
+    const jugadorNombre = document.getElementById("jugador").value.trim() || obtenerUsuarioActivo();
     let pjId = document.getElementById("pj-id").value.trim();
 
     if (!pjId) {
       const dbRef = ref(db);
       try {
-        const snapshot = await get(child(dbRef, `control_usuarios/${usuarioActivo}/sabbat_count`));
+        const snapshot = await get(child(dbRef, `control_usuarios/${jugadorNombre}/sabbat_count`));
         let count = 1;
         if (snapshot.exists() && typeof snapshot.val() === 'number') {
           count = snapshot.val() + 1;
         }
         
         const numFormatted = String(count).padStart(3, '0');
-        pjId = `sabbat-${usuarioActivo}-${numFormatted}`;
+        pjId = `sabbat-${jugadorNombre}-${numFormatted}`;
         
-        await set(ref(db, `control_usuarios/${usuarioActivo}/sabbat_count`), count);
+        await set(ref(db, `control_usuarios/${jugadorNombre}/sabbat_count`), count);
         document.getElementById("pj-id").value = pjId;
       } catch (error) {
         console.error("Error al generar ID:", error);
-        pjId = `sabbat-${usuarioActivo}-001`;
+        pjId = `sabbat-${jugadorNombre}-001`;
         document.getElementById("pj-id").value = pjId;
       }
     }
@@ -992,29 +1013,9 @@
     }
   };
 
-  window.eliminarFicha = async function() {
-    const pjId = document.getElementById("pj-id").value.trim();
-    if (!pjId) {
-      alert("Debes tener una ficha cargada o un ID especificado para poder eliminar.");
-      return;
-    }
-
-    const confirmacion = confirm(`¿Estás seguro de que deseas eliminar permanentemente la ficha "${pjId}"? Esta acción no se puede deshacer.`);
-    if (!confirmacion) return;
-
-    try {
-      await remove(ref(db, `fichas/vampiro_borradores/${pjId}`));
-      await remove(ref(db, `fichas/vampiro_finalizadas/${pjId}`));
-      await remove(ref(db, `administracion/registros/${pjId}`));
-      alert(`La ficha ${pjId} ha sido eliminada con éxito.`);
-      limpiarFormulario();
-    } catch (err) {
-      console.error("Error al eliminar la ficha:", err);
-      alert("Error al eliminar la ficha de Firebase: " + err.message);
-    }
-  };
-
   window.enviarFichaFinal = async function() {
+    if (!validarUsuarioParaGuardar()) return;
+
     let pjId = document.getElementById("pj-id").value.trim();
 
     if (!pjId) {
@@ -1027,6 +1028,7 @@
     if (!confirmar) return;
 
     const datos = recolectarDatosFicha();
+    const jugadorNombre = document.getElementById("jugador").value.trim() || obtenerUsuarioActivo();
 
     try {
       await set(ref(db, `fichas/vampiro_finalizadas/${pjId}`), datos);
@@ -1036,7 +1038,7 @@
         fecha: new Date().toISOString(),
         id_ficha: pjId,
         juego: "vampiro_sabbat",
-        usuario_foro: usuarioActivo
+        usuario_foro: jugadorNombre
       });
 
       try {
