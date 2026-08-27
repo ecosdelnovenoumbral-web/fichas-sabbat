@@ -681,7 +681,7 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  const ADMINS_AUTORIZADOS = ["admin", "narrador", "administrador", "ecosnovenoumbral", "hola", "nigoyin"];
+  const ADMINS_AUTORIZADOS = ["admin", "narrador", "administrador", "ecosnovenoumbral"];
 
   function limpiarTexto(texto) {
     return texto ? texto.toLowerCase().replace(/[^a-z0-9]/g, "") : "";
@@ -691,7 +691,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     let usuarioUrl = urlParams.get('user') || urlParams.get('usuario');
     if (usuarioUrl) return usuarioUrl.trim();
-    return "hola";
+    return "invitado";
   }
 
   async function esNarradorAutorizado() {
@@ -726,23 +726,29 @@
       el.style.cursor = "not-allowed";
     });
 
-    // PERMISOS USUARIO:
+    // PERMISOS USUARIO / JUGADOR:
     // 1. Willpower y Sangre DISPONIBLE
     const wpDisp = document.getElementById("willpower-disp");
     const bloodDisp = document.getElementById("blood-disp");
     if (wpDisp) wpDisp.readOnly = false;
     if (bloodDisp) bloodDisp.readOnly = false;
 
-    // 2. Experiencia Ganados Ultima Escena
+    // 2. Experiencia Ganados Última Escena
     const expEscena = document.getElementById("exp-escena");
     if (expEscena) expEscena.readOnly = false;
 
-    // 3. Combate e Inventario: Solo escribir en campos vacíos
+    // 3. Salud (Permitido para reflejar daño recibido)
+    document.querySelectorAll(".health-checkbox").forEach(el => {
+      el.dataset.readonly = "false";
+      el.style.cursor = "pointer";
+    });
+
+    // 4. Combate e Inventario: Solo escribir en campos vacíos
     document.querySelectorAll(".campo-combate, .campo-inventario").forEach(input => {
       if (!input.value || input.value.trim() === "") {
         input.readOnly = false;
       } else {
-        input.readOnly = true; // No pueden borrar datos existentes
+        input.readOnly = true; // No pueden borrar datos existentes asentados
       }
     });
 
@@ -914,6 +920,7 @@
     }
   };
 
+  // BOTÓN ENVIAR Y FINALIZAR FICHA
   window.enviarFichaFinal = async function() {
     let pjId = document.getElementById("pj-id").value.trim();
 
@@ -963,7 +970,7 @@
   window.cargarModoLecturaAdmin = async function(idManual, ramaManual) {
     const esNarrador = await esNarradorAutorizado();
     if (!esNarrador) {
-      alert("Error usuario restringido");
+      alert("Acceso restringido: Solo el Narrador puede desbloquear la edición total de esta ficha.");
       return;
     }
 
