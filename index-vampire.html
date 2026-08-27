@@ -681,7 +681,6 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // Lista estricta de administradores estáticos
   const ADMINS_AUTORIZADOS = ["admin", "narrador", "administrador", "ecosnovenoumbral", "nigoyin"];
 
   function limpiarTexto(texto) {
@@ -703,26 +702,21 @@
 
     const usuarioClean = limpiarTexto(usuarioRaw);
 
-    // 1. Verificar contra la lista estática local
     if (ADMINS_AUTORIZADOS.includes(usuarioClean)) {
       return true;
     }
 
-    // 2. Verificar contra Firebase (Insensible a Mayúsculas/Minúsculas)
     try {
-      // Intenta consultar la clave en minúsculas limpia (ej: "nigoyin")
       let snapshot = await get(child(ref(db), `narradores/${usuarioClean}`));
       if (snapshot.exists() && snapshot.val() === true) {
         return true;
       }
 
-      // Si no existe, intenta consultar la clave tal como viene en la URL (ej: "Nigoyin")
       snapshot = await get(child(ref(db), `narradores/${usuarioRaw}`));
       if (snapshot.exists() && snapshot.val() === true) {
         return true;
       }
 
-      // Si se guardaron todos los narradores como sub-nodos, recorremos todo el nodo /narradores
       const snapshotAll = await get(child(ref(db), "narradores"));
       if (snapshotAll.exists()) {
         const narradoresData = snapshotAll.val();
@@ -874,6 +868,8 @@
     try {
       await set(ref(db, `fichas/vampiro_borradores/${pjId}`), datos);
       alert(`¡Guardado exitoso!\nID de ficha: ${pjId}`);
+      
+      // Asegurar aplicar restricciones si no es admin
       if (!document.body.classList.contains('modo-admin')) {
         aplicarReglasPermisosUsuario();
       }
@@ -916,7 +912,10 @@
 
       if (snapshot && snapshot.exists()) {
         poblarDatosEnFicha(snapshot.val());
-        if (!document.body.classList.contains('modo-admin')) {
+        
+        // CORRECCIÓN CLAVE: Verificar permisos y aplicar restricciones tras cargar los datos
+        const esNarrador = await esNarradorAutorizado();
+        if (!esNarrador) {
           aplicarReglasPermisosUsuario();
         }
       } else {
@@ -970,7 +969,7 @@
     }
   };
 
-  // BOTÓN EDITAR (Evaluación estricta de rol)
+  // BOTÓN EDITAR
   window.cargarModoLecturaAdmin = async function(idManual, ramaManual) {
     const esNarrador = await esNarradorAutorizado();
     if (!esNarrador) {
@@ -989,6 +988,12 @@
     let idParam = urlParams.get('id');
     const ramaParam = urlParams.get('rama');
     const modeParam = urlParams.get('mode');
+
+    // Comprobación inicial de permisos por defecto para usuarios normales al abrir la página
+    const esNarrador = await esNarradorAutorizado();
+    if (!esNarrador) {
+      aplicarReglasPermisosUsuario();
+    }
 
     if (idParam) {
       if (idParam.includes('/')) {
