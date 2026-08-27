@@ -246,9 +246,8 @@
             const urlParams = new URLSearchParams(window.location.search);
             const tokenUrl = urlParams.get("auth");
             const tokenSession = sessionStorage.getItem("narrador_auth");
-            
-            // Capturar también el parámetro ?user= por si se accede mediante la arquitectura limpia de usuario
             const usuarioUrl = urlParams.get("user") || urlParams.get("usuario") || urlParams.get("username");
+            
             const tokenFinal = tokenUrl || tokenSession || usuarioUrl;
 
             if (!tokenFinal) {
@@ -265,8 +264,13 @@
                     if (tokenUrl && !tokenSession) {
                         sessionStorage.setItem("narrador_auth", tokenUrl);
                     }
-                    const decodedData = atob(tokenFinal).split(":");
-                    usuarioForo = decodedData[1] ? decodedData[1].trim() : "";
+                    
+                    try {
+                        const decodedData = atob(tokenFinal).split(":");
+                        usuarioForo = decodedData[1] ? decodedData[1].trim() : decodedData[0].trim();
+                    } catch (err) {
+                        usuarioForo = tokenFinal.trim();
+                    }
                 }
 
                 if (!usuarioForo) {
@@ -293,7 +297,7 @@
                     expulsar("El usuario ('" + usuarioForo + "') no tiene permisos activos de Narrador en Firebase.");
                 }
             } catch (e) {
-                expulsar("Error de autenticación al conectar con Firebase.");
+                expulsar("Error de autenticación al conectar con Firebase: " + e.message);
             }
         }
 
@@ -528,7 +532,6 @@
             
             const ramaParam = esFinalizado ? "finalizado" : "borrador";
             
-            // Extraer el parámetro ?user= actual de la URL del panel para propagarlo al iframe de la ficha
             const urlParamsActuales = new URLSearchParams(window.location.search);
             const userParam = urlParamsActuales.get("user") || urlParamsActuales.get("usuario") || urlParamsActuales.get("username") || "NIGOYIN";
 
