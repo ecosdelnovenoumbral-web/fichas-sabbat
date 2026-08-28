@@ -586,7 +586,6 @@
 </div>
 
 <script>
-    // Manejo de 3 Estados Cíclicos para Puntos (Vacio -> Lerner '/' -> Filled -> Vacio)
     document.querySelectorAll('.dots').forEach(container => {
         const dots = Array.from(container.querySelectorAll('.dot'));
         dots.forEach((dot, index) => {
@@ -769,9 +768,25 @@
       }
     });
 
-    // ID de la ficha debe ser editable para permitir cargar
     const pjIdInput = document.getElementById("pj-id");
     if (pjIdInput) pjIdInput.readOnly = false;
+  }
+
+  function desbloquearFichaCompletaUsuario() {
+    if (document.body.classList.contains('modo-admin')) return;
+
+    document.querySelectorAll(".container input").forEach(input => {
+      input.readOnly = false;
+    });
+    document.querySelectorAll(".dot, .health-checkbox").forEach(el => {
+      el.dataset.readonly = "false";
+      el.style.cursor = "pointer";
+    });
+    
+    const bloodMax = document.getElementById('blood-max');
+    const bloodTurn = document.getElementById('blood-turn');
+    if (bloodMax) bloodMax.readOnly = true;
+    if (bloodTurn) bloodTurn.readOnly = true;
   }
 
   function desbloquearFichaCompletaNarrador() {
@@ -851,14 +866,32 @@
     const usuarioActivo = obtenerUsuarioActivo();
     const esNarrador = await esNarradorAutorizado();
     const jugadorCampo = document.getElementById("jugador").value.trim();
-
-    // Validación de propietario de ficha salvo si es Narrador
-    if (!esNarrador && jugadorCampo && limpiarTexto(usuarioActivo) !== limpiarTexto(jugadorCampo)) {
-      alert(`No tienes permiso para guardar esta ficha. Le pertenece al jugador: ${jugadorCampo}`);
-      return false;
-    }
-
     let pjId = document.getElementById("pj-id").value.trim();
+
+    // VALIDACIÓN PASO 1: ID vs Usuario vs Jugador
+    const usuarioClean = limpiarTexto(usuarioActivo);
+    const jugadorClean = limpiarTexto(jugadorCampo);
+
+    if (!esNarrador) {
+      if (!jugadorCampo) {
+        alert("Error de validación: El campo 'Jugador' no puede estar vacío.");
+        return false;
+      }
+      if (usuarioClean !== jugadorClean) {
+        alert(`Error de coincidencia: El usuario activo ('${usuarioActivo}') no coincide con el Jugador ('${jugadorCampo}').`);
+        return false;
+      }
+      if (pjId) {
+        const partesId = pjId.split('-');
+        if (partesId.length >= 2) {
+          const usuarioEnId = limpiarTexto(partesId[1]);
+          if (usuarioEnId !== usuarioClean) {
+            alert(`Error de ID: El identificador '${pjId}' no pertenece a tu usuario ('${usuarioActivo}').`);
+            return false;
+          }
+        }
+      }
+    }
 
     if (!pjId) {
       const dbRef = ref(db);
@@ -884,14 +917,10 @@
     const datos = recolectarDatosFicha();
 
     try {
-      // Guardado siempre en borradores para usuarios (el Narrador puede modificar borradores directamente)
       const rutaDestino = `fichas/vampiro_borradores/${pjId}`;
 
       await set(ref(db, rutaDestino), datos);
       alert(`¡Guardado exitoso!\nID de ficha: ${pjId}`);
-      if (!document.body.classList.contains('modo-admin')) {
-        aplicarReglasPermisosUsuario();
-      }
       return true;
     } catch (err) {
       console.error("Error al guardar:", err);
@@ -914,25 +943,42 @@
     document.getElementById("pj-id").value = targetKey;
 
     const dbRef = ref(db);
+    const esNarrador = await esNarradorAutorizado();
+
     try {
       let snapshot = null;
+      let origen = "";
 
       if (ramaManual === 'finalizado') {
         snapshot = await get(child(dbRef, `fichas/vampiro_finalizadas/${targetKey}`));
+        origen = "finalizado";
       } else if (ramaManual === 'borrador') {
         snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
+        origen = "borrador";
       } else {
-        // Prioridad: 1° Finalizadas, 2° Borradores
         snapshot = await get(child(dbRef, `fichas/vampiro_finalizadas/${targetKey}`));
-        if (!snapshot.exists()) {
+        if (snapshot.exists()) {
+          origen = "finalizado";
+        } else {
           snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
+          if (snapshot.exists()) {
+            origen = "borrador";
+          }
         }
       }
 
       if (snapshot && snapshot.exists()) {
         poblarDatosEnFicha(snapshot.val());
-        if (!document.body.classList.contains('modo-admin')) {
-          aplicarReglasPermisosUsuario();
+
+        // PASO 2: Reglas de edición al cargar ficha (link general o panel)
+        if (esNarrador || document.body.classList.contains('modo-admin')) {
+          desbloquearFichaCompletaNarrador();
+        } else {
+          if (origen === "finalizado") {
+            aplicarReglasPermisosUsuario(); // Bloqueada parcialmente para usuario común
+          } else if (origen === "borrador") {
+            desbloquearFichaCompletaUsuario(); // Totalmente editable si es borrador
+          }
         }
       } else {
         alert(`No se encontró ningún personaje registrado con el identificador: ${targetKey}`);
@@ -959,7 +1005,6 @@
     const usuario = obtenerUsuarioActivo();
 
     try {
-      // Transferir a finalizadas
       await set(ref(db, `fichas/vampiro_finalizadas/${pjId}`), datos);
 
       await set(ref(db, `administracion/registros/${pjId}`), {
@@ -970,7 +1015,6 @@
         usuario_foro: usuario
       });
 
-      // Eliminar de borradores
       try {
         await remove(ref(db, `fichas/vampiro_borradores/${pjId}`));
       } catch (e) {
