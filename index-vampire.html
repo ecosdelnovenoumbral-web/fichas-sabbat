@@ -586,6 +586,14 @@
 </div>
 
 <script>
+    var usuarioSesionPostMessage = null;
+
+    window.addEventListener('message', function(event) {
+        if (event.data && event.data.type === 'FORO_USER') {
+            usuarioSesionPostMessage = event.data.username;
+        }
+    });
+
     document.querySelectorAll('.dots').forEach(container => {
         const dots = Array.from(container.querySelectorAll('.dot'));
         dots.forEach((dot, index) => {
@@ -690,6 +698,20 @@
     const urlParams = new URLSearchParams(window.location.search);
     let usuarioUrl = urlParams.get('user') || urlParams.get('usuario');
     if (usuarioUrl) return usuarioUrl.trim();
+
+    if (usuarioSesionPostMessage) return usuarioSesionPostMessage.trim();
+
+    const tokenUrl = urlParams.get('auth') || sessionStorage.getItem('narrador_auth');
+    if (tokenUrl) {
+      try {
+        const decodedData = atob(tokenUrl).split(":");
+        const usuarioForo = decodedData[1] ? decodedData[1].trim() : "";
+        if (usuarioForo) return usuarioForo;
+      } catch (e) {
+        console.warn("Error al decodificar token en obtenerUsuarioActivo:", e);
+      }
+    }
+
     return "invitado";
   }
 
