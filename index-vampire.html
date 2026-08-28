@@ -418,11 +418,11 @@
         <div class="section-box">
             <h3>Virtudes</h3>
             <div class="row">
-                <input type="text" id="virtud-nombre-1" placeholder="Conciencia">
+                <input type="text" id="virtud-nombre-1" value="Conciencia / Convicción">
                 <div class="dots" id="virtud-dots-1"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
             </div>
             <div class="row">
-                <input type="text" id="virtud-nombre-2" placeholder="Autocontrol">
+                <input type="text" id="virtud-nombre-2" value="Autocontrol / Instinto">
                 <div class="dots" id="virtud-dots-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
             </div>
             <div class="row">
@@ -458,7 +458,7 @@
             <div style="margin-bottom: 12px; margin-top: 5px; text-align: center;">
                 <div style="font-size:0.85rem; font-weight:bold; margin-bottom:4px; font-family:var(--decorative-font); color:#fff;">Senda</div>
                 <div style="margin-bottom: 6px;">
-                    <input type="text" id="senda-nombre" placeholder="Escribir Senda..." style="text-align: center; width: 80%;">
+                    <input type="text" id="senda-nombre" placeholder="Escribir Senda..." style="text-align: center; width: 90%; background: transparent; border-bottom: 1px solid var(--border-color); color: #fff;">
                 </div>
                 <div style="display: inline-flex; justify-content: center; width: 100%;" class="dots" id="senda-dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
             </div>
@@ -586,11 +586,11 @@
 </div>
 
 <script>
-    // Manejo de 3 Estados Cíclicos para Puntos (Vacio -> Lerner '/' -> Filled -> Vacio)
+    // Manejo de 3 Estados Cíclicos para Puntos (Vacío -> Lerner '/' -> Filled -> Vacío)
     document.querySelectorAll('.dots').forEach(container => {
         const dots = Array.from(container.querySelectorAll('.dot'));
-        dots.forEach((dot, index) => {
-            dot.addEventListener('click', function(e) {
+        dots.forEach((dot) => {
+            dot.addEventListener('click', function() {
                 if (this.dataset.readonly === "true") return;
                 const isBasePoint = this.classList.contains('base-point');
                 const isModoAdmin = document.body.classList.contains('modo-admin');
