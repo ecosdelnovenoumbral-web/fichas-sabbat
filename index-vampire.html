@@ -868,7 +868,7 @@
     const jugadorCampo = document.getElementById("jugador").value.trim();
     let pjId = document.getElementById("pj-id").value.trim();
 
-    // VALIDACIÓN PASO 1: ID vs Usuario vs Jugador
+    // VALIDACIÓN TRIPLE OBLIGATORIA (ID vs Usuario Activo vs Jugador)
     const usuarioClean = limpiarTexto(usuarioActivo);
     const jugadorClean = limpiarTexto(jugadorCampo);
 
@@ -877,18 +877,29 @@
         alert("Error de validación: El campo 'Jugador' no puede estar vacío.");
         return false;
       }
+
+      // 1. Validar Usuario Activo vs Jugador escrito
       if (usuarioClean !== jugadorClean) {
-        alert(`Error de coincidencia: El usuario activo ('${usuarioActivo}') no coincide con el Jugador ('${jugadorCampo}').`);
+        alert(`Error de coincidencia: El usuario activo ('${usuarioActivo}') no coincide con el campo Jugador ('${jugadorCampo}').`);
         return false;
       }
+
+      // 2. Validar ID vs Usuario Activo / Jugador
       if (pjId) {
         const partesId = pjId.split('-');
-        if (partesId.length >= 2) {
-          const usuarioEnId = limpiarTexto(partesId[1]);
-          if (usuarioEnId !== usuarioClean) {
-            alert(`Error de ID: El identificador '${pjId}' no pertenece a tu usuario ('${usuarioActivo}').`);
-            return false;
-          }
+        let usuarioEnId = "";
+        
+        if (partesId.length >= 3) {
+          // Caso standard: prefix-usuario-count (ej: sabbat-usuario-001)
+          usuarioEnId = limpiarTexto(partesId.slice(1, -1).join('-'));
+        } else if (partesId.length === 2) {
+          // Caso simple: prefix-usuario (ej: sabbat-usuario)
+          usuarioEnId = limpiarTexto(partesId[1]);
+        }
+
+        if (usuarioEnId && usuarioEnId !== usuarioClean) {
+          alert(`Error de ID: El identificador '${pjId}' no contiene tu nombre de usuario ('${usuarioActivo}').`);
+          return false;
         }
       }
     }
