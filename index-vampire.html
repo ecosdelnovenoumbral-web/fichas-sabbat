@@ -924,13 +924,13 @@
 
     let jugadorCampo = jugadorInput ? jugadorInput.value.trim() : "";
 
-    // Validar que se haya ingresado un nombre de jugador
+    // Validar campo 'Jugador' obligatorio
     if (!jugadorCampo) {
       alert("Por favor, ingresa el nombre de jugador en el campo 'Jugador' antes de guardar.");
       return false;
     }
 
-    // Validación de pertenencia: si NO es Narrador, el campo Jugador DEBE coincidir con el usuario activo
+    // 1. Validacion Jugador vs Usuario Activo
     if (!esNarrador) {
       if (limpiarTexto(jugadorCampo) !== limpiarTexto(usuarioActivo)) {
         alert(`Error: No puedes guardar esta ficha porque el nombre de jugador ("${jugadorCampo}") no coincide con tu usuario activo ("${usuarioActivo}"). Solo puedes guardar tus propias fichas.`);
@@ -942,9 +942,24 @@
     const usuarioBase = esNarrador ? jugadorCampo : usuarioActivo;
     const usuarioLimpio = limpiarTexto(usuarioBase);
 
+    // 2. Triple Validación: ID vs Usuario (Validar ID si fue introducido manualmente)
+    if (!esNarrador && pjId !== "") {
+      const partesId = pjId.split("-");
+      if (partesId.length >= 3) {
+        const usuarioEnId = partesId[1];
+        if (limpiarTexto(usuarioEnId) !== usuarioLimpio) {
+          alert(`Error de Validación TRIPLE:\nEl ID "${pjId}" pertenece al usuario "${usuarioEnId}", pero tu usuario activo es "${usuarioActivo}". No puedes guardar fichas a nombre de otro usuario.`);
+          return false;
+        }
+      } else {
+        alert(`Error: El formato del ID debe ser sabbat-nombreusuario-numero (Ej: sabbat-${usuarioLimpio}-001).`);
+        return false;
+      }
+    }
+
     const dbRef = ref(db);
 
-    // Si no tiene un ID ingresado manualmente, se genera uno secuencial evitando colisiones
+    // 3. Generación / Incremento automático del contador por usuario
     if (!pjId) {
       try {
         const snapshot = await get(child(dbRef, `control_usuarios/${usuarioLimpio}/sabbat_count`));
@@ -956,7 +971,7 @@
         let numFormatted = String(count).padStart(3, '0');
         pjId = `sabbat-${usuarioLimpio}-${numFormatted}`;
 
-        // Validación para evitar sobreescribir registros existentes en caso de descuadre
+        // Control de colisión para evitar sobrescritura accidental
         let borradorExistente = await get(child(dbRef, `fichas/vampiro_borradores/${pjId}`));
         let finalizadoExistente = await get(child(dbRef, `fichas/vampiro_finalizadas/${pjId}`));
 
