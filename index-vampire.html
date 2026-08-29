@@ -714,7 +714,24 @@
   function obtenerUsuarioActivo() {
     const urlParams = new URLSearchParams(window.location.search);
     let usuarioUrl = urlParams.get('user') || urlParams.get('usuario');
-    if (usuarioUrl) return usuarioUrl.trim();
+    
+    // Intenta leer el nombre del padre (Foroactivo) si existe
+    if (!usuarioUrl) {
+      try {
+        if (window.parent && window.parent._userdata && window.parent._userdata.username) {
+          usuarioUrl = window.parent._userdata.username;
+        } else if (typeof _userdata !== 'undefined' && _userdata.username) {
+          usuarioUrl = _userdata.username;
+        }
+      } catch (e) {
+        console.warn("Acceso cross-origin restringido al marco superior:", e);
+      }
+    }
+
+    if (usuarioUrl && usuarioUrl.trim() !== "") {
+      return usuarioUrl.trim();
+    }
+    
     return "invitado";
   }
 
