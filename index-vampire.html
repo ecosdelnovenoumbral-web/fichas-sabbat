@@ -746,10 +746,6 @@
     if (spanNode) {
         spanNode.textContent = usuario;
     }
-    const jugadorInput = document.getElementById("jugador");
-    if (jugadorInput && usuario !== "invitado" && !jugadorInput.value) {
-        jugadorInput.value = usuario;
-    }
   }
 
   async function esNarradorAutorizado() {
@@ -921,24 +917,23 @@
     const esNarrador = await esNarradorAutorizado();
     const jugadorInput = document.getElementById("jugador");
 
-    if (usuarioActivo === "invitado") {
-      usuarioActivo = obtenerUsuarioActivo();
-    }
-
     if (usuarioActivo === "invitado" && !esNarrador) {
       alert("Error: Para poder guardar la ficha debes estar con una sesión iniciada en el foro.");
       return false;
     }
 
     let jugadorCampo = jugadorInput ? jugadorInput.value.trim() : "";
+
+    // Validar que se haya ingresado un nombre de jugador
+    if (!jugadorCampo) {
+      alert("Por favor, ingresa el nombre de jugador en el campo 'Jugador' antes de guardar.");
+      return false;
+    }
+
+    // Validación de pertenencia: si NO es Narrador, el campo Jugador DEBE coincidir con el usuario activo
     if (!esNarrador) {
-      if (!jugadorCampo || limpiarTexto(jugadorCampo) !== limpiarTexto(usuarioActivo)) {
-        jugadorCampo = usuarioActivo;
-        if (jugadorInput) jugadorInput.value = usuarioActivo;
-      }
-    } else {
-      if (!jugadorCampo) {
-        alert("Como Narrador, debes asignar el nombre del jugador en el campo 'Jugador'.");
+      if (limpiarTexto(jugadorCampo) !== limpiarTexto(usuarioActivo)) {
+        alert(`Error: No puedes guardar esta ficha porque el nombre de jugador ("${jugadorCampo}") no coincide con tu usuario activo ("${usuarioActivo}"). Solo puedes guardar tus propias fichas.`);
         return false;
       }
     }
