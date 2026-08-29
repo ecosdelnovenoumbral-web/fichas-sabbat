@@ -25,7 +25,29 @@
             margin: 0;
             padding: 20px;
             min-height: 100vh;
+            position: relative;
         }
+
+        /* Indicador en la esquina superior izquierda */
+        .user-tag {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            font-family: var(--body-font);
+            font-size: 0.95rem;
+            color: var(--text-color);
+            background: rgba(18, 8, 8, 0.85);
+            border: 1px solid var(--accent-color);
+            padding: 4px 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+            z-index: 100;
+        }
+        .user-tag span {
+            color: #ff4d4d;
+            font-weight: bold;
+        }
+
         .container {
             max-width: 1000px;
             margin: 0 auto;
@@ -292,6 +314,9 @@
     </style>
 </head>
 <body>
+
+<!-- Validante de Usuario Activo -->
+<div class="user-tag" id="display-user">Usuario: <span id="user-name-span">Cargando...</span></div>
 
 <div class="container">
     <h1>Vampire: El Sabbat</h1>
@@ -693,6 +718,19 @@
     return "invitado";
   }
 
+  // Actualización visual del nombre de usuario en pantalla
+  function actualizarDisplayUsuario() {
+    const usuario = obtenerUsuarioActivo();
+    const spanNode = document.getElementById('user-name-span');
+    if (spanNode) {
+        spanNode.textContent = usuario;
+    }
+    const jugadorInput = document.getElementById("jugador");
+    if (jugadorInput && usuario !== "invitado" && !jugadorInput.value) {
+        jugadorInput.value = usuario;
+    }
+  }
+
   async function esNarradorAutorizado() {
     const urlParams = new URLSearchParams(window.location.search);
     const tokenUrl = urlParams.get('auth') || sessionStorage.getItem('narrador_auth');
@@ -734,7 +772,6 @@
   function aplicarReglasPermisosUsuario() {
     if (document.body.classList.contains('modo-admin')) return;
 
-    // 1. Bloqueo global inicial para usuario común
     document.querySelectorAll(".container input").forEach(input => {
       input.readOnly = true;
     });
@@ -743,23 +780,19 @@
       el.style.cursor = "not-allowed";
     });
 
-    // 2. Habilitar campos de reserva activa de recurso
     const wpDisp = document.getElementById("willpower-disp");
     const bloodDisp = document.getElementById("blood-disp");
     if (wpDisp) wpDisp.readOnly = false;
     if (bloodDisp) bloodDisp.readOnly = false;
 
-    // 3. Habilitar experiencia ganada en escena
     const expEscena = document.getElementById("exp-escena");
     if (expEscena) expEscena.readOnly = false;
 
-    // 4. Habilitar casillas de salud
     document.querySelectorAll(".health-checkbox").forEach(el => {
       el.dataset.readonly = "false";
       el.style.cursor = "pointer";
     });
 
-    // 5. Combate e Inventario: Solo dejar editables campos vacíos
     document.querySelectorAll(".campo-combate, .campo-inventario").forEach(input => {
       if (!input.value || input.value.trim() === "") {
         input.readOnly = false;
@@ -862,28 +895,22 @@
     return datos;
   }
 
-  // --- LÓGICA OPTIMIZADA DE GUARDADO SIN FICHAS HUÉRFANAS ---
   window.guardarFicha = async function() {
     let usuarioActivo = obtenerUsuarioActivo();
     const esNarrador = await esNarradorAutorizado();
     const jugadorInput = document.getElementById("jugador");
 
-    // 1. RE-EVALUACIÓN DE SEGURIDAD EN TIEMPO REAL
-    // Si la URL demoró en inyectar el parámetro o cayó en el fallback, vuelve a chequear antes de escribir en BD
     if (usuarioActivo === "invitado") {
       usuarioActivo = obtenerUsuarioActivo();
     }
 
-    // 2. BLOQUEO OBLIGATORIO DE INVITADOS
     if (usuarioActivo === "invitado" && !esNarrador) {
       alert("Error: Para poder guardar la ficha debes estar con una sesión iniciada en el foro.");
       return false;
     }
 
-    // 3. VÍNCULO TRANSPARENTE: Usuario Foro == Campo Jugador
     let jugadorCampo = jugadorInput ? jugadorInput.value.trim() : "";
     if (!esNarrador) {
-      // Si el jugador no lo escribió o difiere, se autocompleta con el usuario de sesión activo
       if (!jugadorCampo || limpiarTexto(jugadorCampo) !== limpiarTexto(usuarioActivo)) {
         jugadorCampo = usuarioActivo;
         if (jugadorInput) jugadorInput.value = usuarioActivo;
@@ -895,7 +922,6 @@
       }
     }
 
-    // 4. GENERACIÓN Y ASIGNACIÓN DEL ID BASADO EN EL JUGADOR/USUARIO REAL
     let pjId = document.getElementById("pj-id").value.trim();
     const usuarioBase = esNarrador ? jugadorCampo : usuarioActivo;
     const usuarioLimpio = limpiarTexto(usuarioBase);
@@ -921,7 +947,6 @@
       }
     }
 
-    // 5. GUARDADO EN BASE DE DATOS
     const datos = recolectarDatosFicha();
 
     try {
@@ -1053,6 +1078,8 @@
   };
 
   async function procesarUrl() {
+    actualizarDisplayUsuario();
+
     const urlParams = new URLSearchParams(window.location.search);
     let idParam = urlParams.get('id');
     const ramaParam = urlParams.get('rama');
