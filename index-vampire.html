@@ -527,7 +527,7 @@
         <table id="tabla-combate">
             <tr>
                 <th>Arma / Ataque</th>
-                <th>Ocultación</th>
+                <th>Dificultad</th>
                 <th>Daño</th>
                 <th>Alcance</th>
                 <th>Cadencia</th>
@@ -553,9 +553,9 @@
     <div class="grid-3" style="margin-top: 10px; align-items: start;">
         <div class="section-box">
             <div class="box-title" style="font-family: var(--decorative-font);">Armadura</div>
-            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Armadura:</span> <input type="text" id="armadura-tipo"></div>
-            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Clase:</span> <input type="text" id="armadura-clase"></div>
-            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Penalización:</span> <input type="text" id="armadura-penalizacion"></div>
+            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Armadura:</span> <input type="text" id="armadura-tipo" class="campo-armadura"></div>
+            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Clase:</span> <input type="text" id="armadura-clase" class="campo-armadura"></div>
+            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Penalización:</span> <input type="text" id="armadura-penalizacion" class="campo-armadura"></div>
         </div>
 
         <div class="section-box" style="grid-column: span 2;">
@@ -703,7 +703,7 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  const ADMINS_AUTORIZADOS = ["admin", "narrador", "administrador", "ecosnovenoumbral", "nigoyin"];
+  const ADMINS_AUTORIZADOS = ["admin", "narrador", "administrador", "ecosnovenoumbral"];
 
   function limpiarTexto(texto) {
     return texto ? texto.toLowerCase().replace(/[^a-z0-9]/g, "") : "";
@@ -719,11 +719,6 @@
     
     if (window.usuarioCapturadoPostMessage) {
       return window.usuarioCapturadoPostMessage;
-    }
-
-    const jugadorInput = document.getElementById("jugador");
-    if (jugadorInput && jugadorInput.value.trim() !== "") {
-      return jugadorInput.value.trim();
     }
 
     return "invitado";
@@ -789,6 +784,7 @@
   function aplicarReglasPermisosUsuario() {
     if (document.body.classList.contains('modo-admin')) return;
 
+    // Bloquear de forma general
     document.querySelectorAll(".container input").forEach(input => {
       input.readOnly = true;
     });
@@ -797,6 +793,7 @@
       el.style.cursor = "not-allowed";
     });
 
+    // Permitir edición de estado dinámico durante el juego
     const wpDisp = document.getElementById("willpower-disp");
     const bloodDisp = document.getElementById("blood-disp");
     if (wpDisp) wpDisp.readOnly = false;
@@ -810,7 +807,8 @@
       el.style.cursor = "pointer";
     });
 
-    document.querySelectorAll(".campo-combate, .campo-inventario").forEach(input => {
+    // Combate, Armadura e Inventario: Solo agregar (lo que ya tenga contenido no se borra)
+    document.querySelectorAll(".campo-combate, .campo-inventario, .campo-armadura").forEach(input => {
       if (!input.value || input.value.trim() === "") {
         input.readOnly = false;
       } else {
@@ -912,33 +910,89 @@
     return datos;
   }
 
+  // BOTÓN GUARDAR: Guardar EXCLUSIVAMENTE en Borradores para evitar PERMISSION_DENIED
   window.guardarFicha = async function() {
     let usuarioActivo = obtenerUsuarioActivo();
+    const esNarrador = await esNarradorAutorizado();
     const jugadorInput = document.getElementById("jugador");
-    let jugadorCampo = jugadorInput ? jugadorInput.value.trim() : "";
 
-    if (!jugadorCampo && usuarioActivo !== "invitado") {
-      jugadorCampo = usuarioActivo;
-      if (jugadorInput) jugadorInput.value = usuarioActivo;
+    if (usuarioActivo === "invitado" && !esNarrador) {
+      alert("Error: Para poder guardar la ficha debes estar con una sesión iniciada en el foro.");
+      return false;
     }
 
-    const usuarioBase = jugadorCampo || usuarioActivo || "usuario";
-    const usuarioLimpio = limpiarTexto(usuarioBase);
+    let jugadorCampo = jugadorInput ? jugadorInput.value.trim() : "";
+
+    if (!jugadorCampo) {
+      alert("Por favor, ingresa el nombre de jugador en el campo 'Jugador' antes de guardar.");
+      return false;
+    }
+
+    if (!esNarrador) {
+      if (limpiarTexto(jugadorCampo) !== limpiarTexto(usuarioActivo)) {
+        alert(`Error: No puedes guardar esta ficha porque el nombre de jugador ("${jugadorCampo}") no coincide con tu usuario activo ("${usuarioActivo}"). Solo puedes guardar tus propias fichas.`);
+        return false;
+      }
+    }
 
     let pjId = document.getElementById("pj-id").value.trim();
+    const usuarioBase = esNarrador ? jugadorCampo : usuarioActivo;
+    const usuarioLimpio = limpiarTexto(usuarioBase);
 
-    // Generar ID de borrador automáticamente si está vacío
+    if (!esNarrador && pjId !== "") {
+      const partesId = pjId.split("-");
+      if (partesId.length >= 3) {
+        const usuarioEnId = partesId[1];
+        if (limpiarTexto(usuarioEnId) !== usuarioLimpio) {
+          alert(`Error de Validación:\nEl ID "${pjId}" pertenece al usuario "${usuarioEnId}", pero tu usuario activo es "${usuarioActivo}". No puedes guardar fichas a nombre de otro usuario.`);
+          return false;
+        }
+      } else {
+        alert(`Error: El formato del ID debe ser sabbat-nombreusuario-numero (Ej: sabbat-${usuarioLimpio}-001).`);
+        return false;
+      }
+    }
+
+    const dbRef = ref(db);
+
     if (!pjId) {
-      pjId = `sabbat-${usuarioLimpio}-001`;
-      document.getElementById("pj-id").value = pjId;
+      try {
+        const snapshot = await get(child(dbRef, `control_usuarios/${usuarioLimpio}/sabbat_count`));
+        let count = 1;
+        if (snapshot.exists() && typeof snapshot.val() === 'number') {
+          count = snapshot.val() + 1;
+        }
+        
+        let numFormatted = String(count).padStart(3, '0');
+        pjId = `sabbat-${usuarioLimpio}-${numFormatted}`;
+
+        let borradorExistente = await get(child(dbRef, `fichas/vampiro_borradores/${pjId}`));
+        let finalizadoExistente = await get(child(dbRef, `fichas/vampiro_finalizadas/${pjId}`));
+
+        while (borradorExistente.exists() || finalizadoExistente.exists()) {
+          count++;
+          numFormatted = String(count).padStart(3, '0');
+          pjId = `sabbat-${usuarioLimpio}-${numFormatted}`;
+          borradorExistente = await get(child(dbRef, `fichas/vampiro_borradores/${pjId}`));
+          finalizadoExistente = await get(child(dbRef, `fichas/vampiro_finalizadas/${pjId}`));
+        }
+        
+        await set(ref(db, `control_usuarios/${usuarioLimpio}/sabbat_count`), count);
+        document.getElementById("pj-id").value = pjId;
+      } catch (error) {
+        console.error("Error al consultar contador en Firebase:", error);
+        pjId = `sabbat-${usuarioLimpio}-001`;
+        document.getElementById("pj-id").value = pjId;
+      }
     }
 
     const datos = recolectarDatosFicha();
 
     try {
+      // Guardar SIEMPRE en la rama de borradores para la edición continua del jugador
       const rutaDestino = `fichas/vampiro_borradores/${pjId}`;
       await set(ref(db, rutaDestino), datos);
-      alert(`¡Guardado exitoso en borradores!\nID asignado: ${pjId}`);
+      alert(`¡Borrador guardado con éxito!\nID asignado: ${pjId}`);
       return true;
     } catch (err) {
       console.error("Error al guardar en Firebase:", err);
@@ -974,13 +1028,13 @@
         snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
         origen = "borrador";
       } else {
-        snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
+        snapshot = await get(child(dbRef, `fichas/vampiro_finalizadas/${targetKey}`));
         if (snapshot.exists()) {
-          origen = "borrador";
+          origen = "finalizado";
         } else {
-          snapshot = await get(child(dbRef, `fichas/vampiro_finalizadas/${targetKey}`));
+          snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
           if (snapshot.exists()) {
-            origen = "finalizado";
+            origen = "borrador";
           }
         }
       }
@@ -1041,7 +1095,7 @@
       if (!document.body.classList.contains('modo-admin')) {
         aplicarReglasPermisosUsuario();
       }
-      alert("¡Éxito! La ficha ha sido finalizada y actualizada en el sistema.");
+      alert("¡Éxito! La ficha ha sido finalizada y enviada al Narrador.");
     } catch (err) {
       console.error("Error al finalizar ficha:", err);
       alert("Error: No se pudo finalizar el envío de la ficha: " + err.message);
