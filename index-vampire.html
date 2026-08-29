@@ -28,7 +28,6 @@
             position: relative;
         }
 
-        /* Indicador en la esquina superior izquierda */
         .user-tag {
             position: absolute;
             top: 15px;
@@ -315,7 +314,6 @@
 </head>
 <body>
 
-<!-- Validante de Usuario Activo -->
 <div class="user-tag" id="display-user">Usuario: <span id="user-name-span">Cargando...</span></div>
 
 <div class="container">
@@ -324,7 +322,7 @@
     <div class="firebase-panel">
         <span>ID del Personaje:</span>
         <input type="text" id="pj-id" placeholder="Auto / Ej: sabbat-usuario-001" style="width: 200px; background: #121212; border: 1px solid var(--accent-color);">
-        <button class="firebase-btn" onclick="guardarFicha()">Guardar</button>
+        <button class="firebase-btn" onclick="guardarFicha()">Guardar Borrador</button>
         <button class="firebase-btn" onclick="cargarFicha()">Cargar</button>
     </div>
 
@@ -555,9 +553,9 @@
     <div class="grid-3" style="margin-top: 10px; align-items: start;">
         <div class="section-box">
             <div class="box-title" style="font-family: var(--decorative-font);">Armadura</div>
-            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Armadura:</span> <input type="text" id="armadura-tipo"></div>
-            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Clase:</span> <input type="text" id="armadura-clase"></div>
-            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Penalización:</span> <input type="text" id="armadura-penalizacion"></div>
+            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Armadura:</span> <input type="text" id="armadura-tipo" class="campo-armadura"></div>
+            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Clase:</span> <input type="text" id="armadura-clase" class="campo-armadura"></div>
+            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Penalización:</span> <input type="text" id="armadura-penalizacion" class="campo-armadura"></div>
         </div>
 
         <div class="section-box" style="grid-column: span 2;">
@@ -726,7 +724,6 @@
     return "invitado";
   }
 
-  // Listener de PostMessage para capturar el usuario desde Foroactivo
   window.addEventListener("message", (event) => {
     if (event.data && event.data.type === "USER_DATA" && event.data.username) {
       window.usuarioCapturadoPostMessage = event.data.username;
@@ -734,12 +731,10 @@
     }
   });
 
-  // Solicitar usuario al padre al cargar
   if (window.parent !== window) {
     window.parent.postMessage({ type: "REQUEST_USER" }, "*");
   }
 
-  // Actualización visual del nombre de usuario en pantalla
   function actualizarDisplayUsuario() {
     const usuario = obtenerUsuarioActivo();
     const spanNode = document.getElementById('user-name-span');
@@ -789,6 +784,7 @@
   function aplicarReglasPermisosUsuario() {
     if (document.body.classList.contains('modo-admin')) return;
 
+    // Bloquear de forma general
     document.querySelectorAll(".container input").forEach(input => {
       input.readOnly = true;
     });
@@ -797,6 +793,7 @@
       el.style.cursor = "not-allowed";
     });
 
+    // Permitir edición de estado dinámico durante el juego
     const wpDisp = document.getElementById("willpower-disp");
     const bloodDisp = document.getElementById("blood-disp");
     if (wpDisp) wpDisp.readOnly = false;
@@ -810,7 +807,8 @@
       el.style.cursor = "pointer";
     });
 
-    document.querySelectorAll(".campo-combate, .campo-inventario").forEach(input => {
+    // Combate, Armadura e Inventario: Solo agregar (lo que ya tenga contenido no se borra)
+    document.querySelectorAll(".campo-combate, .campo-inventario, .campo-armadura").forEach(input => {
       if (!input.value || input.value.trim() === "") {
         input.readOnly = false;
       } else {
@@ -912,6 +910,7 @@
     return datos;
   }
 
+  // BOTÓN GUARDAR: Guardar EXCLUSIVAMENTE en Borradores para evitar PERMISSION_DENIED
   window.guardarFicha = async function() {
     let usuarioActivo = obtenerUsuarioActivo();
     const esNarrador = await esNarradorAutorizado();
@@ -924,13 +923,11 @@
 
     let jugadorCampo = jugadorInput ? jugadorInput.value.trim() : "";
 
-    // Validar campo 'Jugador' obligatorio
     if (!jugadorCampo) {
       alert("Por favor, ingresa el nombre de jugador en el campo 'Jugador' antes de guardar.");
       return false;
     }
 
-    // 1. Validacion Jugador vs Usuario Activo
     if (!esNarrador) {
       if (limpiarTexto(jugadorCampo) !== limpiarTexto(usuarioActivo)) {
         alert(`Error: No puedes guardar esta ficha porque el nombre de jugador ("${jugadorCampo}") no coincide con tu usuario activo ("${usuarioActivo}"). Solo puedes guardar tus propias fichas.`);
@@ -942,13 +939,12 @@
     const usuarioBase = esNarrador ? jugadorCampo : usuarioActivo;
     const usuarioLimpio = limpiarTexto(usuarioBase);
 
-    // 2. Triple Validación: ID vs Usuario (Validar ID si fue introducido manualmente)
     if (!esNarrador && pjId !== "") {
       const partesId = pjId.split("-");
       if (partesId.length >= 3) {
         const usuarioEnId = partesId[1];
         if (limpiarTexto(usuarioEnId) !== usuarioLimpio) {
-          alert(`Error de Validación TRIPLE:\nEl ID "${pjId}" pertenece al usuario "${usuarioEnId}", pero tu usuario activo es "${usuarioActivo}". No puedes guardar fichas a nombre de otro usuario.`);
+          alert(`Error de Validación:\nEl ID "${pjId}" pertenece al usuario "${usuarioEnId}", pero tu usuario activo es "${usuarioActivo}". No puedes guardar fichas a nombre de otro usuario.`);
           return false;
         }
       } else {
@@ -959,7 +955,6 @@
 
     const dbRef = ref(db);
 
-    // 3. Generación / Incremento automático del contador por usuario
     if (!pjId) {
       try {
         const snapshot = await get(child(dbRef, `control_usuarios/${usuarioLimpio}/sabbat_count`));
@@ -971,7 +966,6 @@
         let numFormatted = String(count).padStart(3, '0');
         pjId = `sabbat-${usuarioLimpio}-${numFormatted}`;
 
-        // Control de colisión para evitar sobrescritura accidental
         let borradorExistente = await get(child(dbRef, `fichas/vampiro_borradores/${pjId}`));
         let finalizadoExistente = await get(child(dbRef, `fichas/vampiro_finalizadas/${pjId}`));
 
@@ -995,9 +989,10 @@
     const datos = recolectarDatosFicha();
 
     try {
+      // Guardar SIEMPRE en la rama de borradores para la edición continua del jugador
       const rutaDestino = `fichas/vampiro_borradores/${pjId}`;
       await set(ref(db, rutaDestino), datos);
-      alert(`¡Guardado exitoso!\nID asignado: ${pjId}`);
+      alert(`¡Borrador guardado con éxito!\nID asignado: ${pjId}`);
       return true;
     } catch (err) {
       console.error("Error al guardar en Firebase:", err);
@@ -1100,7 +1095,7 @@
       if (!document.body.classList.contains('modo-admin')) {
         aplicarReglasPermisosUsuario();
       }
-      alert("¡Éxito! La ficha ha sido finalizada y actualizada en el sistema.");
+      alert("¡Éxito! La ficha ha sido finalizada y enviada al Narrador.");
     } catch (err) {
       console.error("Error al finalizar ficha:", err);
       alert("Error: No se pudo finalizar el envío de la ficha: " + err.message);
