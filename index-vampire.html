@@ -711,28 +711,32 @@
     return texto ? texto.toLowerCase().replace(/[^a-z0-9]/g, "") : "";
   }
 
-  function obtenerUsuarioActivo() {
+function obtenerUsuarioActivo() {
     const urlParams = new URLSearchParams(window.location.search);
     let usuarioUrl = urlParams.get('user') || urlParams.get('usuario');
     
-    // Intenta leer el nombre del padre (Foroactivo) si existe
-    if (!usuarioUrl) {
-      try {
-        if (window.parent && window.parent._userdata && window.parent._userdata.username) {
-          usuarioUrl = window.parent._userdata.username;
-        } else if (typeof _userdata !== 'undefined' && _userdata.username) {
-          usuarioUrl = _userdata.username;
-        }
-      } catch (e) {
-        console.warn("Acceso cross-origin restringido al marco superior:", e);
-      }
-    }
-
     if (usuarioUrl && usuarioUrl.trim() !== "") {
       return usuarioUrl.trim();
     }
     
+    if (window.usuarioCapturadoPostMessage) {
+      return window.usuarioCapturadoPostMessage;
+    }
+
     return "invitado";
+  }
+
+    // Listener de PostMessage para capturar el usuario desde Foroactivo
+  window.addEventListener("message", (event) => {
+    if (event.data && event.data.type === "USER_DATA" && event.data.username) {
+      window.usuarioCapturadoPostMessage = event.data.username;
+      actualizarDisplayUsuario();
+    }
+  });
+
+  // Solicitar usuario al padre al cargar
+  if (window.parent !== window) {
+    window.parent.postMessage({ type: "REQUEST_USER" }, "*");
   }
 
   // Actualización visual del nombre de usuario en pantalla
