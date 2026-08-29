@@ -548,549 +548,332 @@
                 <td><input type="text" id="arma-5-1" class="campo-combate"></td><td><input type="text" id="arma-5-2" class="campo-combate"></td><td><input type="text" id="arma-5-3" class="campo-combate"></td><td><input type="text" id="arma-5-4" class="campo-combate"></td><td><input type="text" id="arma-5-5" class="campo-combate"></td>
             </tr>
         </table>
-    </div>
-
-    <div class="grid-3" style="margin-top: 10px; align-items: start;">
-        <div class="section-box">
-            <div class="box-title" style="font-family: var(--decorative-font);">Armadura</div>
-            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Armadura:</span> <input type="text" id="armadura-tipo"></div>
-            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Clase:</span> <input type="text" id="armadura-clase"></div>
-            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Penalización:</span> <input type="text" id="armadura-penalizacion"></div>
-        </div>
-
-        <div class="section-box" style="grid-column: span 2;">
-            <div class="box-title" style="font-family: var(--decorative-font);">Inventario</div>
-            <div class="grid-2" style="gap: 10px;">
-                <div>
-                    <div class="row"><input type="text" id="inv-1" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-2" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-3" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-4" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-5" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-6" class="campo-inventario"></div>
-                </div>
-                <div>
-                    <div class="row"><input type="text" id="inv-7" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-8" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-9" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-10" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-11" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-12" class="campo-inventario"></div>
+        
+        <div class="grid-2" style="margin-top: 15px;">
+            <div>
+                <div class="box-title">Armadura</div>
+                <div class="row"><span>Clase:</span> <input type="text" id="armadura-clase"></div>
+                <div class="row"><span>Tipo:</span> <input type="text" id="armadura-tipo"></div>
+                <div class="row"><span>Penalización:</span> <input type="text" id="armadura-penalizacion"></div>
+            </div>
+            <div>
+                <div class="box-title">Equipo e Inventario</div>
+                <div class="grid-2" style="gap: 5px;">
+                    <div>
+                        <input type="text" id="inv-1" placeholder="Item 1" style="margin-bottom: 4px; width: 100%;">
+                        <input type="text" id="inv-2" placeholder="Item 2" style="margin-bottom: 4px; width: 100%;">
+                        <input type="text" id="inv-3" placeholder="Item 3" style="margin-bottom: 4px; width: 100%;">
+                        <input type="text" id="inv-4" placeholder="Item 4" style="margin-bottom: 4px; width: 100%;">
+                        <input type="text" id="inv-5" placeholder="Item 5" style="margin-bottom: 4px; width: 100%;">
+                        <input type="text" id="inv-6" placeholder="Item 6" style="margin-bottom: 4px; width: 100%;">
+                    </div>
+                    <div>
+                        <input type="text" id="inv-7" placeholder="Item 7" style="margin-bottom: 4px; width: 100%;">
+                        <input type="text" id="inv-8" placeholder="Item 8" style="margin-bottom: 4px; width: 100%;">
+                        <input type="text" id="inv-9" placeholder="Item 9" style="margin-bottom: 4px; width: 100%;">
+                        <input type="text" id="inv-10" placeholder="Item 10" style="margin-bottom: 4px; width: 100%;">
+                        <input type="text" id="inv-11" placeholder="Item 11" style="margin-bottom: 4px; width: 100%;">
+                        <input type="text" id="inv-12" placeholder="Item 12" style="margin-bottom: 4px; width: 100%;">
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="grid-2" style="margin-top: 10px;">
+    <h2>Méritos y Defectos</h2>
+    <div class="grid-2">
         <div class="section-box">
-            <h2>Méritos</h2>
-            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="merito-nom-1"></div><div class="merit-cost"><input type="number" id="merito-val-1" min="-10" max="0" value="0"></div></div>
-            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="merito-nom-2"></div><div class="merit-cost"><input type="number" id="merito-val-2" min="-10" max="0" value="0"></div></div>
-            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="merito-nom-3"></div><div class="merit-cost"><input type="number" id="merito-val-3" min="-10" max="0" value="0"></div></div>
-            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="merito-nom-4"></div><div class="merit-cost"><input type="number" id="merito-val-4" min="-10" max="0" value="0"></div></div>
-            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="merito-nom-5"></div><div class="merit-cost"><input type="number" id="merito-val-5" min="-10" max="0" value="0"></div></div>
+            <h3>Méritos</h3>
+            <div class="merit-defect-row">
+                <input type="text" id="merito-nom-1" class="merit-name" placeholder="Nombre">
+                <input type="number" id="merito-val-1" class="merit-cost" min="0" max="7" value="0">
+            </div>
+            <div class="merit-defect-row">
+                <input type="text" id="merito-nom-2" class="merit-name" placeholder="Nombre">
+                <input type="number" id="merito-val-2" class="merit-cost" min="0" max="7" value="0">
+            </div>
+            <div class="merit-defect-row">
+                <input type="text" id="merito-nom-3" class="merit-name" placeholder="Nombre">
+                <input type="number" id="merito-val-3" class="merit-cost" min="0" max="7" value="0">
+            </div>
+            <div class="merit-defect-row">
+                <input type="text" id="merito-nom-4" class="merit-name" placeholder="Nombre">
+                <input type="number" id="merito-val-4" class="merit-cost" min="0" max="7" value="0">
+            </div>
+            <div class="merit-defect-row">
+                <input type="text" id="merito-nom-5" class="merit-name" placeholder="Nombre">
+                <input type="number" id="merito-val-5" class="merit-cost" min="0" max="7" value="0">
+            </div>
         </div>
         <div class="section-box">
-            <h2>Defectos</h2>
-            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="defecto-nom-1"></div><div class="merit-cost"><input type="number" id="defecto-val-1" min="0" max="10" value="0"></div></div>
-            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="defecto-nom-2"></div><div class="merit-cost"><input type="number" id="defecto-val-2" min="0" max="10" value="0"></div></div>
-            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="defecto-nom-3"></div><div class="merit-cost"><input type="number" id="defecto-val-3" min="0" max="10" value="0"></div></div>
-            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="defecto-nom-4"></div><div class="merit-cost"><input type="number" id="defecto-val-4" min="0" max="10" value="0"></div></div>
-            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="defecto-nom-5"></div><div class="merit-cost"><input type="number" id="defecto-val-5" min="0" max="10" value="0"></div></div>
+            <h3>Defectos</h3>
+            <div class="merit-defect-row">
+                <input type="text" id="defecto-nom-1" class="merit-name" placeholder="Nombre">
+                <input type="number" id="defecto-val-1" class="merit-cost" min="0" max="7" value="0">
+            </div>
+            <div class="merit-defect-row">
+                <input type="text" id="defecto-nom-2" class="merit-name" placeholder="Nombre">
+                <input type="number" id="defecto-val-2" class="merit-cost" min="0" max="7" value="0">
+            </div>
+            <div class="merit-defect-row">
+                <input type="text" id="defecto-nom-3" class="merit-name" placeholder="Nombre">
+                <input type="number" id="defecto-val-3" class="merit-cost" min="0" max="7" value="0">
+            </div>
+            <div class="merit-defect-row">
+                <input type="text" id="defecto-nom-4" class="merit-name" placeholder="Nombre">
+                <input type="number" id="defecto-val-4" class="merit-cost" min="0" max="7" value="0">
+            </div>
+            <div class="merit-defect-row">
+                <input type="text" id="defecto-nom-5" class="merit-name" placeholder="Nombre">
+                <input type="number" id="defecto-val-5" class="merit-cost" min="0" max="7" value="0">
+            </div>
         </div>
     </div>
-
-    <!-- Panel de Botones Finales -->
-    <div class="admin-panel">
-        <button class="firebase-btn" style="background-color: #2e7d32;" onclick="enviarFichaFinal()">Enviar y Finalizar Ficha</button>
-        <button class="firebase-btn" style="background-color: #0288d1;" onclick="cargarModoLecturaAdmin(null, null, false)">Editar</button>
-    </div>
-
 </div>
 
-<script>
-    document.querySelectorAll('.dots').forEach(container => {
-        const dots = Array.from(container.querySelectorAll('.dot'));
-        dots.forEach((dot, index) => {
-            dot.addEventListener('click', function(e) {
-                if (this.dataset.readonly === "true") return;
-                const isBasePoint = this.classList.contains('base-point');
-                const isModoAdmin = document.body.classList.contains('modo-admin');
-                if (isBasePoint && !isModoAdmin) return;
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-                if (this.classList.contains('filled')) {
-                    this.classList.remove('filled', 'lerner', 'crossed');
-                } else if (this.classList.contains('lerner') || this.classList.contains('crossed')) {
-                    this.classList.remove('lerner', 'crossed');
-                    this.classList.add('filled');
-                } else {
-                    this.classList.add('lerner');
-                }
+    const firebaseConfig = {
+        databaseURL: "https://ecos-del-noveno-umbral-default-rtdb.firebaseio.com/"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const generacionTabla = {
+        3: { maxBlood: 50, bloodPerTurn: "??", texto: "Tercera" },
+        4: { maxBlood: 30, bloodPerTurn: "10", texto: "Cuarta" },
+        5: { maxBlood: 25, bloodPerTurn: "8", texto: "Quinta" },
+        6: { maxBlood: 20, bloodPerTurn: "6", texto: "Sexta" },
+        7: { maxBlood: 15, bloodPerTurn: "4", texto: "Séptima" },
+        8: { maxBlood: 15, bloodPerTurn: "3", texto: "Octava" },
+        9: { maxBlood: 14, bloodPerTurn: "2", texto: "Novena" },
+        10: { maxBlood: 13, bloodPerTurn: "1", texto: "Décima" },
+        11: { maxBlood: 12, bloodPerTurn: "1", texto: "Undécima" },
+        12: { maxBlood: 11, bloodPerTurn: "1", texto: "Duodécima" },
+        13: { maxBlood: 10, bloodPerTurn: "1", texto: "Decimotercera" },
+        14: { maxBlood: 10, bloodPerTurn: "1", texto: "Decimocuarta" },
+        15: { maxBlood: 10, bloodPerTurn: "1", texto: "Decimoquinta" }
+    };
+
+    let currentUser = "invitado";
+    let isNarrador = false;
+    let fichaEstadoOriginal = "borrador"; // "borrador" o "finalizado"
+
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    async function initUser() {
+        const userParam = getQueryParam("user");
+        if (userParam) {
+            currentUser = userParam.trim();
+        }
+        document.getElementById("user-name-span").innerText = currentUser;
+
+        try {
+            const narradoresSnap = await get(ref(db, `narradores/${currentUser}`));
+            if (narradoresSnap.exists() && narradoresSnap.val() === true) {
+                isNarrador = true;
+            }
+        } catch (e) {
+            console.warn("No se pudo verificar el rol de narrador:", e);
+        }
+
+        const pjIdParam = getQueryParam("pjid");
+        if (pjIdParam) {
+            document.getElementById("pj-id").value = pjIdParam;
+            cargarFicha();
+        }
+    }
+
+    window.actualizarValoresGeneracion = function() {
+        const input = document.getElementById("gen-input");
+        let genVal = parseInt(input.value);
+        if (isNaN(genVal)) genVal = 13;
+        if (genVal < 3) genVal = 3;
+        if (genVal > 15) genVal = 15;
+        input.value = genVal;
+
+        const info = generacionTabla[genVal] || generacionTabla[13];
+        document.getElementById("gen-texto").value = info.texto;
+        document.getElementById("blood-max").value = info.maxBlood;
+        document.getElementById("blood-turn").value = info.bloodPerTurn;
+
+        const dispInput = document.getElementById("blood-disp");
+        if (parseInt(dispInput.value) > info.maxBlood) {
+            dispInput.value = info.maxBlood;
+        }
+    };
+
+    window.sincronizarWillpower = function() {
+        const maxW = document.getElementById("willpower-max");
+        const dispW = document.getElementById("willpower-disp");
+        if (parseInt(dispW.value) > parseInt(maxW.value)) {
+            dispW.value = maxW.value;
+        }
+    };
+
+    function setupDots() {
+        document.querySelectorAll(".dots").forEach(container => {
+            const dots = container.querySelectorAll(".dot");
+            dots.forEach((dot, index) => {
+                dot.addEventListener("click", () => {
+                    const isAtributo = container.classList.contains("atributo-dots");
+
+                    if (isAtributo) {
+                        if (dot.classList.contains("filled")) {
+                            if (index === 0) return;
+                            if (index < dots.length - 1 && dots[index + 1].classList.contains("filled")) {
+                                for (let i = index + 1; i < dots.length; i++) {
+                                    dots[i].className = "dot";
+                                }
+                            } else {
+                                dot.className = "dot";
+                            }
+                        } else {
+                            for (let i = 0; i <= index; i++) {
+                                dots[i].className = "dot filled";
+                            }
+                        }
+                    } else {
+                        if (dot.classList.contains("crossed") || dot.classList.contains("lerner")) {
+                            dot.className = "dot";
+                        } else if (dot.classList.contains("filled")) {
+                            dot.className = "dot lerner";
+                        } else {
+                            dot.className = "dot filled";
+                        }
+                    }
+                });
             });
         });
-    });
 
-    document.querySelectorAll('.health-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('click', function() {
-            if (this.dataset.readonly === "true") return;
-            this.classList.toggle('filled');
+        document.querySelectorAll(".health-checkbox").forEach(chk => {
+            chk.addEventListener("click", () => {
+                chk.classList.toggle("filled");
+            });
         });
-    });
-
-    function sincronizarWillpower() {
-        const maxInput = document.getElementById('willpower-max');
-        const dispInput = document.getElementById('willpower-disp');
-        if (!maxInput || !dispInput) return;
-        dispInput.max = maxInput.value;
-        if (parseInt(dispInput.value) > parseInt(maxInput.value)) {
-            dispInput.value = maxInput.value;
-        }
     }
 
-    function actualizarValoresGeneracion() {
-        const genInput = document.getElementById('gen-input');
-        if (!genInput) return;
-        const gen = parseInt(genInput.value) || 13;
-        const bloodMax = document.getElementById('blood-max');
-        const bloodDisp = document.getElementById('blood-disp');
-        const bloodTurn = document.getElementById('blood-turn');
+    window.guardarFicha = async function() {
+        let pjId = document.getElementById("pj-id").value.trim();
+        if (!pjId) {
+            pjId = `sabbat-${currentUser}-001`;
+            document.getElementById("pj-id").value = pjId;
+        }
 
-        let maxReserva = 10;
-        let porTurno = 1;
-
-        if (gen <= 3) { maxReserva = 100; porTurno = 10; }
-        else if (gen === 4) { maxReserva = 50; porTurno = 5; }
-        else if (gen === 5) { maxReserva = 40; porTurno = 4; }
-        else if (gen === 6) { maxReserva = 30; porTurno = 3; }
-        else if (gen === 7) { maxReserva = 20; porTurno = 2; }
-        else if (gen === 8) { maxReserva = 15; porTurno = 3; }
-        else if (gen === 9) { maxReserva = 14; porTurno = 2; }
-        else if (gen === 10) { maxReserva = 13; porTurno = 1; }
-        else if (gen === 11) { maxReserva = 12; porTurno = 1; }
-        else if (gen === 12) { maxReserva = 11; porTurno = 1; }
-        else { maxReserva = 10; porTurno = 1; }
-
-        if (bloodMax) bloodMax.value = maxReserva;
-        if (bloodDisp) {
-            bloodDisp.max = maxReserva;
-            if (parseInt(bloodDisp.value) > maxReserva) {
-                bloodDisp.value = maxReserva;
+        const data = {};
+        
+        document.querySelectorAll("input[type='text'], input[type='number']").forEach(input => {
+            if (input.id && input.id !== "pj-id") {
+                data[input.id] = input.value;
             }
-        }
-        if (bloodTurn) bloodTurn.value = porTurno;
-    }
-
-    window.actualizarValoresGeneracion = actualizarValoresGeneracion;
-    window.sincronizarWillpower = sincronizarWillpower;
-
-    actualizarValoresGeneracion();
-</script>
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-  import { getDatabase, ref, set, get, child, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDida046uOTvsTdYeJWQ3AscySBrVgGri4",
-    authDomain: "ecosnovenumbral.firebaseapp.com",
-    projectId: "ecosnovenumbral",
-    storageBucket: "ecosnovenumbral.firebasestorage.app",
-    messagingSenderId: "863575254950",
-    appId: "1:863575254950:web:dff0626e7a0826de425167",
-    databaseURL: "https://ecosnovenoumbral-default-rtdb.firebaseio.com"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  const ADMINS_AUTORIZADOS = ["admin", "narrador", "administrador", "ecosnovenoumbral", "nigoyin"];
-
-  function limpiarTexto(texto) {
-    return texto ? texto.toLowerCase().replace(/[^a-z0-9]/g, "") : "";
-  }
-
-  function obtenerUsuarioActivo() {
-    const urlParams = new URLSearchParams(window.location.search);
-    let usuarioUrl = urlParams.get('user') || urlParams.get('usuario');
-    
-    if (usuarioUrl && usuarioUrl.trim() !== "") {
-      return usuarioUrl.trim();
-    }
-    
-    if (window.usuarioCapturadoPostMessage) {
-      return window.usuarioCapturadoPostMessage;
-    }
-
-    const jugadorInput = document.getElementById("jugador");
-    if (jugadorInput && jugadorInput.value.trim() !== "") {
-      return jugadorInput.value.trim();
-    }
-
-    return "invitado";
-  }
-
-  window.addEventListener("message", (event) => {
-    if (event.data && event.data.type === "USER_DATA" && event.data.username) {
-      window.usuarioCapturadoPostMessage = event.data.username;
-      actualizarDisplayUsuario();
-    }
-  });
-
-  if (window.parent !== window) {
-    window.parent.postMessage({ type: "REQUEST_USER" }, "*");
-  }
-
-  function actualizarDisplayUsuario() {
-    const usuario = obtenerUsuarioActivo();
-    const spanNode = document.getElementById('user-name-span');
-    if (spanNode) {
-        spanNode.textContent = usuario;
-    }
-  }
-
-  async function esNarradorAutorizado() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const tokenUrl = urlParams.get('auth') || sessionStorage.getItem('narrador_auth');
-
-    if (tokenUrl) {
-      try {
-        const decodedData = atob(tokenUrl).split(":");
-        const usuarioForo = decodedData[1] ? decodedData[1].trim() : "";
-        if (usuarioForo) {
-          const snapshot = await get(child(ref(db), `narradores/${usuarioForo}`));
-          if (snapshot.exists() && snapshot.val() === true) {
-            return true;
-          }
-        }
-      } catch (e) {
-        console.warn("Error al decodificar token de auth:", e);
-      }
-    }
-
-    const usuarioRaw = obtenerUsuarioActivo();
-    const usuarioClean = limpiarTexto(usuarioRaw);
-
-    if (ADMINS_AUTORIZADOS.includes(usuarioClean)) {
-      return true;
-    }
-
-    try {
-      const snapshot = await get(child(ref(db), `narradores/${usuarioRaw}`));
-      if (snapshot.exists() && snapshot.val() === true) {
-        return true;
-      }
-    } catch (err) {
-      console.warn("Consulta a Firebase realizada:", err);
-    }
-
-    return false;
-  }
-
-  function aplicarReglasPermisosUsuario() {
-    if (document.body.classList.contains('modo-admin')) return;
-
-    document.querySelectorAll(".container input").forEach(input => {
-      input.readOnly = true;
-    });
-    document.querySelectorAll(".dot").forEach(el => {
-      el.dataset.readonly = "true";
-      el.style.cursor = "not-allowed";
-    });
-
-    const wpDisp = document.getElementById("willpower-disp");
-    const bloodDisp = document.getElementById("blood-disp");
-    if (wpDisp) wpDisp.readOnly = false;
-    if (bloodDisp) bloodDisp.readOnly = false;
-
-    const expEscena = document.getElementById("exp-escena");
-    if (expEscena) expEscena.readOnly = false;
-
-    document.querySelectorAll(".health-checkbox").forEach(el => {
-      el.dataset.readonly = "false";
-      el.style.cursor = "pointer";
-    });
-
-    document.querySelectorAll(".campo-combate, .campo-inventario").forEach(input => {
-      if (!input.value || input.value.trim() === "") {
-        input.readOnly = false;
-      } else {
-        input.readOnly = true;
-      }
-    });
-
-    const pjIdInput = document.getElementById("pj-id");
-    if (pjIdInput) pjIdInput.readOnly = false;
-  }
-
-  function desbloquearFichaCompletaUsuario() {
-    if (document.body.classList.contains('modo-admin')) return;
-
-    document.querySelectorAll(".container input").forEach(input => {
-      input.readOnly = false;
-    });
-    document.querySelectorAll(".dot, .health-checkbox").forEach(el => {
-      el.dataset.readonly = "false";
-      el.style.cursor = "pointer";
-    });
-    
-    const bloodMax = document.getElementById('blood-max');
-    const bloodTurn = document.getElementById('blood-turn');
-    if (bloodMax) bloodMax.readOnly = true;
-    if (bloodTurn) bloodTurn.readOnly = true;
-  }
-
-  function desbloquearFichaCompletaNarrador() {
-    document.querySelectorAll(".container input").forEach(input => {
-      input.readOnly = false;
-    });
-    document.querySelectorAll(".dot, .health-checkbox").forEach(el => {
-      el.dataset.readonly = "false";
-      el.style.cursor = "pointer";
-    });
-    document.querySelectorAll(".firebase-btn").forEach(btn => {
-      btn.disabled = false;
-      btn.style.opacity = "1";
-      btn.style.cursor = "pointer";
-    });
-  }
-
-  function poblarDatosEnFicha(datos) {
-    if (!datos) return;
-    document.querySelectorAll("input[type='text'], input[type='number']").forEach(input => {
-      if (input.id && datos[input.id] !== undefined) {
-        input.value = datos[input.id];
-      }
-    });
-
-    document.querySelectorAll(".dots").forEach(container => {
-      if (container.id && datos[container.id]) {
-        const estados = datos[container.id];
-        container.querySelectorAll(".dot").forEach((dot, index) => {
-          dot.classList.remove("filled", "crossed", "lerner");
-          if (estados[index] === "filled") dot.classList.add("filled");
-          else if (estados[index] === "crossed" || estados[index] === "lerner") dot.classList.add("lerner");
         });
-      }
-    });
 
-    document.querySelectorAll(".health-checkbox").forEach(box => {
-      if (box.id && datos[box.id] !== undefined) {
-        box.classList.remove("filled");
-        if (datos[box.id] === "filled") box.classList.add("filled");
-      }
-    });
-
-    window.actualizarValoresGeneracion();
-    window.sincronizarWillpower();
-  }
-
-  function recolectarDatosFicha() {
-    const datos = {};
-    document.querySelectorAll("input[type='text'], input[type='number']").forEach(input => {
-      if (input.id && input.id !== "pj-id") {
-        datos[input.id] = input.value;
-      }
-    });
-
-    document.querySelectorAll(".dots").forEach(container => {
-      if (container.id) {
-        const estados = [];
-        container.querySelectorAll(".dot").forEach(dot => {
-          if (dot.classList.contains("filled")) estados.push("filled");
-          else if (dot.classList.contains("lerner") || dot.classList.contains("crossed")) estados.push("lerner");
-          else estados.push("empty");
+        document.querySelectorAll(".dots").forEach(container => {
+            if (container.id) {
+                const arr = [];
+                container.querySelectorAll(".dot").forEach(dot => {
+                    if (dot.classList.contains("crossed") || dot.classList.contains("lerner")) {
+                        arr.push("lerner");
+                    } else if (dot.classList.contains("filled")) {
+                        arr.push("filled");
+                    } else {
+                        arr.push("empty");
+                    }
+                });
+                data[container.id] = arr;
+            }
         });
-        datos[container.id] = estados;
-      }
-    });
 
-    document.querySelectorAll(".health-checkbox").forEach(box => {
-      if (box.id) {
-        datos[box.id] = box.classList.contains("filled") ? "filled" : "empty";
-      }
-    });
-    return datos;
-  }
+        document.querySelectorAll(".health-checkbox").forEach(chk => {
+            data[chk.id] = chk.classList.contains("filled") ? "filled" : "empty";
+        });
 
-  window.guardarFicha = async function() {
-    let usuarioActivo = obtenerUsuarioActivo();
-    const jugadorInput = document.getElementById("jugador");
-    let jugadorCampo = jugadorInput ? jugadorInput.value.trim() : "";
+        // REGLA FUNDAMENTAL: Al guardar desde la interfaz, SIEMPRE se guarda en borradores.
+        const targetRef = ref(db, `fichas/vampiro_borradores/${pjId}`);
 
-    if (!jugadorCampo && usuarioActivo !== "invitado") {
-      jugadorCampo = usuarioActivo;
-      if (jugadorInput) jugadorInput.value = usuarioActivo;
-    }
-
-    const usuarioBase = jugadorCampo || usuarioActivo || "usuario";
-    const usuarioLimpio = limpiarTexto(usuarioBase);
-
-    let pjId = document.getElementById("pj-id").value.trim();
-
-    // Generar ID de borrador automáticamente si está vacío
-    if (!pjId) {
-      pjId = `sabbat-${usuarioLimpio}-001`;
-      document.getElementById("pj-id").value = pjId;
-    }
-
-    const datos = recolectarDatosFicha();
-
-    try {
-      const rutaDestino = `fichas/vampiro_borradores/${pjId}`;
-      await set(ref(db, rutaDestino), datos);
-      alert(`¡Guardado exitoso en borradores!\nID asignado: ${pjId}`);
-      return true;
-    } catch (err) {
-      console.error("Error al guardar en Firebase:", err);
-      alert("Error al guardar en la base de datos: " + err.message);
-      return false;
-    }
-  };
-
-  window.cargarFicha = async function(idManual, ramaManual) {
-    let inputVal = idManual || document.getElementById("pj-id").value.trim();
-    if (!inputVal) {
-      alert("Por favor ingresa un ID para cargar el personaje.");
-      return;
-    }
-
-    let targetKey = inputVal;
-    if (targetKey.includes('/')) {
-      targetKey = targetKey.split('/').pop();
-    }
-    document.getElementById("pj-id").value = targetKey;
-
-    const dbRef = ref(db);
-    const esNarrador = await esNarradorAutorizado();
-
-    try {
-      let snapshot = null;
-      let origen = "";
-
-      if (ramaManual === 'finalizado') {
-        snapshot = await get(child(dbRef, `fichas/vampiro_finalizadas/${targetKey}`));
-        origen = "finalizado";
-      } else if (ramaManual === 'borrador') {
-        snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
-        origen = "borrador";
-      } else {
-        snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
-        if (snapshot.exists()) {
-          origen = "borrador";
-        } else {
-          snapshot = await get(child(dbRef, `fichas/vampiro_finalizadas/${targetKey}`));
-          if (snapshot.exists()) {
-            origen = "finalizado";
-          }
+        try {
+            await set(targetRef, data);
+            alert(`Ficha guardada exitosamente como Borrador en: ${pjId}`);
+        } catch (error) {
+            console.error("Error al guardar:", error);
+            alert("Error al guardar la ficha en Firebase.");
         }
-      }
+    };
 
-      if (snapshot && snapshot.exists()) {
-        poblarDatosEnFicha(snapshot.val());
-
-        if (esNarrador || document.body.classList.contains('modo-admin')) {
-          desbloquearFichaCompletaNarrador();
-        } else {
-          if (origen === "finalizado") {
-            aplicarReglasPermisosUsuario();
-          } else if (origen === "borrador") {
-            desbloquearFichaCompletaUsuario();
-          }
+    window.cargarFicha = async function() {
+        const pjId = document.getElementById("pj-id").value.trim();
+        if (!pjId) {
+            alert("Por favor ingresa un ID de personaje.");
+            return;
         }
-      } else {
-        alert(`No se encontró ningún personaje registrado con el identificador: ${targetKey}`);
-      }
-    } catch (err) {
-      console.error("Error al cargar:", err);
-      alert("Error al intentar conectarse a la base de datos: " + err.message);
-    }
-  };
 
-  window.enviarFichaFinal = async function() {
-    let pjId = document.getElementById("pj-id").value.trim();
+        try {
+            let snap = await get(ref(db, `fichas/vampiro_borradores/${pjId}`));
+            
+            if (snap.exists()) {
+                fichaEstadoOriginal = "borrador";
+            } else {
+                snap = await get(ref(db, `fichas/vampiro_finalizadas/${pjId}`));
+                if (snap.exists()) {
+                    fichaEstadoOriginal = "finalizado";
+                }
+            }
 
-    if (!pjId) {
-      const guardadoBorrador = await window.guardarFicha();
-      if (!guardadoBorrador) return;
-      pjId = document.getElementById("pj-id").value.trim();
-    }
+            if (!snap.exists()) {
+                alert("No se encontró la ficha con ese ID en ninguna colección.");
+                return;
+            }
 
-    const confirmar = confirm("¿Estás seguro de enviar y finalizar tu ficha?");
-    if (!confirmar) return;
+            const data = snap.val();
 
-    const datos = recolectarDatosFicha();
-    const usuario = obtenerUsuarioActivo();
+            document.querySelectorAll("input[type='text'], input[type='number']").forEach(input => {
+                if (input.id && data[input.id] !== undefined) {
+                    input.value = data[input.id];
+                }
+            });
 
-    try {
-      await set(ref(db, `fichas/vampiro_finalizadas/${pjId}`), datos);
+            document.querySelectorAll(".dots").forEach(container => {
+                if (container.id && Array.isArray(data[container.id])) {
+                    const dots = container.querySelectorAll(".dot");
+                    const values = data[container.id];
+                    dots.forEach((dot, index) => {
+                        dot.className = "dot";
+                        if (values[index] === "filled") {
+                            dot.classList.add("filled");
+                        } else if (values[index] === "lerner" || values[index] === "crossed") {
+                            dot.classList.add("lerner");
+                        }
+                    });
+                }
+            });
 
-      await set(ref(db, `administracion/registros/${pjId}`), {
-        estado: "finalizado",
-        fecha: new Date().toISOString(),
-        id_ficha: pjId,
-        juego: "vampiro_sabbat",
-        usuario_foro: usuario
-      });
+            document.querySelectorAll(".health-checkbox").forEach(chk => {
+                if (data[chk.id] === "filled") {
+                    chk.classList.add("filled");
+                } else {
+                    chk.classList.remove("filled");
+                }
+            });
 
-      try {
-        await remove(ref(db, `fichas/vampiro_borradores/${pjId}`));
-      } catch (e) {
-        console.warn("Intento de eliminación de borrador omitido:", e);
-      }
+            window.actualizarValoresGeneracion();
+            alert(`Ficha '${pjId}' cargada correctamente.`);
 
-      if (!document.body.classList.contains('modo-admin')) {
-        aplicarReglasPermisosUsuario();
-      }
-      alert("¡Éxito! La ficha ha sido finalizada y actualizada en el sistema.");
-    } catch (err) {
-      console.error("Error al finalizar ficha:", err);
-      alert("Error: No se pudo finalizar el envío de la ficha: " + err.message);
-    }
-  };
+        } catch (error) {
+            console.error("Error al cargar:", error);
+            alert("Ocurrió un error al cargar la ficha.");
+        }
+    };
 
-  window.cargarModoLecturaAdmin = async function(idManual, ramaManual, silencioso = false) {
-    const esNarrador = await esNarradorAutorizado();
-    if (!esNarrador) {
-      if (!silencioso) alert("Acceso restringido: Solo el Narrador puede desbloquear la edición total de esta ficha.");
-      return;
-    }
-
-    document.body.classList.add('modo-admin');
-    await window.cargarFicha(idManual, ramaManual);
-    desbloquearFichaCompletaNarrador();
-    if (!silencioso) {
-      alert("Modo Narrador Activado: Toda la ficha ha sido desbloqueada para edición.");
-    }
-  };
-
-  async function procesarUrl() {
-    actualizarDisplayUsuario();
-
-    const urlParams = new URLSearchParams(window.location.search);
-    let idParam = urlParams.get('id');
-    const ramaParam = urlParams.get('rama');
-    const modeParam = urlParams.get('mode');
-
-    if (idParam) {
-      if (idParam.includes('/')) {
-        idParam = idParam.split('/').pop();
-      }
-
-      document.getElementById('pj-id').value = idParam;
-
-      if (modeParam === 'read' || modeParam === 'edit') {
-        await window.cargarModoLecturaAdmin(idParam, ramaParam, true);
-      } else {
-        await window.cargarFicha(idParam, ramaParam);
-      }
-    }
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', procesarUrl);
-  } else {
-    procesarUrl();
-  }
+    window.addEventListener("DOMContentLoaded", () => {
+        setupDots();
+        initUser();
+    });
 </script>
 
 </body>
