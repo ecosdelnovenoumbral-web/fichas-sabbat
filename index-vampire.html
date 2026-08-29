@@ -711,7 +711,7 @@
     return texto ? texto.toLowerCase().replace(/[^a-z0-9]/g, "") : "";
   }
 
-function obtenerUsuarioActivo() {
+  function obtenerUsuarioActivo() {
     const urlParams = new URLSearchParams(window.location.search);
     let usuarioUrl = urlParams.get('user') || urlParams.get('usuario');
     
@@ -726,7 +726,7 @@ function obtenerUsuarioActivo() {
     return "invitado";
   }
 
-    // Listener de PostMessage para capturar el usuario desde Foroactivo
+  // Listener de PostMessage para capturar el usuario desde Foroactivo
   window.addEventListener("message", (event) => {
     if (event.data && event.data.type === "USER_DATA" && event.data.username) {
       window.usuarioCapturadoPostMessage = event.data.username;
@@ -947,8 +947,10 @@ function obtenerUsuarioActivo() {
     const usuarioBase = esNarrador ? jugadorCampo : usuarioActivo;
     const usuarioLimpio = limpiarTexto(usuarioBase);
 
+    const dbRef = ref(db);
+
+    // Si no tiene un ID ingresado manualmente, se genera uno secuencial evitando colisiones
     if (!pjId) {
-      const dbRef = ref(db);
       try {
         const snapshot = await get(child(dbRef, `control_usuarios/${usuarioLimpio}/sabbat_count`));
         let count = 1;
@@ -956,8 +958,20 @@ function obtenerUsuarioActivo() {
           count = snapshot.val() + 1;
         }
         
-        const numFormatted = String(count).padStart(3, '0');
+        let numFormatted = String(count).padStart(3, '0');
         pjId = `sabbat-${usuarioLimpio}-${numFormatted}`;
+
+        // Validación para evitar sobreescribir registros existentes en caso de descuadre
+        let borradorExistente = await get(child(dbRef, `fichas/vampiro_borradores/${pjId}`));
+        let finalizadoExistente = await get(child(dbRef, `fichas/vampiro_finalizadas/${pjId}`));
+
+        while (borradorExistente.exists() || finalizadoExistente.exists()) {
+          count++;
+          numFormatted = String(count).padStart(3, '0');
+          pjId = `sabbat-${usuarioLimpio}-${numFormatted}`;
+          borradorExistente = await get(child(dbRef, `fichas/vampiro_borradores/${pjId}`));
+          finalizadoExistente = await get(child(dbRef, `fichas/vampiro_finalizadas/${pjId}`));
+        }
         
         await set(ref(db, `control_usuarios/${usuarioLimpio}/sabbat_count`), count);
         document.getElementById("pj-id").value = pjId;
