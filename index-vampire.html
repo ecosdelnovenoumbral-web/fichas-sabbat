@@ -527,7 +527,7 @@
         <table id="tabla-combate">
             <tr>
                 <th>Arma / Ataque</th>
-                <th>Dificultad</th>
+                <th>Ocultación</th>
                 <th>Daño</th>
                 <th>Alcance</th>
                 <th>Cadencia</th>
@@ -713,6 +713,19 @@
     const urlParams = new URLSearchParams(window.location.search);
     let usuarioUrl = urlParams.get('user') || urlParams.get('usuario');
     
+    // Si viene en el parámetro auth (panel de narrador)
+    const tokenUrl = urlParams.get('auth') || sessionStorage.getItem('narrador_auth');
+    if (tokenUrl && (!usuarioUrl || usuarioUrl === "invitado")) {
+      try {
+        const decodedData = atob(tokenUrl).split(":");
+        if (decodedData[1] && decodedData[1].trim() !== "") {
+          usuarioUrl = decodedData[1].trim();
+        }
+      } catch (e) {
+        console.warn("No se pudo extraer usuario del token auth:", e);
+      }
+    }
+
     if (usuarioUrl && usuarioUrl.trim() !== "") {
       return usuarioUrl.trim();
     }
@@ -927,7 +940,6 @@
 
     let pjId = document.getElementById("pj-id").value.trim();
 
-    // Generar ID de borrador automáticamente si está vacío
     if (!pjId) {
       pjId = `sabbat-${usuarioLimpio}-001`;
       document.getElementById("pj-id").value = pjId;
@@ -936,6 +948,7 @@
     const datos = recolectarDatosFicha();
 
     try {
+      // Guardado exclusivo en borrador para permitir la modificación dinámica de puntos y combate
       const rutaDestino = `fichas/vampiro_borradores/${pjId}`;
       await set(ref(db, rutaDestino), datos);
       alert(`¡Guardado exitoso en borradores!\nID asignado: ${pjId}`);
@@ -974,13 +987,13 @@
         snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
         origen = "borrador";
       } else {
-        snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
+        snapshot = await get(child(dbRef, `fichas/vampiro_finalizadas/${targetKey}`));
         if (snapshot.exists()) {
-          origen = "borrador";
+          origen = "finalizado";
         } else {
-          snapshot = await get(child(dbRef, `fichas/vampiro_finalizadas/${targetKey}`));
+          snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
           if (snapshot.exists()) {
-            origen = "finalizado";
+            origen = "borrador";
           }
         }
       }
