@@ -748,7 +748,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-  import { getDatabase, ref, set, get, child, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+  import { getDatabase, ref, set, get, child, remove, runTransaction } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDida046uOTvsTdYeJWQ3AscySBrVgGri4",
@@ -1012,9 +1012,21 @@
 
     let pjId = document.getElementById("pj-id").value.trim();
 
+    // Si el ID no está definido, se genera uno correlativo utilizando un contador en Firebase
     if (!pjId) {
-      pjId = `sabbat-${usuarioLimpio}-001`;
-      document.getElementById("pj-id").value = pjId;
+      try {
+        const contadorRef = ref(db, `contadores/sabbat/${usuarioLimpio}`);
+        const result = await runTransaction(contadorRef, (currentVal) => {
+          return (currentVal || 0) + 1;
+        });
+        const numSecuencia = String(result.snapshot.val()).padStart(3, '0');
+        pjId = `sabbat-${usuarioLimpio}-${numSecuencia}`;
+        document.getElementById("pj-id").value = pjId;
+      } catch (e) {
+        console.error("Error al obtener secuencial del contador:", e);
+        pjId = `sabbat-${usuarioLimpio}-001`;
+        document.getElementById("pj-id").value = pjId;
+      }
     }
 
     const datos = recolectarDatosFicha();
