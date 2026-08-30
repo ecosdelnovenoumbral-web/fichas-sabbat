@@ -748,7 +748,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-  import { getDatabase, ref, set, get, child, remove, runTransaction } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+  import { getDatabase, ref, set, get, child, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDida046uOTvsTdYeJWQ3AscySBrVgGri4",
@@ -1011,29 +1011,36 @@
     const usuarioLimpio = limpiarTexto(usuarioBase);
 
     let pjId = document.getElementById("pj-id").value.trim();
-
-    // Si el ID no está definido, se genera uno correlativo utilizando un contador en Firebase
-    if (!pjId) {
-      try {
-        const contadorRef = ref(db, `contadores/sabbat/${usuarioLimpio}`);
-        const result = await runTransaction(contadorRef, (currentVal) => {
-          return (currentVal || 0) + 1;
-        });
-        const numSecuencia = String(result.snapshot.val()).padStart(3, '0');
-        pjId = `sabbat-${usuarioLimpio}-${numSecuencia}`;
-        document.getElementById("pj-id").value = pjId;
-      } catch (e) {
-        console.error("Error al obtener secuencial del contador:", e);
-        pjId = `sabbat-${usuarioLimpio}-001`;
-        document.getElementById("pj-id").value = pjId;
-      }
-    }
-
-    const datos = recolectarDatosFicha();
+    const dbRef = ref(db);
 
     try {
+      // 1. Si no hay ID, consultamos el contador para generar el correlativo
+      if (!pjId) {
+        const snapshotContador = await get(child(dbRef, `control_usuarios/${usuarioLimpio}/sabbat_count`));
+        let cuentaActual = snapshotContador.exists() ? parseInt(snapshotContador.val()) : 0;
+        let nuevoNumero = cuentaActual + 1;
+        let numPadded = String(nuevoNumero).padStart(3, '0');
+
+        pjId = `sabbat-${usuarioLimpio}-${numPadded}`;
+        document.getElementById("pj-id").value = pjId;
+
+        // Actualizar el contador en Firebase
+        await set(ref(db, `control_usuarios/${usuarioLimpio}/sabbat_count`), nuevoNumero);
+      } else {
+        // 2. Si el ID ya existe en borrador o finalizado, pedir confirmación antes de sobreescribir
+        const snapBorrador = await get(child(dbRef, `fichas/vampiro_borradores/${pjId}`));
+        const snapFinal = await get(child(dbRef, `fichas/vampiro_finalizadas/${pjId}`));
+
+        if (snapBorrador.exists() || snapFinal.exists()) {
+          const confirmar = confirm(`La ficha con ID "${pjId}" ya existe. ¿Deseas sobreescribirla?`);
+          if (!confirmar) return false;
+        }
+      }
+
+      const datos = recolectarDatosFicha();
       const rutaDestino = `fichas/vampiro_borradores/${pjId}`;
       await set(ref(db, rutaDestino), datos);
+
       alert(`¡Guardado exitoso en borradores!\nID asignado: ${pjId}`);
       return true;
     } catch (err) {
