@@ -214,6 +214,7 @@
             letter-spacing: 1px;
         }
         
+        /* CONTROL Y LEYENDA DE SALUD */
         .health-container {
             display: flex;
             flex-direction: column;
@@ -559,6 +560,7 @@
                 <div class="health-row"><span class="health-label">Torpo/Destruido</span><span class="health-penalty"></span><span class="health-checkbox-container"><span class="health-checkbox" id="salud-8"></span></span></div>
             </div>
 
+            <!-- LEYENDA DE SALUD AL PIE DEL CUADRO -->
             <div class="health-legend">
                 <div class="health-legend-title">Leyenda:</div>
                 <div class="health-legend-item"><span class="health-checkbox bashing"></span> = Contundente ( Bashing )</div>
@@ -676,6 +678,7 @@
         });
     });
 
+    // CICLO DE ESTADOS DE SALUD: vacio -> bashing (/) -> lethal (x) -> aggravated (punto relleno) -> vacio
     document.querySelectorAll('.health-container .health-checkbox').forEach(checkbox => {
         checkbox.addEventListener('click', function() {
             if (this.dataset.readonly === "true") return;
@@ -858,28 +861,34 @@
   function aplicarReglasPermisosUsuario() {
     if (document.body.classList.contains('modo-admin')) return;
 
+    // 1. Bloquear absolutamente todos los inputs
     document.querySelectorAll(".container input").forEach(input => {
       input.readOnly = true;
     });
 
+    // 2. Desactivar todos los dots (puntos)
     document.querySelectorAll(".dot").forEach(el => {
       el.dataset.readonly = "true";
       el.style.cursor = "not-allowed";
     });
 
+    // 3. Desactivar la salud
     document.querySelectorAll(".health-container .health-checkbox").forEach(el => {
       el.dataset.readonly = "true";
       el.style.cursor = "not-allowed";
     });
 
+    // 4. Excepciones de juego: Disponibles de Voluntad y Sangre
     const wpDisp = document.getElementById("willpower-disp");
     const bloodDisp = document.getElementById("blood-disp");
     if (wpDisp) wpDisp.readOnly = false;
     if (bloodDisp) bloodDisp.readOnly = false;
 
+    // 5. Excepciones: Experiencia de escena
     const expEscena = document.getElementById("exp-escena");
     if (expEscena) expEscena.readOnly = false;
 
+    // 6. Inventario y Combate: Permitir escribir solo en celdas vacías
     document.querySelectorAll(".campo-combate, .campo-inventario").forEach(input => {
       if (!input.value || input.value.trim() === "") {
         input.readOnly = false;
@@ -993,50 +1002,54 @@
     const jugadorInput = document.getElementById("jugador");
     let jugadorCampo = jugadorInput ? jugadorInput.value.trim() : "";
 
-    if (!jugadorCampo && usuarioActivo !== "invitado") {
-      jugadorCampo = usuarioActivo;
-      if (jugadorInput) jugadorInput.value = usuarioActivo;
+    // 1. Validar que el usuario no sea "invitado"
+    if (limpiarTexto(usuarioActivo) === "invitado") {
+      alert("Solo pueden guardar fichas aquellos usuarios que estén debidamente registrados.");
+      return false;
+    }
+
+    let pjId = document.getElementById("pj-id").value.trim();
+
+    // 2. Validar que Jugador, Usuario Activo y el ID contengan la misma identidad
+    const userLimpio = limpiarTexto(usuarioActivo);
+    const jugadorLimpio = limpiarTexto(jugadorCampo);
+
+    // Extraer el usuario alojado dentro de la estructura del ID si existe (ejemplo: sabbat-usuario-001)
+    let usuarioEnId = "";
+    if (pjId) {
+      const partesId = pjId.split("-");
+      if (partesId.length >= 2) {
+        usuarioEnId = limpiarTexto(partesId[1]);
+      } else {
+        usuarioEnId = limpiarTexto(pjId);
+      }
+    }
+
+    const coincideJugador = userLimpio === jugadorLimpio;
+    const coincideId = !pjId || (usuarioEnId === userLimpio);
+
+    if (!coincideJugador || !coincideId) {
+      alert("No puedes guardar ni sobreescribir fichas que pertenecen a otro usuario.");
+      return false;
     }
 
     const usuarioBase = jugadorCampo || usuarioActivo || "usuario";
-    const usuarioLimpioActivo = limpiarTexto(usuarioBase);
-
-    let pjId = document.getElementById("pj-id").value.trim();
+    const usuarioLimpio = limpiarTexto(usuarioBase);
     const dbRef = ref(db);
-    const esNarrador = await esNarradorAutorizado();
 
     try {
-      // 1. Si no hay ID, generamos uno nuevo automáticamente asociándolo al usuario activo
+      // Si no hay ID, consultamos el contador para generar el correlativo
       if (!pjId) {
-        const snapshotContador = await get(child(dbRef, `control_usuarios/${usuarioLimpioActivo}/sabbat_count`));
+        const snapshotContador = await get(child(dbRef, `control_usuarios/${usuarioLimpio}/sabbat_count`));
         let cuentaActual = snapshotContador.exists() ? parseInt(snapshotContador.val()) : 0;
         let nuevoNumero = cuentaActual + 1;
         let numPadded = String(nuevoNumero).padStart(3, '0');
 
-        pjId = `sabbat-${usuarioLimpioActivo}-${numPadded}`;
+        pjId = `sabbat-${usuarioLimpio}-${numPadded}`;
         document.getElementById("pj-id").value = pjId;
 
-        await set(ref(db, `control_usuarios/${usuarioLimpioActivo}/sabbat_count`), nuevoNumero);
+        await set(ref(db, `control_usuarios/${usuarioLimpio}/sabbat_count`), nuevoNumero);
       } else {
-        // 2. Validación TRIPLE del ID ingresado: [juego, usuario, correlativo]
-        const partesId = pjId.split("-");
-        
-        if (partesId.length < 3) {
-          alert(`Formato de ID inválido. Debe tener la estructura: juego-usuario-numero (Ej: sabbat-${usuarioLimpioActivo}-001)`);
-          return false;
-        }
-
-        const usuarioEnId = partesId.slice(1, -1).join("-");
-        const usuarioLimpioId = limpiarTexto(usuarioEnId);
-
-        // Si el usuario no es narrador, se valida estrictamente que el usuario del ID, el usuario activo y el campo Jugador coincidan
-        if (!esNarrador) {
-          if (limpiarTexto(jugadorCampo) !== usuarioLimpioActivo || usuarioLimpioId !== usuarioLimpioActivo) {
-            alert(`Error de Validación Triple:\n- Usuario Activo: ${usuarioLimpioActivo}\n- Campo Jugador: ${limpiarTexto(jugadorCampo)}\n- Usuario en ID: ${usuarioLimpioId}\n\nNo puedes guardar ni sobreescribir fichas que pertenecen a otro usuario.`);
-            return false;
-          }
-        }
-
         const snapBorrador = await get(child(dbRef, `fichas/vampiro_borradores/${pjId}`));
         const snapFinal = await get(child(dbRef, `fichas/vampiro_finalizadas/${pjId}`));
 
@@ -1072,6 +1085,7 @@
     }
     document.getElementById("pj-id").value = targetKey;
 
+    // Bloqueo preventivo por latencia de red
     if (!document.body.classList.contains('modo-admin')) {
       aplicarReglasPermisosUsuario();
     }
@@ -1090,6 +1104,7 @@
         snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
         if (snapshot.exists()) origen = "borrador";
       } else {
+        // Consultar primero la colección de finalizadas
         snapshot = await get(child(dbRef, `fichas/vampiro_finalizadas/${targetKey}`));
         if (snapshot.exists()) {
           origen = "finalizado";
@@ -1104,6 +1119,7 @@
       if (snapshot && snapshot.exists()) {
         poblarDatosEnFicha(snapshot.val());
 
+        // Aplicación estricta de permisos según la rama confirmada por Firebase
         if (esNarrador || document.body.classList.contains('modo-admin')) {
           desbloquearFichaCompletaNarrador();
         } else {
@@ -1182,6 +1198,7 @@
   async function procesarUrl() {
     actualizarDisplayUsuario();
 
+    // Bloqueo de seguridad preventivo previo al fetch
     aplicarReglasPermisosUsuario();
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -1202,6 +1219,7 @@
         await window.cargarFicha(idParam, ramaParam);
       }
     } else {
+      // Si no viene ID por URL, asumimos borrador nuevo y desbloqueamos
       desbloquearFichaCompletaUsuario();
     }
   }
