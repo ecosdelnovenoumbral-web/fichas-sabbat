@@ -281,6 +281,19 @@
             line-height: 1.3;
         }
 
+        /* IMAGEN / ICONO PUNTO RELLENO PARA SALUD EN LEYENDA */
+        .img-punto-agravado {
+            display: inline-block;
+            width: 11px;
+            height: 11px;
+            background-color: #8a0303;
+            border: 1px solid #ff4d4d;
+            border-radius: 50%;
+            vertical-align: middle;
+            margin: 0 2px;
+            box-shadow: 0 0 3px rgba(255, 77, 77, 0.6);
+        }
+
         .merit-defect-row {
             display: flex;
             gap: 10px;
@@ -355,6 +368,7 @@
         <div class="section-box">
             <div class="row"><span>Nombre:</span> <input type="text" id="nombre"></div>
             <div class="row"><span>Jugador:</span> <input type="text" id="jugador"></div>
+            <div class="row"><span>Crónica:</span> <input type="text" id="cronica"></div>
         </div>
         <div class="section-box">
             <div class="row"><span>Naturaleza:</span> <input type="text" id="naturaleza"></div>
@@ -363,11 +377,7 @@
         </div>
         <div class="section-box">
             <div class="row"><span>Clan:</span> <input type="text" id="clan"></div>
-            <div class="row">
-                <span>Gen:</span>
-                <input type="text" id="gen-texto" style="flex: 1; min-width: 0;">
-                <input type="number" id="gen-input" min="1" max="16" value="13" oninput="actualizarValoresGeneracion()">
-            </div>
+            <div class="row"><span>Generación:</span> <input type="text" id="gen-texto"> <input type="number" id="gen-input" value="13" min="3" max="15" style="display:none;"></div>
             <div class="row"><span>Sire:</span> <input type="text" id="sire"></div>
         </div>
     </div>
@@ -375,813 +385,616 @@
     <h2>Atributos</h2>
     <div class="grid-3">
         <div class="section-box">
-            <h3>Físicos</h3>
-            <div class="row"><span>Fuerza</span> <div class="dots atributo-dots" id="fuerza"><span class="dot filled base-point"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Destreza</span> <div class="dots atributo-dots" id="destreza"><span class="dot filled base-point"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Resistencia</span> <div class="dots atributo-dots" id="resistencia"><span class="dot filled base-point"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="box-title">Físicos</div>
+            <div class="row"><span>Fuerza</span><div class="dots" data-id="fuerza" data-min="1"></div></div>
+            <div class="row"><span>Destreza</span><div class="dots" data-id="destreza" data-min="1"></div></div>
+            <div class="row"><span>Resistencia</span><div class="dots" data-id="resistencia" data-min="1"></div></div>
         </div>
         <div class="section-box">
-            <h3>Sociales</h3>
-            <div class="row"><span>Carisma</span> <div class="dots atributo-dots" id="carisma"><span class="dot filled base-point"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Manipulación</span> <div class="dots atributo-dots" id="manipulacion"><span class="dot filled base-point"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Apariencia</span> <div class="dots atributo-dots" id="apariencia"><span class="dot filled base-point"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="box-title">Sociales</div>
+            <div class="row"><span>Carisma</span><div class="dots" data-id="carisma" data-min="1"></div></div>
+            <div class="row"><span>Manipulación</span><div class="dots" data-id="manipulacion" data-min="1"></div></div>
+            <div class="row"><span>Apariencia</span><div class="dots" data-id="apariencia" data-min="1"></div></div>
         </div>
         <div class="section-box">
-            <h3>Mentales</h3>
-            <div class="row"><span>Percepción</span> <div class="dots atributo-dots" id="percepcion"><span class="dot filled base-point"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Inteligencia</span> <div class="dots atributo-dots" id="inteligencia"><span class="dot filled base-point"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Astucia</span> <div class="dots atributo-dots" id="astucia"><span class="dot filled base-point"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="box-title">Mentales</div>
+            <div class="row"><span>Percepción</span><div class="dots" data-id="percepcion" data-min="1"></div></div>
+            <div class="row"><span>Inteligencia</span><div class="dots" data-id="inteligencia" data-min="1"></div></div>
+            <div class="row"><span>Astucia</span><div class="dots" data-id="astucia" data-min="1"></div></div>
         </div>
     </div>
 
     <h2>Habilidades</h2>
     <div class="grid-3">
         <div class="section-box">
-            <h3>Talentos</h3>
-            <div class="row"><span>Alerta</span> <div class="dots" id="alerta"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Atletismo</span> <div class="dots" id="atletismo"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Callejeo</span> <div class="dots" id="callejeo"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Consciencia</span> <div class="dots" id="consciencia"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Empatía</span> <div class="dots" id="empatia"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Expresión</span> <div class="dots" id="expresion"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Intimidación</span> <div class="dots" id="intimidacion"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Liderazgo</span> <div class="dots" id="liderazgo"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Pelea</span> <div class="dots" id="pelea"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Subterfugio</span> <div class="dots" id="subterfugio"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><input type="text" id="talento-ext-1"> <div class="dots" id="talento-ext-dots-1"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="box-title">Talentos</div>
+            <div class="row"><span>Alerta</span><div class="dots" data-id="alerta"></div></div>
+            <div class="row"><span>Atletismo</span><div class="dots" data-id="atletismo"></div></div>
+            <div class="row"><span>Callejeo</span><div class="dots" data-id="callejeo"></div></div>
+            <div class="row"><span>Consciencia</span><div class="dots" data-id="consciencia"></div></div>
+            <div class="row"><span>Empatía</span><div class="dots" data-id="empatia"></div></div>
+            <div class="row"><span>Expresión</span><div class="dots" data-id="expresion"></div></div>
+            <div class="row"><span>Intimidación</span><div class="dots" data-id="intimidacion"></div></div>
+            <div class="row"><span>Liderazgo</span><div class="dots" data-id="liderazgo"></div></div>
+            <div class="row"><span>Pelea</span><div class="dots" data-id="pelea"></div></div>
+            <div class="row"><span>Subterfugio</span><div class="dots" data-id="subterfugio"></div></div>
+            <div class="row"><input type="text" id="talento-ext-1" placeholder="Especialidad..."><div class="dots" data-id="talento-ext-dots-1"></div></div>
         </div>
         <div class="section-box">
-            <h3>Técnicas</h3>
-            <div class="row"><span>Armas de Fuego</span> <div class="dots" id="armas-fuego"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Armas C/C</span> <div class="dots" id="armas-cc"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Artesanía</span> <div class="dots" id="artesania"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Conducir</span> <div class="dots" id="conducir"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Etiqueta</span> <div class="dots" id="etiqueta"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Interpretación</span> <div class="dots" id="interpretacion"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Latrocinio</span> <div class="dots" id="latrocinio"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Sigilo</span> <div class="dots" id="sigilo"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Supervivencia</span> <div class="dots" id="supervivencia"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Trato con Anim.</span> <div class="dots" id="trato-animales"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><input type="text" id="tecnica-ext-1"> <div class="dots" id="tecnica-ext-dots-1"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="box-title">Técnicas</div>
+            <div class="row"><span>Armas C. C.</span><div class="dots" data-id="armas-cc"></div></div>
+            <div class="row"><span>Armas de Fuego</span><div class="dots" data-id="armas-fuego"></div></div>
+            <div class="row"><span>Artesanía</span><div class="dots" data-id="artesania"></div></div>
+            <div class="row"><span>Conducir</span><div class="dots" data-id="conducir"></div></div>
+            <div class="row"><span>Etiqueta</span><div class="dots" data-id="etiqueta"></div></div>
+            <div class="row"><span>Interpretación</span><div class="dots" data-id="interpretacion"></div></div>
+            <div class="row"><span>Latrocinio</span><div class="dots" data-id="latrocinio"></div></div>
+            <div class="row"><span>Sigilo</span><div class="dots" data-id="sigilo"></div></div>
+            <div class="row"><span>Supervivencia</span><div class="dots" data-id="supervivencia"></div></div>
+            <div class="row"><span>Trato c/ Animales</span><div class="dots" data-id="trato-animales"></div></div>
+            <div class="row"><input type="text" id="tecnica-ext-1" placeholder="Especialidad..."><div class="dots" data-id="tecnica-ext-dots-1"></div></div>
         </div>
         <div class="section-box">
-            <h3>Conocimientos</h3>
-            <div class="row"><span>Academicismo</span> <div class="dots" id="academicismo"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Ciencias</span> <div class="dots" id="ciencias"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Finanzas</span> <div class="dots" id="finanzas"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Informática</span> <div class="dots" id="informatica"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Investigación</span> <div class="dots" id="investigacion"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Leyes</span> <div class="dots" id="leyes"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Lingüística</span> <div class="dots" id="linguistica"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Medicina</span> <div class="dots" id="medicina"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Ocultismo</span> <div class="dots" id="ocultismo"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Política</span> <div class="dots" id="politica"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><span>Tecnología</span> <div class="dots" id="tecnologia"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="box-title">Conocimientos</div>
+            <div class="row"><span>Academicismo</span><div class="dots" data-id="academicismo"></div></div>
+            <div class="row"><span>Ciencias</span><div class="dots" data-id="ciencias"></div></div>
+            <div class="row"><span>Finanzas</span><div class="dots" data-id="finanzas"></div></div>
+            <div class="row"><span>Informática</span><div class="dots" data-id="informatica"></div></div>
+            <div class="row"><span>Investigación</span><div class="dots" data-id="investigacion"></div></div>
+            <div class="row"><span>Leyes</span><div class="dots" data-id="leyes"></div></div>
+            <div class="row"><span>Lingüística</span><div class="dots" data-id="linguistica"></div></div>
+            <div class="row"><span>Medicina</span><div class="dots" data-id="medicina"></div></div>
+            <div class="row"><span>Ocultismo</span><div class="dots" data-id="ocultismo"></div></div>
+            <div class="row"><span>Política</span><div class="dots" data-id="politica"></div></div>
+            <div class="row"><span>Tecnología</span><div class="dots" data-id="tecnologia"></div></div>
         </div>
     </div>
 
     <h2>Ventajas</h2>
     <div class="grid-3">
         <div class="section-box">
-            <h3>Disciplinas</h3>
-            <div class="row"><input type="text" id="disc-nombre-1"> <div class="dots" id="disc-dots-1"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><input type="text" id="disc-nombre-2"> <div class="dots" id="disc-dots-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><input type="text" id="disc-nombre-3"> <div class="dots" id="disc-dots-3"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><input type="text" id="disc-nombre-4"> <div class="dots" id="disc-dots-4"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><input type="text" id="disc-nombre-5"> <div class="dots" id="disc-dots-5"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><input type="text" id="disc-nombre-6"> <div class="dots" id="disc-dots-6"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="box-title">Disciplinas</div>
+            <div class="row"><input type="text" id="disc-nombre-1"><div class="dots" data-id="disc-dots-1"></div></div>
+            <div class="row"><input type="text" id="disc-nombre-2"><div class="dots" data-id="disc-dots-2"></div></div>
+            <div class="row"><input type="text" id="disc-nombre-3"><div class="dots" data-id="disc-dots-3"></div></div>
+            <div class="row"><input type="text" id="disc-nombre-4"><div class="dots" data-id="disc-dots-4"></div></div>
+            <div class="row"><input type="text" id="disc-nombre-5"><div class="dots" data-id="disc-dots-5"></div></div>
+            <div class="row"><input type="text" id="disc-nombre-6"><div class="dots" data-id="disc-dots-6"></div></div>
+        </div>
+        <div class="section-box">
+            <div class="box-title">Trasfondos</div>
+            <div class="row"><input type="text" id="tras-nombre-1"><div class="dots" data-id="tras-dots-1"></div></div>
+            <div class="row"><input type="text" id="tras-nombre-2"><div class="dots" data-id="tras-dots-2"></div></div>
+            <div class="row"><input type="text" id="tras-nombre-3"><div class="dots" data-id="tras-dots-3"></div></div>
+            <div class="row"><input type="text" id="tras-nombre-4"><div class="dots" data-id="tras-dots-4"></div></div>
+            <div class="row"><input type="text" id="tras-nombre-5"><div class="dots" data-id="tras-dots-5"></div></div>
+            <div class="row"><input type="text" id="tras-nombre-6"><div class="dots" data-id="tras-dots-6"></div></div>
+        </div>
+        <div class="section-box">
+            <div class="box-title">Virtudes</div>
+            <div class="row"><input type="text" id="virtud-nombre-1" value="Conciencia / Convicción"><div class="dots" data-id="virtud-dots-1"></div></div>
+            <div class="row"><input type="text" id="virtud-nombre-2" value="Autocontrol / Instinto"><div class="dots" data-id="virtud-dots-2"></div></div>
+            <div class="row"><span>Coraje</span><div class="dots" data-id="virtud-dots-3"></div></div>
+        </div>
+    </div>
+
+    <h2>Otros Rasgos y Registros</h2>
+    <div class="grid-3">
+        <div class="section-box">
+            <div class="box-title">Otros Rasgos</div>
+            <div class="row"><input type="text" id="otros-nombre-1"><div class="dots" data-id="otros-dots-1"></div></div>
+            <div class="row"><input type="text" id="otros-nombre-2"><div class="dots" data-id="otros-dots-2"></div></div>
+            <div class="row"><input type="text" id="otros-nombre-3"><div class="dots" data-id="otros-dots-3"></div></div>
+            <div class="row"><input type="text" id="otros-nombre-4"><div class="dots" data-id="otros-dots-4"></div></div>
+            <div class="row"><input type="text" id="otros-nombre-5"><div class="dots" data-id="otros-dots-5"></div></div>
+            <div class="row"><input type="text" id="otros-nombre-6"><div class="dots" data-id="otros-dots-6"></div></div>
         </div>
 
         <div class="section-box">
-            <h3>Trasfondos</h3>
-            <div class="row"><input type="text" id="tras-nombre-1"> <div class="dots" id="tras-dots-1"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><input type="text" id="tras-nombre-2"> <div class="dots" id="tras-dots-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><input type="text" id="tras-nombre-3"> <div class="dots" id="tras-dots-3"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><input type="text" id="tras-nombre-4"> <div class="dots" id="tras-dots-4"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><input type="text" id="tras-nombre-5"> <div class="dots" id="tras-dots-5"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><input type="text" id="tras-nombre-6"> <div class="dots" id="tras-dots-6"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+            <div class="box-title">Senda de la Iluminación</div>
+            <div class="row" style="justify-content:center; margin-bottom:10px;">
+                <input type="text" id="senda-nombre" placeholder="Nombre de la Senda..." style="text-align:center;">
+            </div>
+            <div class="row" style="justify-content:center;">
+                <div class="dots" data-id="senda-dots" data-max="10"></div>
+            </div>
+            
+            <div class="box-title" style="margin-top:20px;">Fuerza de Voluntad</div>
+            <div class="row" style="justify-content:center;">
+                <div class="dots" data-id="willpower-max-dots" data-max="10"></div>
+            </div>
+            <div class="row" style="justify-content:center; margin-top:5px;">
+                <span>Disponible:</span>
+                <input type="number" id="willpower-disp" value="10" min="0" max="10">
+                <span>/</span>
+                <input type="number" id="willpower-max" value="10" min="0" max="10" readonly style="border:none; background:transparent;">
+            </div>
+
+            <div class="box-title" style="margin-top:20px;">Reserva de Sangre</div>
+            <div class="row" style="justify-content:center;">
+                <span>Disponible:</span>
+                <input type="number" id="blood-disp" value="10" min="0" max="50">
+                <span>/ Max:</span>
+                <input type="number" id="blood-max" value="10" min="0" max="50">
+            </div>
+            <div class="row" style="justify-content:center; margin-top:5px;">
+                <span>Puntos/Turno:</span>
+                <input type="number" id="blood-turn" value="1" min="1" max="10">
+            </div>
         </div>
 
         <div class="section-box">
-            <h3>Virtudes</h3>
-            <div class="row">
-                <input type="text" id="virtud-nombre-1" placeholder="Conciencia">
-                <div class="dots" id="virtud-dots-1"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+            <div class="box-title">Salud</div>
+            <div class="health-container">
+                <div class="health-row"><span class="health-label">Magullado</span><span class="health-penalty">0</span><div class="health-checkbox-container"><div class="health-checkbox" data-id="salud-1"></div></div></div>
+                <div class="health-row"><span class="health-label">Lacerado</span><span class="health-penalty">-1</span><div class="health-checkbox-container"><div class="health-checkbox" data-id="salud-2"></div></div></div>
+                <div class="health-row"><span class="health-label">Lesionado</span><span class="health-penalty">-1</span><div class="health-checkbox-container"><div class="health-checkbox" data-id="salud-3"></div></div></div>
+                <div class="health-row"><span class="health-label">Herido</span><span class="health-penalty">-2</span><div class="health-checkbox-container"><div class="health-checkbox" data-id="salud-4"></div></div></div>
+                <div class="health-row"><span class="health-label">Gravemente Herido</span><span class="health-penalty">-2</span><div class="health-checkbox-container"><div class="health-checkbox" data-id="salud-5"></div></div></div>
+                <div class="health-row"><span class="health-label">Incapacitado</span><span class="health-penalty">-5</span><div class="health-checkbox-container"><div class="health-checkbox" data-id="salud-6"></div></div></div>
+                <div class="health-row"><span class="health-label">Aletargado</span><span class="health-penalty">--</span><div class="health-checkbox-container"><div class="health-checkbox" data-id="salud-7"></div></div></div>
+                <div class="health-row"><span class="health-label">Muerto</span><span class="health-penalty">--</span><div class="health-checkbox-container"><div class="health-checkbox" data-id="salud-8"></div></div></div>
             </div>
-            <div class="row">
-                <input type="text" id="virtud-nombre-2" placeholder="Autocontrol">
-                <div class="dots" id="virtud-dots-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
-            </div>
-            <div class="row">
-                <span>Coraje</span>
-                <div class="dots" id="virtud-dots-3"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+            <div class="health-legend">
+                <strong>Daño:</strong><br>
+                Contundente: <strong>X</strong> | Letal: <strong>/</strong><br>
+                Agravado: <span class="img-punto-agravado"></span> (punto relleno)
             </div>
         </div>
     </div>
 
-    <h2>Senda, Sangre, Voluntad y Salud</h2>
-    <div class="grid-3">
+    <h2>Méritos y Defectos</h2>
+    <div class="grid-2">
         <div class="section-box">
-            <div class="box-title">Otros Rasgos</div>
-            <div class="row"><input type="text" id="otros-nombre-1"> <div class="dots" id="otros-dots-1"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><input type="text" id="otros-nombre-2"> <div class="dots" id="otros-dots-2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><input type="text" id="otros-nombre-3"> <div class="dots" id="otros-dots-3"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><input type="text" id="otros-nombre-4"> <div class="dots" id="otros-dots-4"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><input type="text" id="otros-nombre-5"> <div class="dots" id="otros-dots-5"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div class="row"><input type="text" id="otros-nombre-6"> <div class="dots" id="otros-dots-6"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
-            <div style="margin-top: 15px; font-size: 0.8rem; display: flex; flex-direction: column; gap: 8px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>Exp. Total:</span>
-                    <input type="number" id="exp-total" min="0" value="0">
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>Ganados Últ. Escena:</span>
-                    <input type="number" id="exp-escena" min="0" value="0">
-                </div>
-            </div>
+            <div class="box-title">Méritos</div>
+            <div class="merit-defect-row"><input type="text" class="merit-name" id="merito-nom-1" placeholder="Nombre..."><input type="number" class="merit-cost" id="merito-val-1" value="0"></div>
+            <div class="merit-defect-row"><input type="text" class="merit-name" id="merito-nom-2" placeholder="Nombre..."><input type="number" class="merit-cost" id="merito-val-2" value="0"></div>
+            <div class="merit-defect-row"><input type="text" class="merit-name" id="merito-nom-3" placeholder="Nombre..."><input type="number" class="merit-cost" id="merito-val-3" value="0"></div>
+            <div class="merit-defect-row"><input type="text" class="merit-name" id="merito-nom-4" placeholder="Nombre..."><input type="number" class="merit-cost" id="merito-val-4" value="0"></div>
+            <div class="merit-defect-row"><input type="text" class="merit-name" id="merito-nom-5" placeholder="Nombre..."><input type="number" class="merit-cost" id="merito-val-5" value="0"></div>
         </div>
-
         <div class="section-box">
-            <div style="margin-bottom: 12px; margin-top: 5px; text-align: center;">
-                <div style="font-size:0.85rem; font-weight:bold; margin-bottom:4px; font-family:var(--decorative-font); color:#fff;">Senda</div>
-                <div style="margin-bottom: 6px;">
-                    <input type="text" id="senda-nombre" placeholder="Escribir Senda..." style="text-align: center; width: 80%;">
-                </div>
-                <div style="display: inline-flex; justify-content: center; width: 100%;" class="dots" id="senda-dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
-            </div>
-            
-            <div style="margin-bottom: 12px;">
-                <div style="font-size:0.85rem; text-align:center; font-weight:bold; margin-bottom:4px; font-family:var(--decorative-font);">Willpower</div>
-                <div style="display: flex; justify-content: space-around; align-items: center; font-size: 0.75rem;">
-                    <div>MÁX:<br><input type="number" id="willpower-max" min="1" max="11" value="10" oninput="sincronizarWillpower()"></div>
-                    <div>DISP.:<br><input type="number" id="willpower-disp" min="0" max="11" value="10"></div>
-                </div>
-            </div>
-
-            <div>
-                <div style="font-size:0.85rem; text-align:center; font-weight:bold; margin-bottom:4px; font-family:var(--decorative-font);">Reserva de Sangre</div>
-                <div style="display: flex; justify-content: space-around; align-items: center; font-size: 0.75rem;">
-                    <div>MÁX:<br><input type="number" id="blood-max" min="1" max="50" value="10" readonly style="background:#1a1a1a; cursor:not-allowed;"></div>
-                    <div>DISP.:<br><input type="number" id="blood-disp" min="0" max="50" value="10"></div>
-                </div>
-                <div style="margin-top: 8px; text-align: center; font-size: 0.8rem; display: flex; justify-content: center; align-items: center; gap: 5px;">
-                    <span>Puntos / Turno:</span>
-                    <input type="text" id="blood-turn" value="1" readonly style="width: 35px; text-align: center; background:#121212; border:1px solid var(--accent-color); color:#fff; border-radius:3px; padding:2px;">
-                </div>
-            </div>
-        </div>
-
-        <div class="section-box">
-            <div class="box-title" style="font-family: var(--decorative-font);">Salud</div>
-            <div class="health-container">
-                <div class="health-row"><span class="health-label">Magullado</span><span class="health-penalty">(-0)</span><span class="health-checkbox-container"><span class="health-checkbox" id="salud-1"></span></span></div>
-                <div class="health-row"><span class="health-label">Lastimado</span><span class="health-penalty">(-1)</span><span class="health-checkbox-container"><span class="health-checkbox" id="salud-2"></span></span></div>
-                <div class="health-row"><span class="health-label">Lesionado</span><span class="health-penalty">(-1)</span><span class="health-checkbox-container"><span class="health-checkbox" id="salud-3"></span></span></div>
-                <div class="health-row"><span class="health-label">Herido</span><span class="health-penalty">(-2)</span><span class="health-checkbox-container"><span class="health-checkbox" id="salud-4"></span></span></div>
-                <div class="health-row"><span class="health-label">Malherido</span><span class="health-penalty">(-2)</span><span class="health-checkbox-container"><span class="health-checkbox" id="salud-5"></span></span></div>
-                <div class="health-row"><span class="health-label">Tullido</span><span class="health-penalty">(-5)</span><span class="health-checkbox-container"><span class="health-checkbox" id="salud-6"></span></span></div>
-                <div class="health-row"><span class="health-label">Incapacitado</span><span class="health-penalty"></span><span class="health-checkbox-container"><span class="health-checkbox" id="salud-7"></span></span></div>
-                <div class="health-row"><span class="health-label">Torpo/Destruido</span><span class="health-penalty"></span><span class="health-checkbox-container"><span class="health-checkbox" id="salud-8"></span></span></div>
-            </div>
-            <div class="health-legend">
-                <strong>Leyenda:</strong><br>
-                Letal = /<br>
-                contundente = x<br>
-                Agravado = un punto relleno
-            </div>
+            <div class="box-title">Defectos</div>
+            <div class="merit-defect-row"><input type="text" class="merit-name" id="defecto-nom-1" placeholder="Nombre..."><input type="number" class="merit-cost" id="defecto-val-1" value="0"></div>
+            <div class="merit-defect-row"><input type="text" class="merit-name" id="defecto-nom-2" placeholder="Nombre..."><input type="number" class="merit-cost" id="defecto-val-2" value="0"></div>
+            <div class="merit-defect-row"><input type="text" class="merit-name" id="defecto-nom-3" placeholder="Nombre..."><input type="number" class="merit-cost" id="defecto-val-3" value="0"></div>
+            <div class="merit-defect-row"><input type="text" class="merit-name" id="defecto-nom-4" placeholder="Nombre..."><input type="number" class="merit-cost" id="defecto-val-4" value="0"></div>
+            <div class="merit-defect-row"><input type="text" class="merit-name" id="defecto-nom-5" placeholder="Nombre..."><input type="number" class="merit-cost" id="defecto-val-5" value="0"></div>
         </div>
     </div>
 
     <h2>Combate e Inventario</h2>
-    <div class="section-box">
-        <table id="tabla-combate">
-            <tr>
-                <th>Arma / Ataque</th>
-                <th>Ocultación</th>
-                <th>Daño</th>
-                <th>Alcance</th>
-                <th>Cadencia</th>
-            </tr>
-            <tr>
-                <td><input type="text" id="arma-1-1" class="campo-combate"></td><td><input type="text" id="arma-1-2" class="campo-combate"></td><td><input type="text" id="arma-1-3" class="campo-combate"></td><td><input type="text" id="arma-1-4" class="campo-combate"></td><td><input type="text" id="arma-1-5" class="campo-combate"></td>
-            </tr>
-            <tr>
-                <td><input type="text" id="arma-2-1" class="campo-combate"></td><td><input type="text" id="arma-2-2" class="campo-combate"></td><td><input type="text" id="arma-2-3" class="campo-combate"></td><td><input type="text" id="arma-2-4" class="campo-combate"></td><td><input type="text" id="arma-2-5" class="campo-combate"></td>
-            </tr>
-            <tr>
-                <td><input type="text" id="arma-3-1" class="campo-combate"></td><td><input type="text" id="arma-3-2" class="campo-combate"></td><td><input type="text" id="arma-3-3" class="campo-combate"></td><td><input type="text" id="arma-3-4" class="campo-combate"></td><td><input type="text" id="arma-3-5" class="campo-combate"></td>
-            </tr>
-            <tr>
-                <td><input type="text" id="arma-4-1" class="campo-combate"></td><td><input type="text" id="arma-4-2" class="campo-combate"></td><td><input type="text" id="arma-4-3" class="campo-combate"></td><td><input type="text" id="arma-4-4" class="campo-combate"></td><td><input type="text" id="arma-4-5" class="campo-combate"></td>
-            </tr>
-            <tr>
-                <td><input type="text" id="arma-5-1" class="campo-combate"></td><td><input type="text" id="arma-5-2" class="campo-combate"></td><td><input type="text" id="arma-5-3" class="campo-combate"></td><td><input type="text" id="arma-5-4" class="campo-combate"></td><td><input type="text" id="arma-5-5" class="campo-combate"></td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="grid-3" style="margin-top: 10px; align-items: start;">
+    <div class="grid-2">
         <div class="section-box">
-            <div class="box-title" style="font-family: var(--decorative-font);">Armadura</div>
-            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Armadura:</span> <input type="text" id="armadura-tipo"></div>
-            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Clase:</span> <input type="text" id="armadura-clase"></div>
-            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Penalización:</span> <input type="text" id="armadura-penalizacion"></div>
+            <div class="box-title">Disposición de Combate</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Arma / Tipo</th>
+                        <th>Ocultación</th>
+                        <th>Dificultad</th>
+                        <th>Alcance</th>
+                        <th>Cadencia</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="text" id="arma-1-1"></td>
+                        <td><input type="text" id="arma-1-2"></td>
+                        <td><input type="text" id="arma-1-3"></td>
+                        <td><input type="text" id="arma-1-4"></td>
+                        <td><input type="text" id="arma-1-5"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" id="arma-2-1"></td>
+                        <td><input type="text" id="arma-2-2"></td>
+                        <td><input type="text" id="arma-2-3"></td>
+                        <td><input type="text" id="arma-2-4"></td>
+                        <td><input type="text" id="arma-2-5"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" id="arma-3-1"></td>
+                        <td><input type="text" id="arma-3-2"></td>
+                        <td><input type="text" id="arma-3-3"></td>
+                        <td><input type="text" id="arma-3-4"></td>
+                        <td><input type="text" id="arma-3-5"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" id="arma-4-1"></td>
+                        <td><input type="text" id="arma-4-2"></td>
+                        <td><input type="text" id="arma-4-3"></td>
+                        <td><input type="text" id="arma-4-4"></td>
+                        <td><input type="text" id="arma-4-5"></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" id="arma-5-1"></td>
+                        <td><input type="text" id="arma-5-2"></td>
+                        <td><input type="text" id="arma-5-3"></td>
+                        <td><input type="text" id="arma-5-4"></td>
+                        <td><input type="text" id="arma-5-5"></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="box-title" style="margin-top:15px;">Armadura</div>
+            <div class="row"><span>Clase:</span> <input type="text" id="armadura-clase"></div>
+            <div class="row"><span>Tipo de Protección:</span> <input type="text" id="armadura-tipo"></div>
+            <div class="row"><span>Penalización:</span> <input type="text" id="armadura-penalizacion"></div>
         </div>
 
-        <div class="section-box" style="grid-column: span 2;">
-            <div class="box-title" style="font-family: var(--decorative-font);">Inventario</div>
-            <div class="grid-2" style="gap: 10px;">
+        <div class="section-box">
+            <div class="box-title">Inventario</div>
+            <div class="grid-2">
                 <div>
-                    <div class="row"><input type="text" id="inv-1" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-2" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-3" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-4" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-5" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-6" class="campo-inventario"></div>
+                    <div class="row"><input type="text" id="inv-1"></div>
+                    <div class="row"><input type="text" id="inv-2"></div>
+                    <div class="row"><input type="text" id="inv-3"></div>
+                    <div class="row"><input type="text" id="inv-4"></div>
+                    <div class="row"><input type="text" id="inv-5"></div>
+                    <div class="row"><input type="text" id="inv-6"></div>
                 </div>
                 <div>
-                    <div class="row"><input type="text" id="inv-7" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-8" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-9" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-10" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-11" class="campo-inventario"></div>
-                    <div class="row"><input type="text" id="inv-12" class="campo-inventario"></div>
+                    <div class="row"><input type="text" id="inv-7"></div>
+                    <div class="row"><input type="text" id="inv-8"></div>
+                    <div class="row"><input type="text" id="inv-9"></div>
+                    <div class="row"><input type="text" id="inv-10"></div>
+                    <div class="row"><input type="text" id="inv-11"></div>
+                    <div class="row"><input type="text" id="inv-12"></div>
                 </div>
             </div>
+
+            <div class="box-title" style="margin-top:15px;">Puntos de Experiencia</div>
+            <div class="row"><span>Total Ganada:</span> <input type="number" id="exp-total" value="0"></div>
+            <div class="row"><span>Disponible Escena:</span> <input type="number" id="exp-escena" value="0"></div>
         </div>
     </div>
-
-    <div class="grid-2" style="margin-top: 10px;">
-        <div class="section-box">
-            <h2>Méritos</h2>
-            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="merito-nom-1"></div><div class="merit-cost"><input type="number" id="merito-val-1" min="-10" max="0" value="0"></div></div>
-            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="merito-nom-2"></div><div class="merit-cost"><input type="number" id="merito-val-2" min="-10" max="0" value="0"></div></div>
-            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="merito-nom-3"></div><div class="merit-cost"><input type="number" id="merito-val-3" min="-10" max="0" value="0"></div></div>
-            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="merito-nom-4"></div><div class="merit-cost"><input type="number" id="merito-val-4" min="-10" max="0" value="0"></div></div>
-            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="merito-nom-5"></div><div class="merit-cost"><input type="number" id="merito-val-5" min="-10" max="0" value="0"></div></div>
-        </div>
-        <div class="section-box">
-            <h2>Defectos</h2>
-            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="defecto-nom-1"></div><div class="merit-cost"><input type="number" id="defecto-val-1" min="0" max="10" value="0"></div></div>
-            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="defecto-nom-2"></div><div class="merit-cost"><input type="number" id="defecto-val-2" min="0" max="10" value="0"></div></div>
-            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="defecto-nom-3"></div><div class="merit-cost"><input type="number" id="defecto-val-3" min="0" max="10" value="0"></div></div>
-            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="defecto-nom-4"></div><div class="merit-cost"><input type="number" id="defecto-val-4" min="0" max="10" value="0"></div></div>
-            <div class="merit-defect-row"><div class="merit-name"><input type="text" id="defecto-nom-5"></div><div class="merit-cost"><input type="number" id="defecto-val-5" min="0" max="10" value="0"></div></div>
-        </div>
-    </div>
-
-    <!-- Panel de Botones Finales -->
-    <div class="admin-panel">
-        <button class="firebase-btn" style="background-color: #2e7d32;" onclick="enviarFichaFinal()">Enviar y Finalizar Ficha</button>
-        <button class="firebase-btn" style="background-color: #0288d1;" onclick="cargarModoLecturaAdmin(null, null, false)">Editar</button>
-    </div>
-
 </div>
 
 <script>
-    document.querySelectorAll('.dots').forEach(container => {
-        const dots = Array.from(container.querySelectorAll('.dot'));
-        dots.forEach((dot, index) => {
-            dot.addEventListener('click', function(e) {
-                if (this.dataset.readonly === "true") return;
-                const isBasePoint = this.classList.contains('base-point');
-                const isModoAdmin = document.body.classList.contains('modo-admin');
-                if (isBasePoint && !isModoAdmin) return;
+    const databaseURL = "https://ecosnovenoumbral-default-rtdb.firebaseio.com";
+    var currentUser = "invitado";
+    var esNarradorModoEdit = false;
 
-                if (this.classList.contains('filled')) {
-                    this.classList.remove('filled', 'lerner', 'crossed');
-                } else if (this.classList.contains('lerner') || this.classList.contains('crossed')) {
-                    this.classList.remove('lerner', 'crossed');
-                    this.classList.add('filled');
+    // Detectar usuario de sesión o parámetros URL
+    function detectarUsuario() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const authParam = urlParams.get('auth');
+        const modeParam = urlParams.get('mode');
+
+        if (modeParam === 'edit' && authParam) {
+            esNarradorModoEdit = true;
+        }
+
+        if (authParam) {
+            try {
+                const decoded = atob(authParam);
+                const parts = decoded.split(':');
+                if (parts.length >= 2 && parts[1].trim() !== '') {
+                    currentUser = parts[1].trim();
+                }
+            } catch(e) {
+                console.log("No se pudo decodificar el token de auth");
+            }
+        }
+
+        const userSpan = document.getElementById('user-name-span');
+        if (userSpan) userSpan.innerText = currentUser;
+    }
+
+    // Inicializar Dots de Atributos/Habilidades/Senda/Voluntad
+    function initDots() {
+        document.querySelectorAll('.dots').forEach(container => {
+            const max = parseInt(container.getAttribute('data-max') || '5');
+            const min = parseInt(container.getAttribute('data-min') || '0');
+            container.innerHTML = '';
+
+            for (let i = 1; i <= max; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                if (i <= min) {
+                    dot.classList.add('filled', 'base-point');
                 } else {
-                    this.classList.add('lerner');
+                    dot.classList.add('empty');
+                }
+                dot.dataset.index = i;
+                
+                dot.addEventListener('click', function() {
+                    if (this.classList.contains('disabled-dot')) return;
+                    const index = parseInt(this.dataset.index);
+                    const allDots = container.querySelectorAll('.dot');
+                    
+                    allDots.forEach((d, idx) => {
+                        const dIndex = idx + 1;
+                        if (dIndex <= min) return;
+                        d.className = 'dot';
+                        if (dIndex <= index) {
+                            d.classList.add('filled');
+                        } else {
+                            d.classList.add('empty');
+                        }
+                    });
+
+                    if (container.getAttribute('data-id') === 'willpower-max-dots') {
+                        const countFilled = container.querySelectorAll('.dot.filled').length;
+                        document.getElementById('willpower-max').value = countFilled;
+                    }
+                });
+
+                container.appendChild(dot);
+            }
+        });
+    }
+
+    // Inicializar Checkboxes de Salud
+    function initHealth() {
+        document.querySelectorAll('.health-checkbox').forEach(box => {
+            box.addEventListener('click', function() {
+                if (this.classList.contains('disabled-health')) return;
+                if (this.classList.contains('empty')) {
+                    this.className = 'health-checkbox contundente';
+                } else if (this.classList.contains('contundente')) {
+                    this.className = 'health-checkbox letal';
+                } else if (this.classList.contains('letal')) {
+                    this.className = 'health-checkbox agravado';
+                } else {
+                    this.className = 'health-checkbox empty';
                 }
             });
+            box.className = 'health-checkbox empty';
         });
-    });
+    }
 
-    // Control de ciclo para los estados de Salud: vacío -> Letal (/) -> Contundente (x) -> Agravado (punto relleno) -> vacío
-    document.querySelectorAll('.health-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('click', function() {
-            if (this.dataset.readonly === "true") return;
+    // Configurar comportamiento para que agreguen texto sin borrar el previo
+    function protegerTextosPermitidos(elementId) {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+        el.dataset.originalText = el.value;
 
-            if (this.classList.contains('agravado')) {
-                this.classList.remove('agravado');
-            } else if (this.classList.contains('contundente')) {
-                this.classList.remove('contundente');
-                this.classList.add('agravado');
-            } else if (this.classList.contains('letal')) {
-                this.classList.remove('letal');
-                this.classList.add('contundente');
-            } else {
-                this.classList.add('letal');
+        el.addEventListener('keydown', function(e) {
+            const orig = this.dataset.originalText || '';
+            // Si intenta borrar caractéres del texto original bloqueado
+            if ((e.key === 'Backspace' || e.key === 'Delete') && this.selectionStart <= orig.length) {
+                e.preventDefault();
             }
         });
-    });
 
-    function sincronizarWillpower() {
-        const maxInput = document.getElementById('willpower-max');
-        const dispInput = document.getElementById('willpower-disp');
-        if (!maxInput || !dispInput) return;
-        dispInput.max = maxInput.value;
-        if (parseInt(dispInput.value) > parseInt(maxInput.value)) {
-            dispInput.value = maxInput.value;
-        }
-    }
-
-    function actualizarValoresGeneracion() {
-        const genInput = document.getElementById('gen-input');
-        if (!genInput) return;
-        const gen = parseInt(genInput.value) || 13;
-        const bloodMax = document.getElementById('blood-max');
-        const bloodDisp = document.getElementById('blood-disp');
-        const bloodTurn = document.getElementById('blood-turn');
-
-        let maxReserva = 10;
-        let porTurno = 1;
-
-        if (gen <= 3) { maxReserva = 100; porTurno = 10; }
-        else if (gen === 4) { maxReserva = 50; porTurno = 5; }
-        else if (gen === 5) { maxReserva = 40; porTurno = 4; }
-        else if (gen === 6) { maxReserva = 30; porTurno = 3; }
-        else if (gen === 7) { maxReserva = 20; porTurno = 2; }
-        else if (gen === 8) { maxReserva = 15; porTurno = 3; }
-        else if (gen === 9) { maxReserva = 14; porTurno = 2; }
-        else if (gen === 10) { maxReserva = 13; porTurno = 1; }
-        else if (gen === 11) { maxReserva = 12; porTurno = 1; }
-        else if (gen === 12) { maxReserva = 11; porTurno = 1; }
-        else { maxReserva = 10; porTurno = 1; }
-
-        if (bloodMax) bloodMax.value = maxReserva;
-        if (bloodDisp) {
-            bloodDisp.max = maxReserva;
-            if (parseInt(bloodDisp.value) > maxReserva) {
-                bloodDisp.value = maxReserva;
+        el.addEventListener('input', function() {
+            const orig = this.dataset.originalText || '';
+            if (!this.value.startsWith(orig)) {
+                this.value = orig + this.value.replace(orig, '');
             }
-        }
-        if (bloodTurn) bloodTurn.value = porTurno;
+        });
     }
 
-    window.actualizarValoresGeneracion = actualizarValoresGeneracion;
-    window.sincronizarWillpower = sincronizarWillpower;
+    // Bloquear controles si la ficha está finalizada y el usuario no es Narrador en Edit
+    function aplicarBloqueoFichaFinalizada() {
+        if (esNarradorModoEdit) return; // Narrador conserva control total de edición
 
-    actualizarValoresGeneracion();
-</script>
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-  import { getDatabase, ref, set, get, child, remove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDida046uOTvsTdYeJWQ3AscySBrVgGri4",
-    authDomain: "ecosnovenumbral.firebaseapp.com",
-    projectId: "ecosnovenumbral",
-    storageBucket: "ecosnovenumbral.firebasestorage.app",
-    messagingSenderId: "863575254950",
-    appId: "1:863575254950:web:dff0626e7a0826de425167",
-    databaseURL: "https://ecosnovenoumbral-default-rtdb.firebaseio.com"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  const ADMINS_AUTORIZADOS = ["admin", "narrador", "administrador", "ecosnovenoumbral", "nigoyin"];
-
-  function limpiarTexto(texto) {
-    return texto ? texto.toLowerCase().replace(/[^a-z0-9]/g, "") : "";
-  }
-
-  function obtenerUsuarioActivo() {
-    const urlParams = new URLSearchParams(window.location.search);
-    let usuarioUrl = urlParams.get('user') || urlParams.get('usuario');
-    
-    // Si viene en el parámetro auth (panel de narrador)
-    const tokenUrl = urlParams.get('auth') || sessionStorage.getItem('narrador_auth');
-    if (tokenUrl && (!usuarioUrl || usuarioUrl === "invitado")) {
-      try {
-        const decodedData = atob(tokenUrl).split(":");
-        if (decodedData[1] && decodedData[1].trim() !== "") {
-          usuarioUrl = decodedData[1].trim();
-        }
-      } catch (e) {
-        console.warn("No se pudo extraer usuario del token auth:", e);
-      }
-    }
-
-    if (usuarioUrl && usuarioUrl.trim() !== "") {
-      return usuarioUrl.trim();
-    }
-    
-    if (window.usuarioCapturadoPostMessage) {
-      return window.usuarioCapturadoPostMessage;
-    }
-
-    const jugadorInput = document.getElementById("jugador");
-    if (jugadorInput && jugadorInput.value.trim() !== "") {
-      return jugadorInput.value.trim();
-    }
-
-    return "invitado";
-  }
-
-  window.addEventListener("message", (event) => {
-    if (event.data && event.data.type === "USER_DATA" && event.data.username) {
-      window.usuarioCapturadoPostMessage = event.data.username;
-      actualizarDisplayUsuario();
-    }
-  });
-
-  if (window.parent !== window) {
-    window.parent.postMessage({ type: "REQUEST_USER" }, "*");
-  }
-
-  function actualizarDisplayUsuario() {
-    const usuario = obtenerUsuarioActivo();
-    const spanNode = document.getElementById('user-name-span');
-    if (spanNode) {
-        spanNode.textContent = usuario;
-    }
-  }
-
-  async function esNarradorAutorizado() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const tokenUrl = urlParams.get('auth') || sessionStorage.getItem('narrador_auth');
-
-    if (tokenUrl) {
-      try {
-        const decodedData = atob(tokenUrl).split(":");
-        const usuarioForo = decodedData[1] ? decodedData[1].trim() : "";
-        if (usuarioForo) {
-          const snapshot = await get(child(ref(db), `narradores/${usuarioForo}`));
-          if (snapshot.exists() && snapshot.val() === true) {
-            return true;
-          }
-        }
-      } catch (e) {
-        console.warn("Error al decodificar token de auth:", e);
-      }
-    }
-
-    const usuarioRaw = obtenerUsuarioActivo();
-    const usuarioClean = limpiarTexto(usuarioRaw);
-
-    if (ADMINS_AUTORIZADOS.includes(usuarioClean)) {
-      return true;
-    }
-
-    try {
-      const snapshot = await get(child(ref(db), `narradores/${usuarioRaw}`));
-      if (snapshot.exists() && snapshot.val() === true) {
-        return true;
-      }
-    } catch (err) {
-      console.warn("Consulta a Firebase realizada:", err);
-    }
-
-    return false;
-  }
-
-  function aplicarReglasPermisosUsuario() {
-    if (document.body.classList.contains('modo-admin')) return;
-
-    // Bloquear todas las entradas por defecto
-    document.querySelectorAll(".container input").forEach(input => {
-      input.readOnly = true;
-    });
-    document.querySelectorAll(".dot").forEach(el => {
-      el.dataset.readonly = "true";
-      el.style.cursor = "not-allowed";
-    });
-
-    // Salud: Bloqueada totalmente para el usuario
-    document.querySelectorAll(".health-checkbox").forEach(el => {
-      el.dataset.readonly = "true";
-      el.style.cursor = "not-allowed";
-    });
-
-    // Permisos especiales: Willpower Disp y Sangre Disp permiten restar pero no incrementar el máximo
-    const wpDisp = document.getElementById("willpower-disp");
-    const bloodDisp = document.getElementById("blood-disp");
-    
-    [wpDisp, bloodDisp].forEach(input => {
-      if (input) {
-        input.readOnly = false;
-        let lastVal = parseInt(input.value) || 0;
+        // Elementos permitidos de libre modificación para combate/recursos
+        const permitidosTotal = ['willpower-disp', 'blood-disp'];
         
-        // Remover listener anterior si existía para evitar duplicados
-        if (input._restaOnlyHandler) {
-          input.removeEventListener('input', input._restaOnlyHandler);
-        }
-
-        input._restaOnlyHandler = function() {
-          const maxAllowed = document.body.classList.contains('modo-admin') 
-            ? Infinity 
-            : (parseInt(this.getAttribute('data-initial-val') || lastVal));
-          const currentVal = parseInt(this.value) || 0;
-
-          if (!document.body.classList.contains('modo-admin') && currentVal > maxAllowed) {
-            this.value = maxAllowed;
-          } else {
-            lastVal = currentVal;
-          }
-        };
-
-        input.setAttribute('data-initial-val', input.value);
-        input.addEventListener('input', input._restaOnlyHandler);
-      }
-    });
-
-    const expEscena = document.getElementById("exp-escena");
-    if (expEscena) expEscena.readOnly = false;
-
-    document.querySelectorAll(".campo-combate, .campo-inventario").forEach(input => {
-      if (!input.value || input.value.trim() === "") {
-        input.readOnly = false;
-      } else {
-        input.readOnly = true;
-      }
-    });
-
-    const pjIdInput = document.getElementById("pj-id");
-    if (pjIdInput) pjIdInput.readOnly = false;
-  }
-
-  function desbloquearFichaCompletaUsuario() {
-    if (document.body.classList.contains('modo-admin')) return;
-
-    document.querySelectorAll(".container input").forEach(input => {
-      input.readOnly = false;
-    });
-    document.querySelectorAll(".dot, .health-checkbox").forEach(el => {
-      el.dataset.readonly = "false";
-      el.style.cursor = "pointer";
-    });
-    
-    const bloodMax = document.getElementById('blood-max');
-    const bloodTurn = document.getElementById('blood-turn');
-    if (bloodMax) bloodMax.readOnly = true;
-    if (bloodTurn) bloodTurn.readOnly = true;
-  }
-
-  function desbloquearFichaCompletaNarrador() {
-    document.querySelectorAll(".container input").forEach(input => {
-      input.readOnly = false;
-    });
-    document.querySelectorAll(".dot, .health-checkbox").forEach(el => {
-      el.dataset.readonly = "false";
-      el.style.cursor = "pointer";
-    });
-    document.querySelectorAll(".firebase-btn").forEach(btn => {
-      btn.disabled = false;
-      btn.style.opacity = "1";
-      btn.style.cursor = "pointer";
-    });
-  }
-
-  function poblarDatosEnFicha(datos) {
-    if (!datos) return;
-    document.querySelectorAll("input[type='text'], input[type='number']").forEach(input => {
-      if (input.id && datos[input.id] !== undefined) {
-        input.value = datos[input.id];
-      }
-    });
-
-    document.querySelectorAll(".dots").forEach(container => {
-      if (container.id && datos[container.id]) {
-        const estados = datos[container.id];
-        container.querySelectorAll(".dot").forEach((dot, index) => {
-          dot.classList.remove("filled", "crossed", "lerner");
-          if (estados[index] === "filled") dot.classList.add("filled");
-          else if (estados[index] === "crossed" || estados[index] === "lerner") dot.classList.add("lerner");
+        // Deshabilitar todos los inputs de la página excepto los permitidos
+        const allInputs = document.querySelectorAll('input');
+        allInputs.forEach(input => {
+            const id = input.id;
+            
+            if (permitidosTotal.includes(id)) {
+                input.removeAttribute('readonly');
+                input.disabled = false;
+            } 
+            else if (id && (id.startsWith('arma-') || id.startsWith('inv-') || id.startsWith('armadura-'))) {
+                // Habilitados para escribir al final sin borrar texto base original
+                input.removeAttribute('readonly');
+                input.disabled = false;
+                protegerTextosPermitidos(id);
+            } 
+            else {
+                input.setAttribute('readonly', 'readonly');
+                if (input.type === 'number') input.style.pointerEvents = 'none';
+            }
         });
-      }
-    });
 
-    document.querySelectorAll(".health-checkbox").forEach(box => {
-      if (box.id && datos[box.id] !== undefined) {
-        box.classList.remove("filled", "letal", "contundente", "agravado");
-        const val = datos[box.id];
-        if (val === "letal") box.classList.add("letal");
-        else if (val === "contundente") box.classList.add("contundente");
-        else if (val === "agravado" || val === "filled") box.classList.add("agravado");
-      }
-    });
-
-    window.actualizarValoresGeneracion();
-    window.sincronizarWillpower();
-  }
-
-  function recolectarDatosFicha() {
-    const datos = {};
-    document.querySelectorAll("input[type='text'], input[type='number']").forEach(input => {
-      if (input.id && input.id !== "pj-id") {
-        datos[input.id] = input.value;
-      }
-    });
-
-    document.querySelectorAll(".dots").forEach(container => {
-      if (container.id) {
-        const estados = [];
-        container.querySelectorAll(".dot").forEach(dot => {
-          if (dot.classList.contains("filled")) estados.push("filled");
-          else if (dot.classList.contains("lerner") || dot.classList.contains("crossed")) estados.push("lerner");
-          else estados.push("empty");
+        // Deshabilitar interactividad en dots de atributos/ventajas/senda
+        document.querySelectorAll('.dot').forEach(dot => {
+            dot.classList.add('disabled-dot');
+            dot.style.pointerEvents = 'none';
         });
-        datos[container.id] = estados;
-      }
-    });
 
-    document.querySelectorAll(".health-checkbox").forEach(box => {
-      if (box.id) {
-        if (box.classList.contains("agravado")) datos[box.id] = "agravado";
-        else if (box.classList.contains("contundente")) datos[box.id] = "contundente";
-        else if (box.classList.contains("letal")) datos[box.id] = "letal";
-        else datos[box.id] = "empty";
-      }
-    });
-    return datos;
-  }
-
-  window.guardarFicha = async function() {
-    let usuarioActivo = obtenerUsuarioActivo();
-    const jugadorInput = document.getElementById("jugador");
-    let jugadorCampo = jugadorInput ? jugadorInput.value.trim() : "";
-
-    if (!jugadorCampo && usuarioActivo !== "invitado") {
-      jugadorCampo = usuarioActivo;
-      if (jugadorInput) jugadorInput.value = usuarioActivo;
+        // Deshabilitar salud
+        document.querySelectorAll('.health-checkbox').forEach(box => {
+            box.classList.add('disabled-health');
+            box.style.pointerEvents = 'none';
+        });
     }
 
-    const usuarioBase = jugadorCampo || usuarioActivo || "usuario";
-    const usuarioLimpio = limpiarTexto(usuarioBase);
-
-    let pjId = document.getElementById("pj-id").value.trim();
-
-    if (!pjId) {
-      pjId = `sabbat-${usuarioLimpio}-001`;
-      document.getElementById("pj-id").value = pjId;
+    // Desbloquear ficha
+    function removerBloqueos() {
+        document.querySelectorAll('input').forEach(input => {
+            input.removeAttribute('readonly');
+            input.disabled = false;
+            input.style.pointerEvents = 'auto';
+        });
+        document.querySelectorAll('.dot').forEach(dot => {
+            dot.classList.remove('disabled-dot');
+            dot.style.pointerEvents = 'auto';
+        });
+        document.querySelectorAll('.health-checkbox').forEach(box => {
+            box.classList.remove('disabled-health');
+            box.style.pointerEvents = 'auto';
+        });
     }
 
-    const datos = recolectarDatosFicha();
-
-    try {
-      // Guardado exclusivo en borrador para permitir la modificación dinámica de puntos y combate
-      const rutaDestino = `fichas/vampiro_borradores/${pjId}`;
-      await set(ref(db, rutaDestino), datos);
-      alert(`¡Guardado exitoso en borradores!\nID asignado: ${pjId}`);
-      return true;
-    } catch (err) {
-      console.error("Error al guardar en Firebase:", err);
-      alert("Error al guardar en la base de datos: " + err.message);
-      return false;
-    }
-  };
-
-  window.cargarFicha = async function(idManual, ramaManual) {
-    let inputVal = idManual || document.getElementById("pj-id").value.trim();
-    if (!inputVal) {
-      alert("Por favor ingresa un ID para cargar el personaje.");
-      return;
-    }
-
-    let targetKey = inputVal;
-    if (targetKey.includes('/')) {
-      targetKey = targetKey.split('/').pop();
-    }
-    document.getElementById("pj-id").value = targetKey;
-
-    const dbRef = ref(db);
-    const esNarrador = await esNarradorAutorizado();
-
-    try {
-      let snapshot = null;
-      let origen = "";
-
-      if (ramaManual === 'finalizado') {
-        snapshot = await get(child(dbRef, `fichas/vampiro_finalizadas/${targetKey}`));
-        origen = "finalizado";
-      } else if (ramaManual === 'borrador') {
-        snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
-        origen = "borrador";
-      } else {
-        snapshot = await get(child(dbRef, `fichas/vampiro_finalizadas/${targetKey}`));
-        if (snapshot.exists()) {
-          origen = "finalizado";
-        } else {
-          snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
-          if (snapshot.exists()) {
-            origen = "borrador";
-          }
+    // Cargar ficha desde Firebase
+    async function cargarFicha() {
+        const idPj = document.getElementById('pj-id').value.trim();
+        if (!idPj) {
+            alert("Por favor ingresa un ID de personaje.");
+            return;
         }
-      }
 
-      if (snapshot && snapshot.exists()) {
-        poblarDatosEnFicha(snapshot.val());
+        removerBloqueos();
 
-        if (esNarrador || document.body.classList.contains('modo-admin')) {
-          desbloquearFichaCompletaNarrador();
-        } else {
-          if (origen === "finalizado") {
-            aplicarReglasPermisosUsuario();
-          } else if (origen === "borrador") {
-            desbloquearFichaCompletaUsuario();
-          }
+        const urlParams = new URLSearchParams(window.location.search);
+        const ramaUrl = urlParams.get('rama');
+
+        try {
+            let datos = null;
+            let esDeFinalizadas = false;
+
+            if (ramaUrl === 'finalizado') {
+                let res = await fetch(`${databaseURL}/fichas/vampiro_finalizadas/${idPj}.json`);
+                datos = await res.json();
+                if (datos) esDeFinalizadas = true;
+            } else if (ramaUrl === 'borrador') {
+                let res = await fetch(`${databaseURL}/fichas/vampiro_borradores/${idPj}.json`);
+                datos = await res.json();
+            } else {
+                // Búsqueda general
+                let resFin = await fetch(`${databaseURL}/fichas/vampiro_finalizadas/${idPj}.json`);
+                datos = await resFin.json();
+                if (datos) {
+                    esDeFinalizadas = true;
+                } else {
+                    let resBor = await fetch(`${databaseURL}/fichas/vampiro_borradores/${idPj}.json`);
+                    datos = await resBor.json();
+                }
+            }
+
+            if (!datos) {
+                alert("Ficha no encontrada.");
+                return;
+            }
+
+            // Mapear campos de texto simples
+            for (let key in datos) {
+                const element = document.getElementById(key);
+                if (element && element.tagName === 'INPUT' && !Array.isArray(datos[key])) {
+                    element.value = datos[key];
+                }
+            }
+
+            // Mapear Dots
+            document.querySelectorAll('.dots').forEach(container => {
+                const id = container.getAttribute('data-id');
+                if (id && datos[id] && Array.isArray(datos[id])) {
+                    const arrayValores = datos[id];
+                    const dots = container.querySelectorAll('.dot');
+                    dots.forEach((dot, idx) => {
+                        dot.className = 'dot';
+                        if (arrayValores[idx]) {
+                            dot.classList.add(arrayValores[idx]);
+                        } else {
+                            dot.classList.add('empty');
+                        }
+                    });
+                }
+            });
+
+            // Mapear Salud
+            for (let i = 1; i <= 8; i++) {
+                const val = datos[`salud-${i}`];
+                const box = document.querySelector(`.health-checkbox[data-id="salud-${i}"]`);
+                if (box && val) {
+                    box.className = `health-checkbox ${val}`;
+                }
+            }
+
+            // Si el estado es finalizado o viene de la rama de finalizadas -> Bloquear lectura
+            if (esDeFinalizadas || datos.estado === 'finalizado' || datos.finalizado === true) {
+                aplicarBloqueoFichaFinalizada();
+            }
+
+        } catch (error) {
+            alert("Error al cargar ficha: " + error.message);
         }
-      } else {
-        alert(`No se encontró ningún personaje registrado con el identificador: ${targetKey}`);
-      }
-    } catch (err) {
-      console.error("Error al cargar:", err);
-      alert("Error al intentar conectarse a la base de datos: " + err.message);
-    }
-  };
-
-  window.enviarFichaFinal = async function() {
-    let pjId = document.getElementById("pj-id").value.trim();
-
-    if (!pjId) {
-      const guardadoBorrador = await window.guardarFicha();
-      if (!guardadoBorrador) return;
-      pjId = document.getElementById("pj-id").value.trim();
     }
 
-    const confirmar = confirm("¿Estás seguro de enviar y finalizar tu ficha?");
-    if (!confirmar) return;
+    // Guardar Ficha con Triple Validación
+    async function guardarFicha() {
+        const idPj = document.getElementById('pj-id').value.trim();
+        const nombreJugador = document.getElementById('jugador').value.trim();
 
-    const datos = recolectarDatosFicha();
-    const usuario = obtenerUsuarioActivo();
+        if (!idPj) {
+            alert("Debes asignar un ID a la ficha antes de guardar.");
+            return;
+        }
 
-    try {
-      await set(ref(db, `fichas/vampiro_finalizadas/${pjId}`), datos);
+        // TRIPLE VALIDACIÓN: ID vs Nombre Jugador vs Usuario Foro
+        if (!esNarradorModoEdit) {
+            const idValido = idPj.toLowerCase().includes(currentUser.toLowerCase());
+            const jugadorValido = nombreJugador.toLowerCase() === currentUser.toLowerCase();
 
-      await set(ref(db, `administracion/registros/${pjId}`), {
-        estado: "finalizado",
-        fecha: new Date().toISOString(),
-        id_ficha: pjId,
-        juego: "vampiro_sabbat",
-        usuario_foro: usuario
-      });
+            if (!idValido || !jugadorValido) {
+                alert(`Error de validación:\n- ID Personaje debe contener tu usuario ('${currentUser}').\n- Campo Jugador debe coincidir exactamente con tu usuario ('${currentUser}').`);
+                return;
+            }
+        }
 
-      try {
-        await remove(ref(db, `fichas/vampiro_borradores/${pjId}`));
-      } catch (e) {
-        console.warn("Intento de eliminación de borrador omitido:", e);
-      }
+        let datosFicha = {};
 
-      if (!document.body.classList.contains('modo-admin')) {
-        aplicarReglasPermisosUsuario();
-      }
-      alert("¡Éxito! La ficha ha sido finalizada y actualizada en el sistema.");
-    } catch (err) {
-      console.error("Error al finalizar ficha:", err);
-      alert("Error: No se pudo finalizar el envío de la ficha: " + err.message);
+        // Recolectar Inputs
+        document.querySelectorAll('input').forEach(input => {
+            if (input.id) {
+                datosFicha[input.id] = input.value;
+            }
+        });
+
+        // Recolectar Dots
+        document.querySelectorAll('.dots').forEach(container => {
+            const id = container.getAttribute('data-id');
+            if (id) {
+                let arrayDots = [];
+                container.querySelectorAll('.dot').forEach(dot => {
+                    if (dot.classList.contains('lerner')) arrayDots.push('lerner');
+                    else if (dot.classList.contains('filled')) arrayDots.push('filled');
+                    else arrayDots.push('empty');
+                });
+                datosFicha[id] = arrayDots;
+            }
+        });
+
+        // Recolectar Salud
+        for (let i = 1; i <= 8; i++) {
+            const box = document.querySelector(`.health-checkbox[data-id="salud-${i}"]`);
+            if (box) {
+                if (box.classList.contains('agravado')) datosFicha[`salud-${i}`] = 'agravado';
+                else if (box.classList.contains('letal')) datosFicha[`salud-${i}`] = 'letal';
+                else if (box.classList.contains('contundente')) datosFicha[`salud-${i}`] = 'contundente';
+                else datosFicha[`salud-${i}`] = 'empty';
+            }
+        }
+
+        try {
+            const url = `${databaseURL}/fichas/vampiro_borradores/${idPj}.json`;
+            const res = await fetch(url, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datosFicha)
+            });
+
+            if (res.ok) {
+                alert("Ficha guardada exitosamente en borradores.");
+            } else {
+                throw new Error("No se pudo guardar la información.");
+            }
+        } catch(e) {
+            alert("Error al guardar: " + e.message);
+        }
     }
-  };
 
-  window.cargarModoLecturaAdmin = async function(idManual, ramaManual, silencioso = false) {
-    const esNarrador = await esNarradorAutorizado();
-    if (!esNarrador) {
-      if (!silencioso) alert("Acceso restringido: Solo el Narrador puede desbloquear la edición total de esta ficha.");
-      return;
-    }
+    window.onload = function() {
+        detectarUsuario();
+        initDots();
+        initHealth();
 
-    document.body.classList.add('modo-admin');
-    await window.cargarFicha(idManual, ramaManual);
-    desbloquearFichaCompletaNarrador();
-    if (!silencioso) {
-      alert("Modo Narrador Activado: Toda la ficha ha sido desbloqueada para edición.");
-    }
-  };
-
-  async function procesarUrl() {
-    actualizarDisplayUsuario();
-
-    const urlParams = new URLSearchParams(window.location.search);
-    let idParam = urlParams.get('id');
-    const ramaParam = urlParams.get('rama');
-    const modeParam = urlParams.get('mode');
-
-    if (idParam) {
-      if (idParam.includes('/')) {
-        idParam = idParam.split('/').pop();
-      }
-
-      document.getElementById('pj-id').value = idParam;
-
-      if (modeParam === 'read' || modeParam === 'edit') {
-        await window.cargarModoLecturaAdmin(idParam, ramaParam, true);
-      } else {
-        await window.cargarFicha(idParam, ramaParam);
-      }
-    }
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', procesarUrl);
-  } else {
-    procesarUrl();
-  }
+        // Autocargar si viene id en la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const idParam = urlParams.get('id');
+        if (idParam) {
+            document.getElementById('pj-id').value = idParam;
+            cargarFicha();
+        }
+    };
 </script>
-
 </body>
 </html>
