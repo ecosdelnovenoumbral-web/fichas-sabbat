@@ -1002,36 +1002,45 @@
     let usuarioActivo = obtenerUsuarioActivo();
     const jugadorInput = document.getElementById("jugador");
     let jugadorCampo = jugadorInput ? jugadorInput.value.trim() : "";
-
-    // 1. Validar que el usuario no sea "invitado"
-    if (limpiarTexto(usuarioActivo) === "invitado") {
-      alert("Solo pueden guardar fichas aquellos usuarios que estén debidamente registrados.");
-      return false;
-    }
-
     let pjId = document.getElementById("pj-id").value.trim();
 
-    // 2. Validar que Jugador, Usuario Activo y el ID contengan la misma identidad
-    const userLimpio = limpiarTexto(usuarioActivo);
-    const jugadorLimpio = limpiarTexto(jugadorCampo);
+    // Verificación de ROL: Narrador autoriza bypass de validación cruzada
+    const esNarrador = await esNarradorAutorizado();
 
-    // Extraer el usuario alojado dentro de la estructura del ID si existe (ejemplo: sabbat-usuario-001)
-    let usuarioEnId = "";
-    if (pjId) {
-      const partesId = pjId.split("-");
-      if (partesId.length >= 2) {
-        usuarioEnId = limpiarTexto(partesId[1]);
-      } else {
-        usuarioEnId = limpiarTexto(pjId);
+    if (!esNarrador) {
+      // 1. Validar que el usuario regular no sea "invitado"
+      if (limpiarTexto(usuarioActivo) === "invitado") {
+        alert("Solo pueden guardar fichas aquellos usuarios que estén debidamente registrados.");
+        return false;
       }
-    }
 
-    const coincideJugador = userLimpio === jugadorLimpio;
-    const coincideId = !pjId || (usuarioEnId === userLimpio);
+      // 2. Triple validación estricta para jugadores (Usuario / Jugador / ID)
+      const userLimpio = limpiarTexto(usuarioActivo);
+      const jugadorLimpio = limpiarTexto(jugadorCampo);
 
-    if (!coincideJugador || !coincideId) {
-      alert("No puedes guardar ni sobreescribir fichas que pertenecen a otro usuario.");
-      return false;
+      let usuarioEnId = "";
+      if (pjId) {
+        const partesId = pjId.split("-");
+        if (partesId.length >= 2) {
+          usuarioEnId = limpiarTexto(partesId[1]);
+        } else {
+          usuarioEnId = limpiarTexto(pjId);
+        }
+      }
+
+      const coincideJugador = userLimpio === jugadorLimpio;
+      const coincideId = !pjId || (usuarioEnId === userLimpio);
+
+      if (!coincideJugador || !coincideId) {
+        alert("No puedes guardar ni sobreescribir fichas que pertenecen a otro usuario.");
+        return false;
+      }
+    } else {
+      // Excepción para Narrador: Requiere un identificador o campo de Jugador asignado
+      if (!jugadorCampo) {
+        alert("Como Narrador, debes asignar un nombre en el campo 'Jugador' para crear o guardar la ficha.");
+        return false;
+      }
     }
 
     const usuarioBase = jugadorCampo || usuarioActivo || "usuario";
@@ -1039,7 +1048,7 @@
     const dbRef = ref(db);
 
     try {
-      // Si no hay ID, consultamos el contador para generar el correlativo
+      // Autogeneración correlativa si no existe un ID manual
       if (!pjId) {
         const snapshotContador = await get(child(dbRef, `control_usuarios/${usuarioLimpio}/sabbat_count`));
         let cuentaActual = snapshotContador.exists() ? parseInt(snapshotContador.val()) : 0;
