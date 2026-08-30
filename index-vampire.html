@@ -326,7 +326,6 @@
         <button class="firebase-btn" onclick="cargarFicha()">Cargar</button>
     </div>
 
-    <!-- SECCIÓN DE CABECERA -->
     <div class="grid-3">
         <div class="section-box">
             <div class="row"><span>Nombre:</span> <input type="text" id="nombre"></div>
@@ -553,9 +552,9 @@
     <div class="grid-3" style="margin-top: 10px; align-items: start;">
         <div class="section-box">
             <div class="box-title" style="font-family: var(--decorative-font);">Armadura</div>
-            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Armadura:</span> <input type="text" id="armadura-tipo"></div>
-            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Clase:</span> <input type="text" id="armadura-clase"></div>
-            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Penalización:</span> <input type="text" id="armadura-penalizacion"></div>
+            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Armadura:</span> <input type="text" id="armadura-tipo" class="campo-combate"></div>
+            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Clase:</span> <input type="text" id="armadura-clase" class="campo-combate"></div>
+            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Penalización:</span> <input type="text" id="armadura-penalizacion" class="campo-combate"></div>
         </div>
 
         <div class="section-box" style="grid-column: span 2;">
@@ -600,7 +599,6 @@
         </div>
     </div>
 
-    <!-- Panel de Botones Finales -->
     <div class="admin-panel">
         <button class="firebase-btn" style="background-color: #2e7d32;" onclick="enviarFichaFinal()">Enviar y Finalizar Ficha</button>
         <button class="firebase-btn" style="background-color: #0288d1;" onclick="cargarModoLecturaAdmin(null, null, false)">Editar</button>
@@ -802,27 +800,40 @@
   function aplicarReglasPermisosUsuario() {
     if (document.body.classList.contains('modo-admin')) return;
 
+    // Bloquear todos los inputs de texto/número de forma general
     document.querySelectorAll(".container input").forEach(input => {
       input.readOnly = true;
     });
+
+    // Bloquear círculos/dots de atributos, habilidades y ventajas
     document.querySelectorAll(".dot").forEach(el => {
       el.dataset.readonly = "true";
       el.style.cursor = "not-allowed";
     });
 
+    // Bloquear cajas de salud
+    document.querySelectorAll(".health-checkbox").forEach(el => {
+      el.dataset.readonly = "true";
+      el.style.cursor = "not-allowed";
+    });
+
+    // Permitir editar solo la disponibilidad de Voluntad y Reserva de Sangre
     const wpDisp = document.getElementById("willpower-disp");
     const bloodDisp = document.getElementById("blood-disp");
     if (wpDisp) wpDisp.readOnly = false;
     if (bloodDisp) bloodDisp.readOnly = false;
 
+    // Asegurar que los Máximos estén totalmente bloqueados
+    const wpMax = document.getElementById("willpower-max");
+    const bloodMax = document.getElementById("blood-max");
+    if (wpMax) wpMax.readOnly = true;
+    if (bloodMax) bloodMax.readOnly = true;
+
+    // Permitir modificar experiencia ganada en la última escena
     const expEscena = document.getElementById("exp-escena");
     if (expEscena) expEscena.readOnly = false;
 
-    document.querySelectorAll(".health-checkbox").forEach(el => {
-      el.dataset.readonly = "false";
-      el.style.cursor = "pointer";
-    });
-
+    // Permitir escribir en combate e inventario SOLO si la casilla está vacía (sin permitir borrar)
     document.querySelectorAll(".campo-combate, .campo-inventario").forEach(input => {
       if (!input.value || input.value.trim() === "") {
         input.readOnly = false;
@@ -831,6 +842,7 @@
       }
     });
 
+    // Permitir cambiar o ver la ID en el panel superior
     const pjIdInput = document.getElementById("pj-id");
     if (pjIdInput) pjIdInput.readOnly = false;
   }
@@ -987,10 +999,12 @@
         snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
         origen = "borrador";
       } else {
+        // Buscar 1° en finalizados
         snapshot = await get(child(dbRef, `fichas/vampiro_finalizadas/${targetKey}`));
         if (snapshot.exists()) {
           origen = "finalizado";
         } else {
+          // Si no existe en finalizados, buscar en borradores
           snapshot = await get(child(dbRef, `fichas/vampiro_borradores/${targetKey}`));
           if (snapshot.exists()) {
             origen = "borrador";
@@ -1001,6 +1015,7 @@
       if (snapshot && snapshot.exists()) {
         poblarDatosEnFicha(snapshot.val());
 
+        // Aplicar permisos estrictamente en función del origen hallado
         if (esNarrador || document.body.classList.contains('modo-admin')) {
           desbloquearFichaCompletaNarrador();
         } else {
