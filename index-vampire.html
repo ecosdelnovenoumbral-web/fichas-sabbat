@@ -214,6 +214,7 @@
             letter-spacing: 1px;
         }
         
+        /* CONTROL Y LEYENDA DE SALUD */
         .health-container {
             display: flex;
             flex-direction: column;
@@ -249,12 +250,51 @@
             height: 14px;
             border: 1px solid var(--border-color);
             background: #121212;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             border-radius: 50%;
             cursor: pointer;
+            position: relative;
+            font-size: 11px;
+            font-weight: bold;
+            color: #ffffff;
+            user-select: none;
+            box-sizing: border-box;
         }
-        .health-checkbox.filled {
+        .health-checkbox.bashing::after {
+            content: "/";
+            line-height: 1;
+        }
+        .health-checkbox.lethal::after {
+            content: "x";
+            font-size: 10px;
+            line-height: 1;
+        }
+        .health-checkbox.aggravated {
             background: var(--accent-color);
+        }
+
+        .health-legend {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px dashed var(--border-color);
+            font-size: 0.78rem;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .health-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .health-legend-title {
+            font-weight: bold;
+            color: #ff4d4d;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+            font-size: 0.8rem;
         }
 
         .merit-defect-row {
@@ -519,6 +559,14 @@
                 <div class="health-row"><span class="health-label">Incapacitado</span><span class="health-penalty"></span><span class="health-checkbox-container"><span class="health-checkbox" id="salud-7"></span></span></div>
                 <div class="health-row"><span class="health-label">Torpo/Destruido</span><span class="health-penalty"></span><span class="health-checkbox-container"><span class="health-checkbox" id="salud-8"></span></span></div>
             </div>
+
+            <!-- LEYENDA DE SALUD AL PIE DEL CUADRO -->
+            <div class="health-legend">
+                <div class="health-legend-title">Leyenda:</div>
+                <div class="health-legend-item"><span class="health-checkbox bashing"></span> = Contundente ( Bashing )</div>
+                <div class="health-legend-item"><span class="health-checkbox lethal"></span> = Letal ( Lethal )</div>
+                <div class="health-legend-item"><span class="health-checkbox aggravated"></span> = Agravado ( Aggravated )</div>
+            </div>
         </div>
     </div>
 
@@ -630,10 +678,22 @@
         });
     });
 
-    document.querySelectorAll('.health-checkbox').forEach(checkbox => {
+    // CICLO DE ESTADOS DE SALUD: vacio -> bashing (/) -> lethal (x) -> aggravated (punto relleno) -> vacio
+    document.querySelectorAll('.health-container .health-checkbox').forEach(checkbox => {
         checkbox.addEventListener('click', function() {
             if (this.dataset.readonly === "true") return;
-            this.classList.toggle('filled');
+            
+            if (!this.classList.contains('bashing') && !this.classList.contains('lethal') && !this.classList.contains('aggravated')) {
+                this.classList.add('bashing');
+            } else if (this.classList.contains('bashing')) {
+                this.classList.remove('bashing');
+                this.classList.add('lethal');
+            } else if (this.classList.contains('lethal')) {
+                this.classList.remove('lethal');
+                this.classList.add('aggravated');
+            } else {
+                this.classList.remove('aggravated');
+            }
         });
     });
 
@@ -813,7 +873,7 @@
     });
 
     // 3. Desactivar la salud
-    document.querySelectorAll(".health-checkbox").forEach(el => {
+    document.querySelectorAll(".health-container .health-checkbox").forEach(el => {
       el.dataset.readonly = "true";
       el.style.cursor = "not-allowed";
     });
@@ -847,7 +907,7 @@
     document.querySelectorAll(".container input").forEach(input => {
       input.readOnly = false;
     });
-    document.querySelectorAll(".dot, .health-checkbox").forEach(el => {
+    document.querySelectorAll(".dot, .health-container .health-checkbox").forEach(el => {
       el.dataset.readonly = "false";
       el.style.cursor = "pointer";
     });
@@ -862,7 +922,7 @@
     document.querySelectorAll(".container input").forEach(input => {
       input.readOnly = false;
     });
-    document.querySelectorAll(".dot, .health-checkbox").forEach(el => {
+    document.querySelectorAll(".dot, .health-container .health-checkbox").forEach(el => {
       el.dataset.readonly = "false";
       el.style.cursor = "pointer";
     });
@@ -892,10 +952,13 @@
       }
     });
 
-    document.querySelectorAll(".health-checkbox").forEach(box => {
+    document.querySelectorAll(".health-container .health-checkbox").forEach(box => {
       if (box.id && datos[box.id] !== undefined) {
-        box.classList.remove("filled");
-        if (datos[box.id] === "filled") box.classList.add("filled");
+        box.classList.remove("bashing", "lethal", "aggravated", "filled");
+        const valor = datos[box.id];
+        if (valor === "bashing") box.classList.add("bashing");
+        else if (valor === "lethal") box.classList.add("lethal");
+        else if (valor === "aggravated" || valor === "filled") box.classList.add("aggravated");
       }
     });
 
@@ -923,9 +986,12 @@
       }
     });
 
-    document.querySelectorAll(".health-checkbox").forEach(box => {
+    document.querySelectorAll(".health-container .health-checkbox").forEach(box => {
       if (box.id) {
-        datos[box.id] = box.classList.contains("filled") ? "filled" : "empty";
+        if (box.classList.contains("bashing")) datos[box.id] = "bashing";
+        else if (box.classList.contains("lethal")) datos[box.id] = "lethal";
+        else if (box.classList.contains("aggravated")) datos[box.id] = "aggravated";
+        else datos[box.id] = "empty";
       }
     });
     return datos;
