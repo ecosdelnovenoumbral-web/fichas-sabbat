@@ -249,12 +249,36 @@
             height: 14px;
             border: 1px solid var(--border-color);
             background: #121212;
-            display: inline-block;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
             border-radius: 50%;
             cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+            color: #ffffff;
+            user-select: none;
+            line-height: 1;
         }
-        .health-checkbox.filled {
+        .health-checkbox.letal::after {
+            content: "/";
+        }
+        .health-checkbox.contundente::after {
+            content: "x";
+        }
+        .health-checkbox.agravado {
             background: var(--accent-color);
+        }
+
+        .health-legend {
+            margin-top: 10px;
+            font-size: 0.75rem;
+            color: #dcd3cb;
+            text-align: left;
+            border-top: 1px solid var(--border-color);
+            padding-top: 6px;
+            width: 100%;
+            line-height: 1.3;
         }
 
         .merit-defect-row {
@@ -519,6 +543,12 @@
                 <div class="health-row"><span class="health-label">Incapacitado</span><span class="health-penalty"></span><span class="health-checkbox-container"><span class="health-checkbox" id="salud-7"></span></span></div>
                 <div class="health-row"><span class="health-label">Torpo/Destruido</span><span class="health-penalty"></span><span class="health-checkbox-container"><span class="health-checkbox" id="salud-8"></span></span></div>
             </div>
+            <div class="health-legend">
+                <strong>Leyenda:</strong><br>
+                Letal = /<br>
+                contundente = x<br>
+                Agravado = un punto relleno
+            </div>
         </div>
     </div>
 
@@ -630,10 +660,22 @@
         });
     });
 
+    // Control de ciclo para los estados de Salud: vacío -> Letal (/) -> Contundente (x) -> Agravado (punto relleno) -> vacío
     document.querySelectorAll('.health-checkbox').forEach(checkbox => {
         checkbox.addEventListener('click', function() {
             if (this.dataset.readonly === "true") return;
-            this.classList.toggle('filled');
+
+            if (this.classList.contains('agravado')) {
+                this.classList.remove('agravado');
+            } else if (this.classList.contains('contundente')) {
+                this.classList.remove('contundente');
+                this.classList.add('agravado');
+            } else if (this.classList.contains('letal')) {
+                this.classList.remove('letal');
+                this.classList.add('contundente');
+            } else {
+                this.classList.add('letal');
+            }
         });
     });
 
@@ -802,6 +844,7 @@
   function aplicarReglasPermisosUsuario() {
     if (document.body.classList.contains('modo-admin')) return;
 
+    // Bloquear todas las entradas por defecto
     document.querySelectorAll(".container input").forEach(input => {
       input.readOnly = true;
     });
@@ -810,18 +853,46 @@
       el.style.cursor = "not-allowed";
     });
 
+    // Salud: Bloqueada totalmente para el usuario
+    document.querySelectorAll(".health-checkbox").forEach(el => {
+      el.dataset.readonly = "true";
+      el.style.cursor = "not-allowed";
+    });
+
+    // Permisos especiales: Willpower Disp y Sangre Disp permiten restar pero no incrementar el máximo
     const wpDisp = document.getElementById("willpower-disp");
     const bloodDisp = document.getElementById("blood-disp");
-    if (wpDisp) wpDisp.readOnly = false;
-    if (bloodDisp) bloodDisp.readOnly = false;
+    
+    [wpDisp, bloodDisp].forEach(input => {
+      if (input) {
+        input.readOnly = false;
+        let lastVal = parseInt(input.value) || 0;
+        
+        // Remover listener anterior si existía para evitar duplicados
+        if (input._restaOnlyHandler) {
+          input.removeEventListener('input', input._restaOnlyHandler);
+        }
+
+        input._restaOnlyHandler = function() {
+          const maxAllowed = document.body.classList.contains('modo-admin') 
+            ? Infinity 
+            : (parseInt(this.getAttribute('data-initial-val') || lastVal));
+          const currentVal = parseInt(this.value) || 0;
+
+          if (!document.body.classList.contains('modo-admin') && currentVal > maxAllowed) {
+            this.value = maxAllowed;
+          } else {
+            lastVal = currentVal;
+          }
+        };
+
+        input.setAttribute('data-initial-val', input.value);
+        input.addEventListener('input', input._restaOnlyHandler);
+      }
+    });
 
     const expEscena = document.getElementById("exp-escena");
     if (expEscena) expEscena.readOnly = false;
-
-    document.querySelectorAll(".health-checkbox").forEach(el => {
-      el.dataset.readonly = "false";
-      el.style.cursor = "pointer";
-    });
 
     document.querySelectorAll(".campo-combate, .campo-inventario").forEach(input => {
       if (!input.value || input.value.trim() === "") {
@@ -888,8 +959,11 @@
 
     document.querySelectorAll(".health-checkbox").forEach(box => {
       if (box.id && datos[box.id] !== undefined) {
-        box.classList.remove("filled");
-        if (datos[box.id] === "filled") box.classList.add("filled");
+        box.classList.remove("filled", "letal", "contundente", "agravado");
+        const val = datos[box.id];
+        if (val === "letal") box.classList.add("letal");
+        else if (val === "contundente") box.classList.add("contundente");
+        else if (val === "agravado" || val === "filled") box.classList.add("agravado");
       }
     });
 
@@ -919,7 +993,10 @@
 
     document.querySelectorAll(".health-checkbox").forEach(box => {
       if (box.id) {
-        datos[box.id] = box.classList.contains("filled") ? "filled" : "empty";
+        if (box.classList.contains("agravado")) datos[box.id] = "agravado";
+        else if (box.classList.contains("contundente")) datos[box.id] = "contundente";
+        else if (box.classList.contains("letal")) datos[box.id] = "letal";
+        else datos[box.id] = "empty";
       }
     });
     return datos;
