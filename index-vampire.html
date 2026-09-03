@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=960, initial-scale=1.0, minimum-scale=0.25, maximum-scale=5.0, user-scalable=yes">
+    <meta name="viewport" content="width=1000, initial-scale=1.0, minimum-scale=0.25, maximum-scale=5.0, user-scalable=yes">
     <title>Vampire: El Sabbat - Ficha de Personaje</title>    
     <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
@@ -48,7 +48,10 @@
         }
 
         .container {
-            max-width: 1000px;
+            /* fijando el ancho en 1000px estrictos*/
+            width: 1000px !important;
+            min-width: 1000px !important;
+            max-width: 1000px !important;
             margin: 0 auto;
             background: var(--card-bg);
             border: 2px solid var(--accent-color);
@@ -93,18 +96,18 @@
             text-align: center;
             letter-spacing: 1px;
         }
-        .grid-3 {
+        .grid-3 {        /*asegurando ( que las columnas tengan un ancho mínimo y no se colapsen*/
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(3, minmax(290px, 1fr)) !important;
             gap: 15px;
             box-sizing: border-box;
         }
-        .grid-2 {
+        .grid-2 {        /*aqui tambien*/
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(2, minmax(440px, 1fr)) !important;
             gap: 15px;
             box-sizing: border-box;
-        }
+         }
         .row {
             display: flex;
             justify-content: space-between;
