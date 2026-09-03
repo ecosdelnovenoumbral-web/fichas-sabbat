@@ -2,17 +2,10 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <!-- Escala de zoom inicial: mas cerca 0.45 / mas alejada 0.3 -->
-    <meta name="viewport" content="width=1500, initial-scale=0.35, minimum-scale=0.1, maximum-scale=3.0, user-scalable=yes">
-    <title>Vampire: El Sabbat - Ficha de Personaje</title>    
+    <meta name="viewport" content="width=1100, initial-scale=0.2, minimum-scale=0.1, maximum-scale=3.0, user-scalable=yes">
+    <title>Vampire: El Sabbat - Ficha de Personaje</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        <style>
-    /* Agrega esto al inicio de tus estilos */
-        body {
-            min-width: 1550px !important;
-            overflow-x: auto !important;
-    }
         :root {
             --bg-color: #050505;
             --card-bg: #120808;
@@ -55,10 +48,7 @@
         }
 
         .container {
-            /* fijando el ancho en 1000px estrictos*/
-            width: 1000px !important;
-            min-width: 1000px !important;
-            max-width: 1000px !important;
+            max-width: 1000px;
             margin: 0 auto;
             background: var(--card-bg);
             border: 2px solid var(--accent-color);
@@ -103,18 +93,18 @@
             text-align: center;
             letter-spacing: 1px;
         }
-        .grid-3 {        /*asegurando ( que las columnas tengan un ancho mínimo y no se colapsen*/
+        .grid-3 {
             display: grid;
-            grid-template-columns: repeat(3, minmax(290px, 1fr)) !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 15px;
             box-sizing: border-box;
         }
-        .grid-2 {        /*aqui tambien*/
+        .grid-2 {
             display: grid;
-            grid-template-columns: repeat(2, minmax(440px, 1fr)) !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 15px;
             box-sizing: border-box;
-         }
+        }
         .row {
             display: flex;
             justify-content: space-between;
