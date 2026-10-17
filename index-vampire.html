@@ -47,7 +47,7 @@
             font-weight: bold;
         }
 
-        .container {/*fijando el ancho en 1000px estrictos ancho de contenedor*/
+        .container {
             width: 1000px !important;
             min-width: 1000px !important;
             max-width: 1000px !important;
@@ -216,7 +216,6 @@
             letter-spacing: 1px;
         }
         
-        /* CONTROL Y LEYENDA DE SALUD */
         .health-container {
             display: flex;
             flex-direction: column;
@@ -336,10 +335,14 @@
             font-weight: bold;
             text-transform: uppercase;
             border-radius: 3px;
-            transition: background 0.2s ease;
+            transition: background 0.2s ease, opacity 0.2s ease;
         }
-        .firebase-btn:hover {
+        .firebase-btn:hover:not(:disabled) {
             background: #b30000;
+        }
+        .firebase-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         .admin-panel {
             background: #150202;
@@ -360,7 +363,8 @@
 <div class="user-tag" id="display-user">Usuario: <span id="user-name-span">Cargando...</span></div>
 
 <div class="container">
-    <h1>Vampire: El Sabbat</h1><!--            titulo               -->
+    <h1>Vampire: El Sabbat</h1>
+
     <div class="firebase-panel">
         <span>ID del Personaje:</span>
         <input type="text" id="pj-id" placeholder="Auto / Ej: sabbat-usuario-001" style="width: 200px; background: #121212; border: 1px solid var(--accent-color);">
@@ -652,7 +656,7 @@
 
     <!-- Panel de Botones Finales -->
     <div class="admin-panel">
-        <button class="firebase-btn" style="background-color: #2e7d32;" onclick="enviarFichaFinal()">Enviar y Finalizar Ficha</button>
+        <button id="btn-finalizar" class="firebase-btn" style="background-color: #2e7d32;" onclick="enviarFichaFinal()">Enviar y Finalizar Ficha</button>
         <button class="firebase-btn" style="background-color: #0288d1;" onclick="cargarModoLecturaAdmin(null, null, false)">Editar</button>
     </div>
 
@@ -901,6 +905,12 @@
 
     const pjIdInput = document.getElementById("pj-id");
     if (pjIdInput) pjIdInput.readOnly = false;
+
+    // 7. Bloquear el botón "Enviar y Finalizar Ficha" para usuarios normales
+    const btnFinalizar = document.getElementById("btn-finalizar");
+    if (btnFinalizar) {
+      btnFinalizar.disabled = true;
+    }
   }
 
   function desbloquearFichaCompletaUsuario() {
@@ -918,6 +928,11 @@
     const bloodTurn = document.getElementById('blood-turn');
     if (bloodMax) bloodMax.readOnly = true;
     if (bloodTurn) bloodTurn.readOnly = true;
+
+    const btnFinalizar = document.getElementById("btn-finalizar");
+    if (btnFinalizar) {
+      btnFinalizar.disabled = false;
+    }
   }
 
   function desbloquearFichaCompletaNarrador() {
@@ -1181,9 +1196,13 @@
         console.warn("Intento de eliminación de borrador omitido:", e);
       }
 
-      if (!document.body.classList.contains('modo-admin')) {
+      const esNarrador = await esNarradorAutorizado();
+      if (!esNarrador && !document.body.classList.contains('modo-admin')) {
         aplicarReglasPermisosUsuario();
+      } else {
+        desbloquearFichaCompletaNarrador();
       }
+      
       alert("¡Éxito! La ficha ha sido finalizada y actualizada en el sistema.");
     } catch (err) {
       console.error("Error al finalizar ficha:", err);
