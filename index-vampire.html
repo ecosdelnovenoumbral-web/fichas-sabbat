@@ -299,6 +299,25 @@
             font-size: 0.8rem;
         }
 
+        .ocultacion-legend-box {
+            font-size: 0.82rem;
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            line-height: 1.25;
+        }
+        .ocultacion-legend-title {
+            font-weight: bold;
+            color: #ff4d4d;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            text-align: center;
+            margin-bottom: 4px;
+            letter-spacing: 1px;
+            font-family: var(--decorative-font);
+        }
+
         .merit-defect-row {
             display: flex;
             gap: 10px;
@@ -605,11 +624,24 @@
     </div>
 
     <div class="grid-3" style="margin-top: 10px; align-items: start;">
-        <div class="section-box">
-            <div class="box-title" style="font-family: var(--decorative-font);">Armadura</div>
-            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Armadura:</span> <input type="text" id="armadura-tipo" class="campo-combate"></div>
-            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Clase:</span> <input type="text" id="armadura-clase" class="campo-combate"></div>
-            <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Penalización:</span> <input type="text" id="armadura-penalizacion" class="campo-combate"></div>
+        <div>
+            <div class="section-box">
+                <div class="box-title" style="font-family: var(--decorative-font);">Armadura</div>
+                <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Armadura:</span> <input type="text" id="armadura-tipo" class="campo-combate"></div>
+                <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Clase:</span> <input type="text" id="armadura-clase" class="campo-combate"></div>
+                <div class="row" style="margin-bottom: 6px; font-size: 0.85rem;"><span>Penalización:</span> <input type="text" id="armadura-penalizacion" class="campo-combate"></div>
+            </div>
+
+            <!-- CUADRO INDEPENDIENTE PARA LA LEYENDA DE OCULTACIÓN -->
+            <div class="section-box">
+                <div class="ocultacion-legend-box">
+                    <div class="ocultacion-legend-title">Ocultación:</div>
+                    <div><b>B</b> = Se puede transportar en el bolsillo.</div>
+                    <div><b>Ch</b> = Se puede esconder en una chaqueta.</div>
+                    <div><b>A</b> = Se puede esconder en un abrigo.</div>
+                    <div><b>N</b> = No se puede llevar oculta en absoluto.</div>
+                </div>
+            </div>
         </div>
 
         <div class="section-box" style="grid-column: span 2;">
@@ -622,6 +654,8 @@
                     <div class="row"><input type="text" id="inv-4" class="campo-inventario"></div>
                     <div class="row"><input type="text" id="inv-5" class="campo-inventario"></div>
                     <div class="row"><input type="text" id="inv-6" class="campo-inventario"></div>
+                    <div class="row"><input type="text" id="inv-13" class="campo-inventario"></div>
+                    <div class="row"><input type="text" id="inv-14" class="campo-inventario"></div>
                 </div>
                 <div>
                     <div class="row"><input type="text" id="inv-7" class="campo-inventario"></div>
@@ -630,6 +664,8 @@
                     <div class="row"><input type="text" id="inv-10" class="campo-inventario"></div>
                     <div class="row"><input type="text" id="inv-11" class="campo-inventario"></div>
                     <div class="row"><input type="text" id="inv-12" class="campo-inventario"></div>
+                    <div class="row"><input type="text" id="inv-15" class="campo-inventario"></div>
+                    <div class="row"><input type="text" id="inv-16" class="campo-inventario"></div>
                 </div>
             </div>
         </div>
